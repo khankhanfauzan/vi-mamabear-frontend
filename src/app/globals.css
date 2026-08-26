@@ -1,0 +1,140 @@
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .page-max-width {
+    max-width: 1240px;
+    @apply mx-auto;
+  }
+
+  .page-spacing {
+    @apply px-4 sm:px-4 md:px-6;
+  }
+
+  /* Font Guide implementation */
+  .text-font-1 {
+    font-size: 0.75rem;
+  }
+  .text-font-2 {
+    font-size: 1rem;
+  }
+  .text-font-3 {
+    font-size: 1.25rem;
+  }
+  .text-font-4 {
+    font-size: 1.5rem;
+  }
+  .text-font-5 {
+    font-size: 2rem;
+  }
+  .text-font-6 {
+    font-size: 2.5rem;
+  }
+}
+
+@layer base {
+  :root {
+    --font-sans: var(--font-quicksand);
+    --font-heading: var(--font-quicksand);
+
+    /* Mamabear Branding (Reference Hex Codes) */
+    --mama-brown: #6c4735;
+    --mama-hot-pink: #d6557e;
+    --mama-pink: #fbcbd9;
+    --mama-cream: #ffe8dc;
+    --color-gray: #545454;
+    --color-light-gray: #a9a9a9;
+
+    /* Global Size */
+    --admin-sidebar-width: 16rem;
+
+    /* Shadcn Mapping using predefined Mamabear colors in OKLCH */
+    --radius: 0.5rem;
+    --background: 1 0 0;
+    --foreground: 0.3342 0.01 48.4048;
+    --card: 1 0 0;
+    --card-foreground: 0.3342 0.01 48.4048;
+    --popover: 1 0 0;
+    --popover-foreground: 0.3342 0.01 48.4048;
+    --primary: 0.6279 0.1659 3.3964;
+    --primary-foreground: 1 0 0;
+    --secondary: 0.8877 0.057 358.9659;
+    --secondary-foreground: 0.4187 0.05 44.5165;
+    --muted: 0.9463 0.03 49.46;
+    --muted-foreground: 0.3342 0.01 48.4048;
+    --accent: 0.8877 0.057 358.9659;
+    --accent-foreground: 0.4187 0.05 44.5165;
+    --destructive: 0.628 0.2577 29.2339;
+    --destructive-foreground: 0.9851 0 0;
+    --border: 0.7202 0.01 52.0458;
+    --input: 0.7202 0.01 52.0458;
+    --ring: 0.6279 0.1659 3.3964;
+    --chart-1: 0.5804 0.1707 340.357;
+    --chart-2: 0.4187 0.05 44.5165;
+    --chart-3: 0.8695 0.0609 341.0938;
+    --chart-4: 0.9403 0.03 49.4572;
+    --chart-5: 0.3342 0.01 48.4048;
+    --sidebar: 1 0 0;
+    --sidebar-foreground: 0.3342 0.01 48.4048;
+    --sidebar-primary: 0.5804 0.1707 340.357;
+    --sidebar-primary-foreground: 1 0 0;
+    --sidebar-accent: 0.8695 0.0609 341.0938;
+    --sidebar-accent-foreground: 0.4187 0.05 44.5165;
+    --sidebar-border: 0.7202 0.01 52.0458;
+    --sidebar-ring: 0.5804 0.1707 340.357;
+  }
+
+  .dark {
+    --background: 0.1448 0.0168 46.5307;
+    --foreground: 0.9851 0 0;
+    --card: 0.1996 0.0208 45.4712;
+    --card-foreground: 0.9851 0 0;
+    --popover: 0.1996 0.0208 45.4712;
+    --popover-foreground: 0.9851 0 0;
+    --primary: 0.5804 0.1707 340.357;
+    --primary-foreground: 1 0 0;
+    --secondary: 0.2508 0.0195 45.6802;
+    --secondary-foreground: 0.9851 0 0;
+    --muted: 0.2508 0.0195 45.6802;
+    --muted-foreground: 0.7007 0.0149 46.162;
+    --accent: 0.2508 0.0195 45.6802;
+    --accent-foreground: 0.9851 0 0;
+    --destructive: 0.4614 0.1893 29.2339;
+    --destructive-foreground: 0.9851 0 0;
+    --border: 0.2508 0.0195 45.6802;
+    --input: 0.2508 0.0195 45.6802;
+    --ring: 0.5804 0.1707 340.357;
+    --chart-1: 0.81 0.1 252;
+    --chart-2: 0.62 0.19 260;
+    --chart-3: 0.55 0.22 263;
+    --chart-4: 0.49 0.22 264;
+    --chart-5: 0.42 0.18 266;
+    --sidebar: 0.1448 0.0168 46.5307;
+    --sidebar-foreground: 0.9851 0 0;
+    --sidebar-primary: 0.5804 0.1707 340.357;
+    --sidebar-primary-foreground: 1 0 0;
+    --sidebar-accent: 0.2508 0.0195 45.6802;
+    --sidebar-accent-foreground: 0.9851 0 0;
+    --sidebar-border: 0.2508 0.0195 45.6802;
+    --sidebar-ring: 0.5804 0.1707 340.357;
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2;
+  }
+  html {
+    @apply font-sans;
+  }
+}

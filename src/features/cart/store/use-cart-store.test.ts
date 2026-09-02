@@ -168,6 +168,22 @@ describe("useCartStore", () => {
     });
   });
 
+  describe("mergeGuestCart", () => {
+    it("syncs items from the merged backend cart", async () => {
+      useCartStore.setState({ items: [buildCartItem({ id: "guest-item" })] });
+      const mergedCart = {
+        items: [buildCartItem({ id: "user-item", quantity: 2 })],
+      };
+      (cartService.mergeCart as jest.Mock).mockResolvedValue(mergedCart);
+
+      await useCartStore.getState().mergeGuestCart();
+
+      expect(cartService.mergeCart).toHaveBeenCalled();
+      expect(useCartStore.getState().items).toEqual(mergedCart.items);
+      expect(useCartStore.getState().isLoading).toBe(false);
+    });
+  });
+
   describe("updateQuantity", () => {
     it("updates the quantity of the matching item", async () => {
       useCartStore.setState({ items: [buildCartItem({ id: "1", quantity: 1 })] });

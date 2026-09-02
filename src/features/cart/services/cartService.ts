@@ -39,7 +39,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
 
 export async function fetchCart(): Promise<Cart | null> {
   try {
-    const res = await apiClient.get(`/carts`, {
+    const res = await apiClient.get(`/cart`, {
       ...defaultOptions,
       cache: "no-store", // Cart is highly dynamic, never cache statically
     });
@@ -79,7 +79,7 @@ export async function validateCart(): Promise<CartValidationResult> {
 
 export async function addToCart(payload: AddToCartPayload): Promise<CartItem> {
   try {
-    const res = await apiClient.post(`/cart/item`, payload, defaultOptions);
+    const res = await apiClient.post(`/cart/items`, payload, defaultOptions);
     return await parseResponse<CartItem>(res);
   } catch (error) {
     console.error(`[cartService] addToCart failed:`, error);

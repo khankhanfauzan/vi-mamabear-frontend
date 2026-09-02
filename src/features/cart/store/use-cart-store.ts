@@ -152,7 +152,7 @@ export const useCartStore = create<CartState>()(
         try {
           await cartService.removeCartItem(itemId);
           const newItems = (get().items || []).filter(
-            (item) => item.id === itemId,
+            (item) => item.id !== itemId,
           );
           set({ items: newItems });
         } catch (error) {

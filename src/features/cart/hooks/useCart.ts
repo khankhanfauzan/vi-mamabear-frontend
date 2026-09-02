@@ -6,6 +6,8 @@ import { cartService } from "@/features/cart/services/cartService";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
 const DUMMY_PROMO_CODE = "MAMABEAR10";
+const PROMO_DISCOUNT_RATE = 0.1;
+const FREE_SHIPPING_THRESHOLD = 500000;
 
 export const useCartLogic = () => {
   const router = useRouter();
@@ -123,11 +125,17 @@ export const useCartLogic = () => {
     return { subtotal, totalQuantity };
   }, [items]);
 
-  const discountAmount = appliedPromo ? subtotal * 0.15 : 0;
+  const discountAmount = appliedPromo ? subtotal * PROMO_DISCOUNT_RATE : 0;
   const grandTotal = subtotal - discountAmount;
 
-  const missingForFreeShipping = Math.max(0, 500000 - subtotal);
-  const freeShippingProgress = Math.min(100, (subtotal / 400000) * 100);
+  const missingForFreeShipping = Math.max(
+    0,
+    FREE_SHIPPING_THRESHOLD - subtotal,
+  );
+  const freeShippingProgress = Math.min(
+    100,
+    (subtotal / FREE_SHIPPING_THRESHOLD) * 100,
+  );
 
   return {
     items: items || [],

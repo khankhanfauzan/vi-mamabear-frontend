@@ -56,12 +56,10 @@ export const useCartStore = create<CartState>()(
       mergeGuestCart: async () => {
         set({ isLoading: true });
         try {
-          // Tell the backend to merge the cookie session into the JWT user
-          await cartService.mergeCart();
-          // const mergedCart = await cartService.mergeCart();
-          // if (mergedCart) {
-          //   set({ items: mergedCart.items });
-          // }
+          const mergedCart = await cartService.mergeCart();
+          if (mergedCart) {
+            set({ items: mergedCart.items ?? [] });
+          }
         } catch (error) {
           console.error("[useCartStore] mergeGuestCart failed:", error);
         } finally {
@@ -88,7 +86,14 @@ export const useCartStore = create<CartState>()(
 
           const newItems = [...currentItems];
           if (existingItemIndex >= 0) {
-            newItems[existingItemIndex].quantity = dbItem.quantity;
+            const existingItem = newItems[existingItemIndex];
+            newItems[existingItemIndex] = {
+              ...existingItem,
+              ...dbItem,
+              product: existingItem.product,
+              variant: existingItem.variant,
+              quantity: dbItem.quantity,
+            };
           } else {
             // Append with frontend data since backend response lacks nested product/variant
             newItems.push({

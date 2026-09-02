@@ -52,6 +52,14 @@ describe("getStatusConfig", () => {
     });
   });
 
+  it("maps lowercase and alias statuses to the same labels", () => {
+    expect(getStatusConfig("pending").label).toBe("Menunggu Pembayaran");
+    expect(getStatusConfig("payment-pending").label).toBe(
+      "Menunggu Pembayaran",
+    );
+    expect(getStatusConfig("cancelled").label).toBe("Dibatalkan");
+  });
+
   it("falls back to a default config for unknown statuses", () => {
     expect(getStatusConfig("SOME_UNKNOWN_STATUS")).toEqual({
       label: "SOME_UNKNOWN_STATUS",

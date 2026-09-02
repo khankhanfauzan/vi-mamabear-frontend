@@ -24,10 +24,27 @@ export const formatDate = (dateString: string): string => {
 };
 
 /**
+ * Normalizes backend / Midtrans / legacy status strings into the canonical enum key.
+ * e.g. "pending", "payment-pending" → "PAYMENT_PENDING"
+ */
+const normalizeOrderStatus = (status: string): string => {
+  const normalized = status.trim().toUpperCase().replace(/[\s-]+/g, "_");
+  const aliases: Record<string, string> = {
+    PENDING: "PAYMENT_PENDING",
+    PAID: "PAYMENT_PAID",
+    PROCESSING: "PROCESSED",
+    SHIPPED: "SENDING",
+    DELIVERED: "RECEIVED",
+    CANCELED: "CANCELLED",
+  };
+  return aliases[normalized] ?? normalized;
+};
+
+/**
  * Returns Tailwind classes and labels based on the new backend OrderStatus enum.
  */
 export const getStatusConfig = (status: string) => {
-  switch (status) {
+  switch (normalizeOrderStatus(status)) {
     case "PAYMENT_PENDING":
       return { 
         label: "Menunggu Pembayaran", 
@@ -72,7 +89,7 @@ export const getStatusConfig = (status: string) => {
       };
     case "CANCELLED":
       return { 
-        label: "Batal", 
+        label: "Dibatalkan", 
         badge: "bg-[var(--color-gray)] text-white", 
         footer: "bg-[var(--color-gray)] text-white" 
       };

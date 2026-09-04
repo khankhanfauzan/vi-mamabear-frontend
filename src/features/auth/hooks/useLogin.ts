@@ -35,7 +35,7 @@ export function useLogin() {
       const session = await getSession();
 
       if (
-        session?.user?.role === "ADMIN" &&
+        session?.user?.role === "ADMIN" ||
         session?.user?.role === "SUPERADMIN"
       ) {
         router.push("/admin/dashboard");

@@ -22,19 +22,76 @@ const defaultOptions: RequestInit = {
   credentials: "include",
 };
 
-/**
- * Helper to parse the response safely.
- * Handles both raw returns and { data: ... } wrapped returns from NestJS interceptors.
- */
-async function parseResponse<T>(response: Response): Promise<T> {
-  const json = await response.json();
+type ResponsePayload<T = unknown> = {
+  data?: T;
+  message?: string | string[];
+  success?: boolean;
+  statusCode?: number;
+  error?: string;
+};
 
-  if (!response.ok) {
-    throw new Error(json.message || `HTTP Error ${response.status}`);
+const isResponsePayload = (value: unknown): value is ResponsePayload =>
+  typeof value === "object" && value !== null;
+
+const getResponseErrorMessage = (
+  payload: unknown,
+  status: number,
+): string => {
+  if (isResponsePayload(payload)) {
+    if (Array.isArray(payload.message)) {
+      const messages = payload.message.filter(
+        (item): item is string => typeof item === "string" && item.trim().length > 0,
+      );
+
+      if (messages.length > 0) {
+        return messages.join(", ");
+      }
+    }
+
+    if (typeof payload.message === "string" && payload.message.trim().length > 0) {
+      return payload.message;
+    }
+
+    if (typeof payload.error === "string" && payload.error.trim().length > 0) {
+      return payload.error;
+    }
   }
 
-  // If backend wrapped it in a "data" object, extract it. Otherwise, return raw json.
-  return json.data !== undefined ? json.data : json;
+  return `HTTP Error ${status}`;
+};
+
+/**
+ * Parses both raw payloads and the backend's { data: ... } envelope.
+ *
+ * DELETE endpoints can legitimately return 204 without a JSON body, and some
+ * gateways return a non-JSON body for failures. Those responses should still
+ * produce a predictable service result/error instead of leaking a JSON parse
+ * exception to callers.
+ */
+async function parseResponse<T>(response: Response): Promise<T> {
+  let payload: unknown;
+
+  if (response.status !== 204) {
+    try {
+      payload = await response.json();
+    } catch {
+      payload = undefined;
+    }
+  }
+
+  if (!response.ok) {
+    throw new Error(getResponseErrorMessage(payload, response.status));
+  }
+
+  if (isResponsePayload(payload) && payload.success === false) {
+    throw new Error(getResponseErrorMessage(payload, response.status));
+  }
+
+  if (isResponsePayload(payload) && "data" in payload) {
+    return payload.data as T;
+  }
+
+  return payload as T;
 }
 
 export async function fetchCart(): Promise<Cart | null> {
@@ -45,10 +102,11 @@ export async function fetchCart(): Promise<Cart | null> {
     });
 
     if (res.status === 404) return null;
-    return await parseResponse<Cart>(res);
+    const cart = await parseResponse<Cart | null>(res);
+    return cart ?? null;
   } catch (error) {
     console.error("[cartService] fetchCart failed:", error);
-    return null;
+    throw error;
   }
 }
 

@@ -42,7 +42,7 @@ export function useLogin() {
       } else {
         // router.push("/");
         router.push(callbackUrl);
-        router.refresh(); 
+        router.refresh();
       }
 
       router.refresh();

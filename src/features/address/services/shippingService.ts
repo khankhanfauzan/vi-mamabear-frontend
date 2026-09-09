@@ -14,7 +14,6 @@ import {
 export async function getProvinces(): Promise<Region[]> {
   try {
     const res = await apiClient.get(`/shipping/province`, {
-      cache: "force-cache",
     });
 
     if (!res.ok) {
@@ -25,8 +24,8 @@ export async function getProvinces(): Promise<Region[]> {
 
     if (!response.success) {
       // Assuming 'message' might be an array of strings as per guidelines
-      const errorMessage = Array.isArray(response.message) 
-        ? response.message[0] 
+      const errorMessage = Array.isArray(response.message)
+        ? response.message[0]
         : response.message;
       throw new Error(errorMessage || "Gagal mengambil daftar provinsi");
     }
@@ -54,8 +53,8 @@ export async function getCities(provinceId: number): Promise<Region[]> {
     const response: ApiResponse<Region[]> = await res.json();
 
     if (!response.success) {
-      const errorMessage = Array.isArray(response.message) 
-        ? response.message[0] 
+      const errorMessage = Array.isArray(response.message)
+        ? response.message[0]
         : response.message;
       throw new Error(errorMessage || "Gagal mengambil daftar kota/kabupaten");
     }
@@ -83,8 +82,8 @@ export async function getDistricts(cityId: number): Promise<Region[]> {
     const response: ApiResponse<Region[]> = await res.json();
 
     if (!response.success) {
-      const errorMessage = Array.isArray(response.message) 
-        ? response.message[0] 
+      const errorMessage = Array.isArray(response.message)
+        ? response.message[0]
         : response.message;
       throw new Error(errorMessage || "Gagal mengambil daftar kecamatan");
     }
@@ -112,8 +111,8 @@ export async function getSubdistricts(districtId: number): Promise<Subdistrict[]
     const response: ApiResponse<Subdistrict[]> = await res.json();
 
     if (!response.success) {
-      const errorMessage = Array.isArray(response.message) 
-        ? response.message[0] 
+      const errorMessage = Array.isArray(response.message)
+        ? response.message[0]
         : response.message;
       throw new Error(errorMessage || "Gagal mengambil daftar kelurahan");
     }
@@ -137,8 +136,8 @@ export async function calculateShippingCost(
     const result: ApiResponse<ShippingOption[]> = await response.json();
 
     if (!result.success || !result.data) {
-      const errorMessage = Array.isArray(result.message) 
-        ? result.message[0] 
+      const errorMessage = Array.isArray(result.message)
+        ? result.message[0]
         : result.message;
       throw new Error(errorMessage || "Gagal menghitung ongkos kirim");
     }

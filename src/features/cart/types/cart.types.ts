@@ -62,6 +62,18 @@ export interface Cart {
   id: string;
   userId: string | null;
   sessionId: string | null;
+  promoCodeId?: number | null;
+  promoCodeString?: string | null;
+  productDiscountIdr: number;
+  shippingDiscountIdr: number;
+  promoCode?: {
+    id: number;
+    code: string;
+    discountType: 'PRODUCT_PERCENTAGE' | 'PRODUCT_FIXED' | 'FREE_SHIPPING';
+    discountValue: string;
+    maxDiscountIdr?: number | null;
+    maxShippingDiscountIdr?: number | null;
+  } | null;
   subtotalIdr: number;
   taxIdr: number;
   shippingCostIdr: number;

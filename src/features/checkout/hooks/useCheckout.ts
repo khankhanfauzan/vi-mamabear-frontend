@@ -35,15 +35,43 @@ export function useCheckout(initialAddresses: Address[], userEmail: string) {
   const selectedAddress = initialAddresses.find(
     (a) => String(a.id) === selectedAddressId,
   );
-  const subtotal =
-    cart?.items?.reduce(
-      (sum, item) => sum + parseInt(item.price as string) * item.quantity,
-      0,
-    ) || 0;
-  const shippingCost = selectedShipping?.cost || 0;
+  const subtotal = cart?.subtotalIdr || 0;
+  const shippingCost = cart?.shippingCostIdr || selectedShipping?.cost || 0;
   const tax = cart?.taxIdr || 0;
-  const promoDiscount = 0;
-  const grandTotal = subtotal + shippingCost + tax - promoDiscount;
+
+  const promoObj = cart?.promoCode || null;
+  let productDiscount = cart?.productDiscountIdr || 0;
+  let shippingDiscount = cart?.shippingDiscountIdr || 0;
+
+  // Manual fallback calculation for display if backend hasn't calculated it yet
+  if (promoObj) {
+    if (promoObj.discountType === 'PRODUCT_PERCENTAGE' && productDiscount === 0) {
+      const percentage = parseFloat(promoObj.discountValue) / 100;
+      productDiscount = subtotal * percentage;
+      if (promoObj.maxDiscountIdr && productDiscount > promoObj.maxDiscountIdr) {
+        productDiscount = promoObj.maxDiscountIdr;
+      }
+    } else if (promoObj.discountType === 'PRODUCT_FIXED' && productDiscount === 0) {
+      productDiscount = parseFloat(promoObj.discountValue);
+    } else if (promoObj.discountType === 'FREE_SHIPPING' && shippingDiscount === 0 && shippingCost > 0) {
+      // Free shipping up to maxShippingDiscountIdr
+      shippingDiscount = shippingCost;
+      if (promoObj.maxShippingDiscountIdr && shippingDiscount > promoObj.maxShippingDiscountIdr) {
+        shippingDiscount = promoObj.maxShippingDiscountIdr;
+      }
+    }
+  }
+
+  // Ensure discounts do not exceed their respective totals
+  if (productDiscount > subtotal) {
+    productDiscount = subtotal;
+  }
+  if (shippingDiscount > shippingCost) {
+    shippingDiscount = shippingCost;
+  }
+
+  const promoDiscount = productDiscount + shippingDiscount;
+  const grandTotal = (subtotal - productDiscount) + (shippingCost - shippingDiscount) + tax;
 
   // Initial Load & Shipping Calculation Effects
   useEffect(() => {
@@ -197,6 +225,8 @@ export function useCheckout(initialAddresses: Address[], userEmail: string) {
       subtotal,
       shippingCost,
       tax,
+      productDiscount,
+      shippingDiscount,
       promoDiscount,
       grandTotal,
     },

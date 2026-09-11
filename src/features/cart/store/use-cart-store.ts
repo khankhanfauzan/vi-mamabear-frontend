@@ -4,7 +4,7 @@ import {
   ProductDetail,
   ProductVariant,
 } from "@/features/products/types/product.types";
-import { CartItem } from "@/features/cart/types/cart.types";
+import { Cart, CartItem } from "@/features/cart/types/cart.types";
 import { cartService } from "@/features/cart/services/cartService";
 
 export interface AddItemPayload {
@@ -14,6 +14,7 @@ export interface AddItemPayload {
 }
 
 interface CartState {
+  cart: Cart | null;
   items: CartItem[];
   isLoading: boolean;
   isOpen: boolean;
@@ -25,11 +26,14 @@ interface CartState {
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   clearCart: () => Promise<void>;
+  applyPromoCode: (code: string) => Promise<void>;
+  removePromoCode: () => Promise<void>;
 }
 
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
+      cart: null,
       items: [],
       isLoading: false,
       isOpen: false,
@@ -41,10 +45,10 @@ export const useCartStore = create<CartState>()(
         try {
           const dbCart = await cartService.fetchCart();
           if (dbCart) {
-            set({ items: dbCart.items });
+            set({ cart: dbCart, items: dbCart.items });
           } else {
             // If backend says no cart, we clear local cache to sync with backend
-            set({ items: [] });
+            set({ cart: null, items: [] });
           }
         } catch (error) {
           console.error("[useCartStore] initializeCart failed:", error);
@@ -58,7 +62,7 @@ export const useCartStore = create<CartState>()(
         try {
           const mergedCart = await cartService.mergeCart();
           if (mergedCart) {
-            set({ items: mergedCart.items ?? [] });
+            set({ cart: mergedCart, items: mergedCart.items ?? [] });
           }
         } catch (error) {
           console.error("[useCartStore] mergeGuestCart failed:", error);
@@ -172,9 +176,35 @@ export const useCartStore = create<CartState>()(
         set({ isLoading: true });
         try {
           await cartService.clearCart();
-          set({ items: [] });
+          set({ cart: null, items: [] });
         } catch (error) {
           console.error("[useCartStore] clearCart failed:", error);
+          throw error;
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      applyPromoCode: async (code: string) => {
+        set({ isLoading: true });
+        try {
+          await cartService.applyPromoCode(code);
+          await get().initializeCart();
+        } catch (error) {
+          console.error("[useCartStore] applyPromoCode failed:", error);
+          throw error;
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      removePromoCode: async () => {
+        set({ isLoading: true });
+        try {
+          await cartService.removePromoCode();
+          await get().initializeCart();
+        } catch (error) {
+          console.error("[useCartStore] removePromoCode failed:", error);
           throw error;
         } finally {
           set({ isLoading: false });
@@ -184,7 +214,7 @@ export const useCartStore = create<CartState>()(
     {
       name: "mamabear-cart-storage",
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ items: state.items }),
+      partialize: (state) => ({ cart: state.cart, items: state.items }),
     },
   ),
 );

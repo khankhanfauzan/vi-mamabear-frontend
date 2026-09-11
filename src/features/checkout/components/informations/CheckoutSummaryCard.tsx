@@ -8,11 +8,13 @@ interface CheckoutSummaryCardProps {
   isLoadingCart: boolean;
   isCalculatingShipping: boolean;
   isSubmitting: boolean;
-  selectedShipping: ShippingOption;
+  selectedShipping: ShippingOption | null;
   totals: {
     subtotal: number;
     shippingCost: number;
     tax: number;
+    productDiscount: number;
+    shippingDiscount: number;
     promoDiscount: number;
     grandTotal: number;
   };
@@ -96,6 +98,16 @@ export function CheckoutSummaryCard({
               </span>
             )}
           </div>
+
+          {totals.productDiscount > 0 && (
+            <div className="flex justify-between text-font-2 text-green-600">
+              <span>Diskon Produk</span>
+              <span className="font-bold">
+                -{formatRupiah(totals.productDiscount)}
+              </span>
+            </div>
+          )}
+
           <div className="flex justify-between text-font-2">
             <span className="text-gray-600">Ongkos Kirim</span>
             {isCalculatingShipping ? (
@@ -109,6 +121,15 @@ export function CheckoutSummaryCard({
             )}
           </div>
 
+          {totals.shippingDiscount > 0 && (
+            <div className="flex justify-between text-font-2 text-green-600">
+              <span>Diskon Ongkos Kirim (Promo)</span>
+              <span className="font-bold">
+                -{formatRupiah(totals.shippingDiscount)}
+              </span>
+            </div>
+          )}
+
           {/* Pajak (Tax) */}
           <div className="flex justify-between text-font-2">
             <span className="text-gray-600">Pajak</span>
@@ -120,15 +141,6 @@ export function CheckoutSummaryCard({
               </span>
             )}
           </div>
-
-          {totals.promoDiscount > 0 && (
-            <div className="flex justify-between text-font-2">
-              <span className="text-gray-600">Promo</span>
-              <span className="font-bold text-red-600">
-                ({formatRupiah(totals.promoDiscount)})
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Grand Total */}

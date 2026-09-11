@@ -29,6 +29,9 @@ export interface Order {
   subtotalIdr: number;
   taxIdr: number;
   shippingCostIdr: number;
+  promoCodeId?: number | null;
+  productDiscountIdr: number;
+  shippingDiscountIdr: number;
   courierName: string | null;
   courierCode: string | null;
   shippingMethod: string | null;

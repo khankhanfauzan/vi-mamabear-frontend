@@ -1,6 +1,8 @@
 import React from "react";
 import { formatIDR } from "@/utils/formatters";
 
+import { Cart } from "@/features/cart/types/cart.types";
+
 export const OrderSummary = ({
   subtotal,
   discountAmount,
@@ -8,10 +10,15 @@ export const OrderSummary = ({
   promoCode,
   setPromoCode,
   appliedPromo,
+  promoObj,
   handleApplyPromo,
+  handleRemovePromo,
+  isApplyingPromo,
+  promoError,
   selectedCount,
   handleCheckout,
   isCheckingOut,
+  cart,
 }: {
   subtotal: number;
   discountAmount: number;
@@ -19,10 +26,15 @@ export const OrderSummary = ({
   promoCode: string;
   setPromoCode: (val: string) => void;
   appliedPromo: string | null;
+  promoObj: Cart["promoCode"];
   handleApplyPromo: () => void;
+  handleRemovePromo: () => void;
+  isApplyingPromo: boolean;
+  promoError: string | null;
   selectedCount: number;
   handleCheckout: () => void;
   isCheckingOut: boolean;
+  cart: Cart | null;
 }) => {
   return (
     <div className="border border-gray-200 rounded-2xl p-6 bg-white sticky top-24 shadow-sm">
@@ -44,28 +56,53 @@ export const OrderSummary = ({
 
       <hr className="border-gray-100 mb-6" />
 
-      {}
+      {/* Promo Code Section */}
       <div className="mb-6">
         <label className="block text-font-2 font-semibold text-[var(--mama-brown)] mb-3">
           Kode Promo
         </label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="MAMABEAR"
-            value={promoCode}
-            onChange={(e) => setPromoCode(e.target.value)}
-            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-font-2 focus:outline-none focus:border-[var(--mama-hot-pink)] text-[var(--color-gray)] uppercase"
-            disabled={!!appliedPromo}
-          />
-          <button
-            onClick={handleApplyPromo}
-            disabled={!promoCode || !!appliedPromo}
-            className="bg-[var(--mama-hot-pink)] text-white px-6 py-2 rounded-lg font-bold text-font-2 hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            PAKAI
-          </button>
-        </div>
+        {!appliedPromo ? (
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="MAMABEAR"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-font-2 focus:outline-none focus:border-[var(--mama-hot-pink)] text-[var(--color-gray)] uppercase"
+                disabled={isApplyingPromo}
+              />
+              <button
+                onClick={handleApplyPromo}
+                disabled={isApplyingPromo || !promoCode}
+                className="bg-[var(--mama-hot-pink)] text-white px-6 py-2 rounded-lg font-bold text-font-2 hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {isApplyingPromo ? "PROSES..." : "PAKAI"}
+              </button>
+            </div>
+            {promoError && (
+              <p className="text-red-500 text-sm mt-1">{promoError}</p>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center justify-between p-3 border border-green-500 rounded-lg bg-green-50">
+            <div className="flex flex-col">
+              <span className="font-semibold text-green-700">Promo: {appliedPromo}</span>
+              {promoObj?.discountType === "FREE_SHIPPING" && (cart?.shippingCostIdr === 0 || cart?.shippingCostIdr === undefined) && (
+                <span className="text-xs text-green-600 mt-1">
+                  ✓ Diskon Ongkos Kirim akan dihitung otomatis saat memilih kurir di halaman Checkout.
+                </span>
+              )}
+            </div>
+            <button
+              onClick={handleRemovePromo}
+              disabled={isApplyingPromo}
+              className="text-red-500 text-sm font-semibold hover:underline disabled:opacity-50 ml-4 shrink-0"
+            >
+              Hapus
+            </button>
+          </div>
+        )}
       </div>
 
       {}

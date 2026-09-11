@@ -25,8 +25,13 @@ export function CartClientView() {
     promoCode,
     setPromoCode,
     appliedPromo,
+    promoObj,
     handleApplyPromo,
+    handleRemovePromo,
+    isApplyingPromo,
+    promoError,
     isCheckingOut,
+    cart,
   } = useCartLogic();
 
   // const isAllSelected = items.length > 0 && selectedIds.size === items.length;
@@ -141,10 +146,15 @@ export function CartClientView() {
                 promoCode={promoCode}
                 setPromoCode={setPromoCode}
                 appliedPromo={appliedPromo}
+                promoObj={promoObj}
                 handleApplyPromo={handleApplyPromo}
+                handleRemovePromo={handleRemovePromo}
+                isApplyingPromo={isApplyingPromo}
+                promoError={promoError}
                 selectedCount={selectedIds.size}
                 handleCheckout={handleCheckout}
                 isCheckingOut={isCheckingOut}
+                cart={cart}
               />
             </div>
           </div>

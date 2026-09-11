@@ -110,6 +110,26 @@ export async function fetchCart(): Promise<Cart | null> {
   }
 }
 
+export async function applyPromoCode(code: string): Promise<Cart> {
+  try {
+    const res = await apiClient.post(`/cart/promo`, { code }, defaultOptions);
+    return await parseResponse<Cart>(res);
+  } catch (error) {
+    console.error(`[cartService] applyPromoCode failed:`, error);
+    throw error;
+  }
+}
+
+export async function removePromoCode(): Promise<Cart> {
+  try {
+    const res = await apiClient.delete(`/cart/promo`, defaultOptions);
+    return await parseResponse<Cart>(res);
+  } catch (error) {
+    console.error(`[cartService] removePromoCode failed:`, error);
+    throw error;
+  }
+}
+
 export async function mergeCart(): Promise<Cart> {
   try {
     // Pass undefined for body since /cart/merge doesn't require a payload
@@ -208,4 +228,6 @@ export const cartService = {
   clearCart,
   mergeCart,
   validateCart,
+  applyPromoCode,
+  removePromoCode,
 };

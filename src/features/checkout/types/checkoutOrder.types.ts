@@ -85,6 +85,9 @@ export interface Order {
   subtotalIdr: number;
   shippingCostIdr: number;
   taxIdr: number;
+  promoCodeId?: number | null;
+  productDiscountIdr: number;
+  shippingDiscountIdr: number;
   shippingMethod: string;
   trackingNumber: string | null;
   paymentMethod: PaymentMethod | string;

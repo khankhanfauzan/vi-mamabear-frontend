@@ -1,24 +1,23 @@
 "use client";
 
 import { MamaBearMascot } from "@/components/layout/chat/MamaBearMascot";
+import { ChatMessageList } from "@/features/chat/components/ChatMessageList";
+import { useConversationHistory } from "@/features/chat/hooks/useConversationHistory";
+import {
+  CONVERSATION_STORAGE_KEY,
+  type ChatMessage,
+} from "@/features/chat/types/chat.types";
 import {
   NEWSLETTER_CLOSED_EVENT,
   NEWSLETTER_STORAGE_KEY,
 } from "@/features/home/hooks/useNewsletterPopup";
 import { cn } from "@/lib/utils";
 import { Loader2, MessageCircle, Send, X } from "lucide-react";
+import Link from "next/link";
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
 
 const GREETING_DELAY_MS = 2500;
 const MAX_MESSAGE_LENGTH = 1000;
-
-type ChatRole = "user" | "assistant";
-
-type ChatMessage = {
-  id: string;
-  role: ChatRole;
-  content: string;
-};
 
 const OPENING_MESSAGE: ChatMessage = {
   id: "opening",
@@ -41,14 +40,22 @@ export default function ChatWidget() {
   const [showGreeting, setShowGreeting] = useState(false);
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([OPENING_MESSAGE]);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [localMessages, setLocalMessages] = useState<ChatMessage[]>([
+    OPENING_MESSAGE,
+  ]);
   const listRef = useRef<HTMLDivElement>(null);
   const replyIndex = useRef(0);
   const remainingChars = MAX_MESSAGE_LENGTH - input.length;
+  const history = useConversationHistory(conversationId, { enabled: isOpen });
+  const usingHistory = Boolean(conversationId);
+  const messages = usingHistory ? history.messages : localMessages;
+  const setMessages = usingHistory ? history.setMessages : setLocalMessages;
   const canSend =
     input.trim().length > 0 &&
     input.length <= MAX_MESSAGE_LENGTH &&
-    !isSending;
+    !isSending &&
+    !(usingHistory && history.isLoading);
 
   useEffect(() => {
     let delayTimer: ReturnType<typeof setTimeout> | undefined;
@@ -68,6 +75,11 @@ export default function ChatWidget() {
       window.removeEventListener(NEWSLETTER_CLOSED_EVENT, startGreeting);
       if (delayTimer) clearTimeout(delayTimer);
     };
+  }, []);
+
+  useEffect(() => {
+    const storedId = localStorage.getItem(CONVERSATION_STORAGE_KEY);
+    if (storedId) setConversationId(storedId);
   }, []);
 
   useEffect(() => {
@@ -128,42 +140,57 @@ export default function ChatWidget() {
           <header className="flex items-center justify-between bg-[var(--mama-hot-pink)] px-4 py-3 text-white">
             <div>
               <p className="text-sm font-semibold">MamaBear Care</p>
-              <p className="text-[11px] text-white/85">Online • siap membantu</p>
+              <p className="text-[11px] text-white/85">
+                {usingHistory ? "Riwayat percakapan" : "Online • siap membantu"}
+              </p>
             </div>
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              className="rounded-full p-1.5 hover:bg-white/15"
-              aria-label="Tutup chat"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-1">
+              {conversationId && (
+                <Link
+                  href={`/chat/${conversationId}`}
+                  className="rounded-full px-2 py-1 text-[11px] font-medium text-white/90 hover:bg-white/15"
+                >
+                  Lihat lengkap
+                </Link>
+              )}
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="rounded-full p-1.5 hover:bg-white/15"
+                aria-label="Tutup chat"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </header>
 
           <div
             ref={listRef}
             className="flex-1 space-y-3 overflow-y-auto bg-[var(--mama-cream)]/50 px-3 py-4"
           >
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={cn(
-                  "flex",
-                  message.role === "user" ? "justify-end" : "justify-start",
-                )}
-              >
-                <p
-                  className={cn(
-                    "max-w-[80%] rounded-2xl px-3 py-2 text-sm leading-relaxed shadow-sm",
-                    message.role === "user"
-                      ? "rounded-br-md bg-[var(--mama-hot-pink)] text-white"
-                      : "rounded-bl-md border border-[var(--mama-pink)] bg-white text-[var(--mama-brown)]",
-                  )}
-                >
-                  {message.content}
-                </p>
+            {usingHistory && history.isLoading ? (
+              <div className="flex h-full flex-col items-center justify-center gap-2 text-[var(--mama-brown)]">
+                <Loader2 className="h-5 w-5 animate-spin text-[var(--mama-hot-pink)]" />
+                <p className="text-xs">Memuat riwayat...</p>
               </div>
-            ))}
+            ) : usingHistory && history.error ? (
+              <div className="flex h-full flex-col items-center justify-center gap-2 px-4 text-center">
+                <p className="text-xs text-red-600">{history.error}</p>
+                <button
+                  type="button"
+                  onClick={() => void history.refetch()}
+                  className="text-xs font-semibold text-[var(--mama-hot-pink)]"
+                >
+                  Coba lagi
+                </button>
+              </div>
+            ) : messages.length === 0 ? (
+              <p className="text-center text-xs text-[var(--color-gray)]">
+                Belum ada pesan di percakapan ini.
+              </p>
+            ) : (
+              <ChatMessageList messages={messages} />
+            )}
           </div>
 
           <form

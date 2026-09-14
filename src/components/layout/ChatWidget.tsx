@@ -6,10 +6,11 @@ import {
   NEWSLETTER_STORAGE_KEY,
 } from "@/features/home/hooks/useNewsletterPopup";
 import { cn } from "@/lib/utils";
-import { MessageCircle, Send, X } from "lucide-react";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { Loader2, MessageCircle, Send, X } from "lucide-react";
+import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
 
 const GREETING_DELAY_MS = 2500;
+const MAX_MESSAGE_LENGTH = 1000;
 
 type ChatRole = "user" | "assistant";
 
@@ -39,9 +40,15 @@ export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [showGreeting, setShowGreeting] = useState(false);
   const [input, setInput] = useState("");
+  const [isSending, setIsSending] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([OPENING_MESSAGE]);
   const listRef = useRef<HTMLDivElement>(null);
   const replyIndex = useRef(0);
+  const remainingChars = MAX_MESSAGE_LENGTH - input.length;
+  const canSend =
+    input.trim().length > 0 &&
+    input.length <= MAX_MESSAGE_LENGTH &&
+    !isSending;
 
   useEffect(() => {
     let delayTimer: ReturnType<typeof setTimeout> | undefined;
@@ -77,7 +84,7 @@ export default function ChatWidget() {
   const sendMessage = (event?: FormEvent) => {
     event?.preventDefault();
     const text = input.trim();
-    if (!text) return;
+    if (!text || text.length > MAX_MESSAGE_LENGTH || isSending) return;
 
     const userMessage: ChatMessage = {
       id: createId(),
@@ -87,6 +94,7 @@ export default function ChatWidget() {
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setIsSending(true);
 
     const reply = MOCK_REPLIES[replyIndex.current % MOCK_REPLIES.length];
     replyIndex.current += 1;
@@ -100,7 +108,14 @@ export default function ChatWidget() {
           content: reply,
         },
       ]);
+      setIsSending(false);
     }, 600);
+  };
+
+  const handleInputKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key !== "Enter" || event.shiftKey) return;
+    event.preventDefault();
+    sendMessage();
   };
 
   return (
@@ -153,23 +168,44 @@ export default function ChatWidget() {
 
           <form
             onSubmit={sendMessage}
-            className="flex items-center gap-2 border-t border-[var(--mama-pink)] bg-white p-3"
+            className="border-t border-[var(--mama-pink)] bg-white p-3"
           >
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Tulis pesan Mama..."
-              className="min-w-0 flex-1 rounded-full border border-[var(--mama-pink)] bg-[var(--mama-cream)]/40 px-3 py-2 text-sm text-[var(--mama-brown)] placeholder:text-[var(--color-light-gray)] focus:border-[var(--mama-hot-pink)] focus:outline-none"
-              aria-label="Pesan chat"
-            />
-            <button
-              type="submit"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--mama-hot-pink)] text-white hover:brightness-95 disabled:opacity-50"
-              disabled={!input.trim()}
-              aria-label="Kirim pesan"
+            <div className="flex items-end gap-2">
+              <textarea
+                value={input}
+                onChange={(e) =>
+                  setInput(e.target.value.slice(0, MAX_MESSAGE_LENGTH))
+                }
+                onKeyDown={handleInputKeyDown}
+                placeholder="Tulis pesan Mama..."
+                maxLength={MAX_MESSAGE_LENGTH}
+                rows={2}
+                className="min-h-10 min-w-0 flex-1 resize-none rounded-2xl border border-[var(--mama-pink)] bg-[var(--mama-cream)]/40 px-3 py-2 text-sm text-[var(--mama-brown)] placeholder:text-[var(--color-light-gray)] focus:border-[var(--mama-hot-pink)] focus:outline-none"
+                aria-label="Pesan chat"
+                aria-describedby="chat-char-count"
+              />
+              <button
+                type="submit"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mama-hot-pink)] text-white hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={!canSend}
+                aria-label="Kirim pesan"
+              >
+                {isSending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+            <p
+              id="chat-char-count"
+              className={cn(
+                "mt-1.5 text-right text-[11px] text-[var(--color-light-gray)]",
+                remainingChars <= 50 && "text-[var(--mama-hot-pink)]",
+              )}
             >
-              <Send className="h-4 w-4" />
-            </button>
+              Sisa {remainingChars} karakter
+            </p>
           </form>
         </section>
       )}

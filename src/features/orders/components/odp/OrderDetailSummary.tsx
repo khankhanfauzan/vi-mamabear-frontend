@@ -13,15 +13,22 @@ interface OrderDetailSummaryProps {
  * Renders the list of purchased items and the total pricing breakdown.
  */
 export default function OrderDetailSummary({ order }: OrderDetailSummaryProps) {
-  // Calculate potential promo/discount safely by casting strings to Numbers
+  const productDiscount = Number(order.productDiscountIdr || 0);
+  const shippingDiscount = Number(order.shippingDiscountIdr || 0);
+
+  // Fallback: infer combined discount if individual fields are not set
   const totalBeforeDiscount =
     Number(order.subtotalIdr || 0) +
     Number(order.shippingCostIdr || 0) +
     Number(order.taxIdr || 0);
   const grandTotal =
     order.grandTotalIdr != null ? Number(order.grandTotalIdr) : totalBeforeDiscount;
-  const promoAmount =
+  const inferredDiscount =
     totalBeforeDiscount > grandTotal ? totalBeforeDiscount - grandTotal : 0;
+
+  const hasProductDiscount = productDiscount > 0;
+  const hasShippingDiscount = shippingDiscount > 0;
+  const hasInferredDiscount = !hasProductDiscount && !hasShippingDiscount && inferredDiscount > 0;
 
   return (
     <div className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm mb-6">
@@ -106,14 +113,39 @@ export default function OrderDetailSummary({ order }: OrderDetailSummaryProps) {
           </>
         )}
 
-        {/* Render Promo if discount exists */}
-        {promoAmount > 0 && (
+        {/* Render Promo Discounts */}
+        {hasProductDiscount && (
+          <>
+            <div className="w-full h-px bg-gray-200" />
+            <div className="flex justify-between items-center text-font-2">
+              <span className="text-[var(--color-gray)]">Diskon Produk</span>
+              <span className="font-bold text-red-600">
+                ({formatRupiah(productDiscount)})
+              </span>
+            </div>
+          </>
+        )}
+
+        {hasShippingDiscount && (
+          <>
+            <div className="w-full h-px bg-gray-200" />
+            <div className="flex justify-between items-center text-font-2">
+              <span className="text-[var(--color-gray)]">Diskon Ongkos Kirim</span>
+              <span className="font-bold text-red-600">
+                ({formatRupiah(shippingDiscount)})
+              </span>
+            </div>
+          </>
+        )}
+
+        {/* Fallback: single combined discount line */}
+        {hasInferredDiscount && (
           <>
             <div className="w-full h-px bg-gray-200" />
             <div className="flex justify-between items-center text-font-2">
               <span className="text-[var(--color-gray)]">Promo</span>
               <span className="font-bold text-red-600">
-                ({formatRupiah(promoAmount)})
+                ({formatRupiah(inferredDiscount)})
               </span>
             </div>
           </>

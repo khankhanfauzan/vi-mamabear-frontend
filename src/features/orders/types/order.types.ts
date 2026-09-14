@@ -124,6 +124,8 @@ export interface Order {
   shippingAddress: OrderShippingAddress;
   orderStatusHistory?: OrderStatusHistory[];
   grandTotalIdr?: number;
+  productDiscountIdr?: number;
+  shippingDiscountIdr?: number;
 }
 
 /**
@@ -158,6 +160,8 @@ export interface InvoiceData {
   ShippingAddress: string;
   subtotalIdr: string | number;
   shippingCostIdr: string | number;
+  productDiscountIdr?: string | number;
+  shippingDiscountIdr?: string | number;
   totalIdr: string | number;
   PaymentMethod: string;
   InvoicePaymentStatus: string;

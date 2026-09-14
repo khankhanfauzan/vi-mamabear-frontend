@@ -9,6 +9,8 @@ import { createPayment } from "@/features/checkout/services/paymentService";
 import {
   fetchCart,
   updateCartItemCourier,
+  applyPromoCode,
+  removePromoCode,
 } from "@/features/cart/services/cartService";
 import { useCartStore } from "@/features/cart/store/use-cart-store";
 import { CreateOrderPayload } from "@/features/checkout/types/checkoutOrder.types";
@@ -30,6 +32,9 @@ export function useCheckout(initialAddresses: Address[], userEmail: string) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [notes, setNotes] = useState<string>("");
+  const [promoCode, setPromoCode] = useState<string>("");
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+  const [promoError, setPromoError] = useState<string | null>(null);
 
   // Derived Values
   const selectedAddress = initialAddresses.find(
@@ -154,6 +159,40 @@ export function useCheckout(initialAddresses: Address[], userEmail: string) {
     }
   };
 
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return;
+    setIsApplyingPromo(true);
+    setPromoError(null);
+    try {
+      await applyPromoCode(promoCode.trim());
+      const updatedCart = await fetchCart();
+      setCart(updatedCart);
+      setPromoCode("");
+    } catch (error) {
+      setPromoError(
+        error instanceof Error ? error.message : "Kode promo tidak valid.",
+      );
+    } finally {
+      setIsApplyingPromo(false);
+    }
+  };
+
+  const handleRemovePromo = async () => {
+    setIsApplyingPromo(true);
+    setPromoError(null);
+    try {
+      await removePromoCode();
+      const updatedCart = await fetchCart();
+      setCart(updatedCart);
+    } catch (error) {
+      setPromoError(
+        error instanceof Error ? error.message : "Gagal menghapus promo.",
+      );
+    } finally {
+      setIsApplyingPromo(false);
+    }
+  };
+
   const handleCheckout = async () => {
     if (!selectedAddress || !selectedShipping || !cart) {
       setErrorMessage("Mohon lengkapi alamat dan opsi pengiriman.");
@@ -234,7 +273,17 @@ export function useCheckout(initialAddresses: Address[], userEmail: string) {
       handleSelectAddress,
       handleSelectShipping,
       handleNotesChange,
+      handleApplyPromo,
+      handleRemovePromo,
       handleCheckout,
+    },
+    promo: {
+      promoCode,
+      setPromoCode,
+      isApplyingPromo,
+      promoError,
+      appliedPromo: cart?.promoCodeString || null,
+      promoObj: cart?.promoCode || null,
     },
   };
 }

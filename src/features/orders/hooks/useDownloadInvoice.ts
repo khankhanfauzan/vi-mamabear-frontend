@@ -81,6 +81,23 @@ export function useDownloadInvoice() {
       // Ringkasan Harga
       doc.text(`Subtotal    : ${formatRupiah(Number(invoice.subtotalIdr))}`, leftMargin, currentY);
       currentY += 6;
+
+      const productDiscount = Number(invoice.productDiscountIdr || 0);
+      const shippingDiscount = Number(invoice.shippingDiscountIdr || 0);
+
+      if (productDiscount > 0) {
+        doc.setTextColor(220, 38, 38);
+        doc.text(`Diskon Produk: (${formatRupiah(productDiscount)})`, leftMargin, currentY);
+        doc.setTextColor(0, 0, 0);
+        currentY += 6;
+      }
+      if (shippingDiscount > 0) {
+        doc.setTextColor(220, 38, 38);
+        doc.text(`Diskon Ongkir: (${formatRupiah(shippingDiscount)})`, leftMargin, currentY);
+        doc.setTextColor(0, 0, 0);
+        currentY += 6;
+      }
+
       doc.text(`Ongkos Kirim: ${formatRupiah(Number(invoice.shippingCostIdr))}`, leftMargin, currentY);
       currentY += 8;
 

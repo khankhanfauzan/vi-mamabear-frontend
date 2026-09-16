@@ -1,11 +1,17 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { X } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useUIStore } from "@/store/use-ui-store";
+import { cn } from "@/lib/utils";
 
 export function SidebarMenu() {
   const { isSidebarOpen, closeSidebar } = useUIStore();
+  const pathname = usePathname() || "";
+  const isChatPage = pathname === "/chat" || pathname.startsWith("/chat/");
 
   if (!isSidebarOpen) return null;
 
@@ -110,7 +116,14 @@ export function SidebarMenu() {
               </h3>
               <ul className="space-y-4 text-stone-600 font-medium">
                 <li>
-                  <Link href="/chat" onClick={closeSidebar}>
+                  <Link
+                    href="/chat"
+                    onClick={closeSidebar}
+                    className={cn(
+                      isChatPage && "font-bold text-[var(--mama-hot-pink)]",
+                    )}
+                    aria-current={isChatPage ? "page" : undefined}
+                  >
                     Online Chat
                   </Link>
                 </li>

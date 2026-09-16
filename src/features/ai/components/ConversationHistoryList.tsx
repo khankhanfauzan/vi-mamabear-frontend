@@ -1,50 +1,61 @@
 "use client";
 
-import { MessageCircle, TriangleAlert } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { MessageCircle, RotateCcw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAiConversations } from "@/features/ai/hooks/useAiConversations";
 import { AiConversation } from "@/features/ai/types/conversation.types";
 
 export function ConversationHistoryList() {
-  const { conversations, isLoading, isMock, error } = useAiConversations();
+  const { conversations, isLoading, isMock, error, refetch } = useAiConversations();
 
   if (isLoading) {
     return <ConversationHistorySkeleton />;
   }
 
-  if (error) {
-    return (
-      <Alert variant="destructive" className="rounded-md">
-        <TriangleAlert className="size-4" />
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
-    );
-  }
-
-  if (conversations.length === 0) {
-    return (
-      <div className="rounded-md border border-dashed border-pink-100 bg-pink-50/50 px-4 py-6 text-center text-sm text-stone-500">
-        Belum ada riwayat percakapan.
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-2">
-      {isMock && (
-        <p className="text-xs text-stone-400">
-          Menampilkan contoh riwayat sementara.
-        </p>
+      {/* Non-blocking error banner — input form tetap bisa diakses */}
+      {error && (
+        <div
+          className="flex items-center justify-between rounded-lg border border-pink-200 bg-pink-50 px-3 py-2 text-xs text-pink-700"
+          role="alert"
+        >
+          <span>Riwayat belum bisa dimuat.</span>
+          <button
+            type="button"
+            onClick={() => void refetch()}
+            className="ml-2 inline-flex items-center gap-1 font-semibold underline hover:text-pink-900 focus:outline-none"
+            aria-label="Muat ulang riwayat percakapan"
+          >
+            <RotateCcw className="size-3" />
+            Coba lagi
+          </button>
+        </div>
       )}
-      <ul className="space-y-2" aria-label="Riwayat percakapan AI">
-        {conversations.map((conversation) => (
-          <ConversationHistoryItem
-            key={conversation.id}
-            conversation={conversation}
-          />
-        ))}
-      </ul>
+
+      {!error && conversations.length === 0 && (
+        <div className="rounded-md border border-dashed border-pink-100 bg-pink-50/50 px-4 py-6 text-center text-sm text-stone-500">
+          Belum ada riwayat percakapan.
+        </div>
+      )}
+
+      {conversations.length > 0 && (
+        <>
+          {isMock && (
+            <p className="text-xs text-stone-400">
+              Menampilkan contoh riwayat sementara.
+            </p>
+          )}
+          <ul className="space-y-2" aria-label="Riwayat percakapan AI">
+            {conversations.map((conversation) => (
+              <ConversationHistoryItem
+                key={conversation.id}
+                conversation={conversation}
+              />
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   );
 }

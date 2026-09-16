@@ -1,63 +1,113 @@
 "use client";
 
+import { MamaBearMascot } from "@/components/layout/chat/MamaBearMascot";
+import { ChatPanel } from "@/features/chat/components/ChatPanel";
+import {
+  NEWSLETTER_CLOSED_EVENT,
+  NEWSLETTER_STORAGE_KEY,
+} from "@/features/home/hooks/useNewsletterPopup";
 import { MessageCircle, X } from "lucide-react";
-import React, { useState } from "react";
-import { AssistantTypingIndicator } from "@/features/ai/components/AssistantTypingIndicator";
-import { ConversationHistoryList } from "@/features/ai/components/ConversationHistoryList";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
-interface ChatWidgetProps {
-  isAiResponding?: boolean;
-}
+const GREETING_DELAY_MS = 2500;
 
-export default function ChatWidget({ isAiResponding = false }: ChatWidgetProps) {
+export default function ChatWidget() {
+  const pathname = usePathname() || "";
   const [isOpen, setIsOpen] = useState(false);
+  const [showGreeting, setShowGreeting] = useState(false);
+  const hideOnChatPage = pathname === "/chat" || pathname.startsWith("/chat/");
+
+  useEffect(() => {
+    let delayTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const startGreeting = () => {
+      delayTimer = setTimeout(() => setShowGreeting(true), GREETING_DELAY_MS);
+    };
+
+    const alreadyDismissed = localStorage.getItem(NEWSLETTER_STORAGE_KEY);
+    if (alreadyDismissed) {
+      startGreeting();
+    } else {
+      window.addEventListener(NEWSLETTER_CLOSED_EVENT, startGreeting);
+    }
+
+    return () => {
+      window.removeEventListener(NEWSLETTER_CLOSED_EVENT, startGreeting);
+      if (delayTimer) clearTimeout(delayTimer);
+    };
+  }, []);
+
+  const openChat = () => {
+    setIsOpen(true);
+    setShowGreeting(false);
+  };
+
+  if (hideOnChatPage) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 md:bottom-6 md:right-6">
+    <div className="pointer-events-none fixed bottom-20 right-4 z-[55] flex flex-col items-end gap-3 md:bottom-6 md:right-6">
       {isOpen && (
-        <section
-          className="mb-4 w-[min(360px,calc(100vw-2rem))] rounded-lg border border-pink-100 bg-white shadow-xl"
-          aria-label="Chat AI MamaBear"
-        >
-          <div className="flex items-center justify-between border-b border-pink-100 px-4 py-3">
-            <div>
-              <h2 className="text-sm font-bold text-stone-900">
-                Chat AI MamaBear
-              </h2>
-              <p className="text-xs text-stone-500">Riwayat percakapan</p>
+        <div className="pointer-events-auto">
+          <ChatPanel
+            variant="widget"
+            historyEnabled={isOpen}
+            onClose={() => setIsOpen(false)}
+          />
+        </div>
+      )}
+
+      <div className="relative flex flex-col items-end">
+        {showGreeting && !isOpen && (
+          <div className="mama-bear-enter pointer-events-auto z-10 mb-[-1.35rem] flex flex-col items-end md:mb-[-1.75rem]">
+            <div className="relative mb-1 mr-8 max-w-[11rem] md:mr-10 md:max-w-[13rem]">
+              <button
+                type="button"
+                onClick={openChat}
+                className="rounded-2xl rounded-br-sm border border-[var(--mama-pink)] bg-white px-3 py-2 text-left text-xs font-medium text-[var(--mama-brown)] shadow-lg md:text-sm"
+              >
+                Butuh bantuan, Mama?
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowGreeting(false)}
+                className="absolute -right-1.5 -top-1.5 rounded-full bg-white p-0.5 text-[var(--color-light-gray)] shadow"
+                aria-label="Tutup sapaan"
+              >
+                <X className="h-3 w-3" />
+              </button>
+              <span className="pointer-events-none absolute -bottom-1.5 right-3 h-3 w-3 rotate-45 border-b border-r border-[var(--mama-pink)] bg-white" />
             </div>
             <button
               type="button"
-              className="inline-flex size-8 items-center justify-center rounded-full text-stone-500 transition hover:bg-pink-50 hover:text-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300"
-              onClick={() => setIsOpen(false)}
-              aria-label="Tutup chat AI"
+              onClick={openChat}
+              className="h-[4.75rem] w-[4.25rem] md:h-24 md:w-[5.5rem]"
+              aria-label="Buka chat MamaBear"
             >
-              <X className="size-4" />
+              <MamaBearMascot className="h-full w-full" />
             </button>
           </div>
+        )}
 
-          <div className="max-h-[min(420px,calc(100vh-7rem))] space-y-4 overflow-y-auto p-4">
-            <ConversationHistoryList />
-            {isAiResponding && (
-              <AssistantTypingIndicator className="border-t border-pink-50 pt-3" />
-            )}
-          </div>
-        </section>
-      )}
-
-      <button
-        type="button"
-        className="relative flex h-14 w-14 items-center justify-center rounded-full bg-pink-500 text-white shadow-xl transition-all hover:scale-110 hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 group"
-        onClick={() => setIsOpen((current) => !current)}
-        aria-label={isOpen ? "Tutup chat AI" : "Buka chat AI"}
-        aria-expanded={isOpen}
-      >
-        <MessageCircle className="h-7 w-7 group-hover:animate-bounce" />
-        <span className="absolute -right-1 -top-1 flex h-3 w-3">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-pink-400 opacity-75" />
-          <span className="relative inline-flex h-3 w-3 rounded-full bg-pink-300" />
-        </span>
-      </button>
+        <button
+          type="button"
+          onClick={() => (isOpen ? setIsOpen(false) : openChat())}
+          className="pointer-events-auto group relative z-[1] flex h-12 w-12 items-center justify-center rounded-full bg-[var(--mama-hot-pink)] text-white shadow-xl transition-transform hover:scale-110 md:h-14 md:w-14"
+          aria-label={isOpen ? "Tutup chat" : "Buka chat"}
+        >
+          {isOpen ? (
+            <X className="h-6 w-6 md:h-7 md:w-7" />
+          ) : (
+            <MessageCircle className="h-6 w-6 group-hover:animate-bounce md:h-7 md:w-7" />
+          )}
+          {!isOpen && (
+            <span className="absolute -right-1 -top-1 flex h-3 w-3">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--mama-pink)] opacity-75" />
+              <span className="relative inline-flex h-3 w-3 rounded-full bg-[var(--mama-pink)]" />
+            </span>
+          )}
+        </button>
+      </div>
     </div>
   );
 }

@@ -191,6 +191,38 @@
     animation: mama-bear-enter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
+  .chat-markdown {
+    @apply text-sm leading-relaxed;
+  }
+
+  .chat-markdown p {
+    @apply mb-2 last:mb-0;
+  }
+
+  .chat-markdown strong {
+    @apply font-bold;
+  }
+
+  .chat-markdown em {
+    @apply italic;
+  }
+
+  .chat-markdown ul {
+    @apply mb-2 list-disc pl-4 last:mb-0;
+  }
+
+  .chat-markdown ol {
+    @apply mb-2 list-decimal pl-4 last:mb-0;
+  }
+
+  .chat-markdown li {
+    @apply mb-1 last:mb-0;
+  }
+
+  .chat-markdown a {
+    @apply font-semibold underline underline-offset-2;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .mama-bear-figure,
     .mama-bear-arm,

@@ -1,4 +1,8 @@
+"use client";
+
 import { cn } from "@/lib/utils";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { ChatMessage } from "../types/chat.types";
 import { ProductChatCard } from "./ProductChatCard";
 
@@ -29,6 +33,7 @@ export function ChatMessageList({
       {messages.map((message) => {
         const timestamp = showTimestamps ? formatTimestamp(message.createdAt) : null;
         const isUser = message.role === "user";
+        const reply = message.content;
 
         return (
           <div
@@ -44,7 +49,15 @@ export function ChatMessageList({
                     : "rounded-bl-md border border-[var(--mama-pink)] bg-white text-[var(--mama-brown)]",
                 )}
               >
-                <p className="whitespace-pre-wrap">{message.content}</p>
+                {isUser ? (
+                  <p className="whitespace-pre-wrap">{reply}</p>
+                ) : (
+                  <div className="chat-markdown">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {reply}
+                    </ReactMarkdown>
+                  </div>
+                )}
                 {timestamp && (
                   <p
                     className={cn(

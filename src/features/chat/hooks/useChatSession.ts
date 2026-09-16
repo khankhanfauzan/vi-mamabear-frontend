@@ -11,7 +11,7 @@ export const MAX_MESSAGE_LENGTH = 1000;
 const OPENING_MESSAGE: ChatMessage = {
   id: "opening",
   role: "assistant",
-  content: "Hai Mama! Ada yang bisa MamaBear bantu hari ini?",
+  content: "Hai Mama! Ada yang bisa **MamaBear** bantu hari ini?",
 };
 
 const SAMPLE_PRODUCTS: ChatProduct[] = [
@@ -34,7 +34,7 @@ const SAMPLE_PRODUCTS: ChatProduct[] = [
 const MOCK_REPLIES: Array<{ content: string; products?: ChatProduct[] }> = [
   {
     content:
-      "Pilihan tepat sekali, Ma! Untuk camilan lezat bernutrisi tinggi, Mama Bear punya rekomendasi favorit para busui:",
+      "Pilihan tepat sekali, Ma! Untuk camilan lezat bernutrisi tinggi, Mama Bear punya rekomendasi favorit para busui:\n\n- **Kukis Almond Oat** — kaya serat\n- *Superfood* untuk busui\n\nSilakan pilih produk di bawah, ya.",
     products: SAMPLE_PRODUCTS,
   },
   {
@@ -85,9 +85,9 @@ export function useChatSession(options: { historyEnabled?: boolean } = {}) {
     list.scrollTo({ top: list.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = (event?: FormEvent) => {
+  const sendMessage = (event?: FormEvent, textOverride?: string) => {
     event?.preventDefault();
-    const text = input.trim();
+    const text = (textOverride ?? input).trim();
     if (!text || text.length > MAX_MESSAGE_LENGTH || isSending) return;
 
     setMessages((prev) => [
@@ -133,5 +133,9 @@ export function useChatSession(options: { historyEnabled?: boolean } = {}) {
     history,
     sendMessage,
     handleInputKeyDown,
+    sendQuickReply: (label: string) => {
+      setInput(label);
+      sendMessage(undefined, label);
+    },
   };
 }

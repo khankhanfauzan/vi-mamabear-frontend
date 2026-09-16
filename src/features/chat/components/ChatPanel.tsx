@@ -5,6 +5,7 @@ import { Loader2, Send, X } from "lucide-react";
 import Link from "next/link";
 import { MAX_MESSAGE_LENGTH, useChatSession } from "../hooks/useChatSession";
 import { ChatMessageList } from "./ChatMessageList";
+import { AssistantTypingIndicator } from "@/features/ai/components/AssistantTypingIndicator";
 
 type ChatPanelProps = {
   variant?: "widget" | "page";
@@ -99,6 +100,11 @@ export function ChatPanel({
           </p>
         ) : (
           <ChatMessageList messages={messages} />
+        )}
+
+        {/* Typing indicator: muncul saat AI sedang memproses balasan */}
+        {isSending && (
+          <AssistantTypingIndicator className="pt-1" />
         )}
       </div>
 

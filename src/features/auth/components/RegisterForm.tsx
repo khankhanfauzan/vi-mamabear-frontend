@@ -21,6 +21,18 @@ import { Controller, useForm } from "react-hook-form";
 import { RegisterPayload } from "../types/auth.types";
 import { useRegister } from "@/features/auth/hooks/useRegister";
 
+const formatPhoneNumberInput = (value: string) => {
+  let digits = value.replace(/\D/g, "");
+
+  while (digits.startsWith("62") || digits.startsWith("0")) {
+    digits = digits.startsWith("62")
+      ? digits.slice(2)
+      : digits.replace(/^0+/, "");
+  }
+
+  return digits;
+};
+
 export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const { loading, error, isSubmitted, handleRegister } = useRegister();
@@ -36,6 +48,11 @@ export function RegisterForm() {
   >();
 
   const password = watch("password");
+  const { onChange: onPhoneChange, ...phoneRegister } = register("phone", {
+    required: "Nomor handphone wajib diisi",
+    validate: (value) =>
+      /^8\d{8,}$/.test(value || "") || "Nomor HP tidak valid",
+  });
 
   /**
    * Success View: Verification Email Sent
@@ -248,18 +265,15 @@ export function RegisterForm() {
               <Input
                 id="phone"
                 type="text"
+                inputMode="numeric"
                 placeholder="81234567890"
-                {...register("phone", {
-                  required: "Nomor handphone wajib diisi",
-                  pattern: {
-                    value: /^[0-9]+$/,
-                    message: "Hanya boleh angka",
-                  },
-                  minLength: {
-                    value: 9,
-                    message: "Nomor terlalu pendek",
-                  },
-                })}
+                {...phoneRegister}
+                onChange={(event) => {
+                  event.target.value = formatPhoneNumberInput(
+                    event.target.value,
+                  );
+                  onPhoneChange(event);
+                }}
                 className={`pl-4 bg-white border-0 [&::placeholder]:text-[0.6rem] [&::placeholder]:text-stone-400 [&::placeholder]:font-semibold rounded-none`}
               />
             </div>

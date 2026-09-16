@@ -3,6 +3,18 @@
 import React from "react";
 import { useAddressForm } from "../../hooks/useCreateAddressForm";
 
+const formatPhoneNumberInput = (value: string) => {
+  let digits = value.replace(/\D/g, "");
+
+  while (digits.startsWith("62") || digits.startsWith("0")) {
+    digits = digits.startsWith("62")
+      ? digits.slice(2)
+      : digits.replace(/^0+/, "");
+  }
+
+  return digits;
+};
+
 /**
  * Address Creation Form matching the provided MamaBear UI specifications.
  */
@@ -17,6 +29,14 @@ export function AddressForm() {
     loaders,
     successMessage,
   } = useAddressForm();
+  const { onChange: onPhoneNumberChange, ...phoneNumberRegister } = register(
+    "phoneNumber",
+    {
+      required: "Nomor handphone wajib diisi",
+      validate: (value) =>
+        /^8\d{8,}$/.test(value || "") || "Nomor HP tidak valid",
+    },
+  );
 
   return (
     <div className="w-full max-w-3xl mx-auto bg-white p-6 rounded-lg">
@@ -56,11 +76,16 @@ export function AddressForm() {
               </span>
               <input
                 type="tel"
+                inputMode="numeric"
                 placeholder="123456789"
                 className="w-full border-0 focus:ring-0 px-0 py-2 bg-transparent text-font-2 text-gray-800 outline-none"
-                {...register("phoneNumber", {
-                  required: "Nomor handphone wajib diisi",
-                })}
+                {...phoneNumberRegister}
+                onChange={(event) => {
+                  event.target.value = formatPhoneNumberInput(
+                    event.target.value,
+                  );
+                  onPhoneNumberChange(event);
+                }}
               />
             </div>
             {errors.phoneNumber && (

@@ -5,6 +5,7 @@ import { Loader2, Send, X } from "lucide-react";
 import Link from "next/link";
 import { MAX_MESSAGE_LENGTH, useChatSession } from "../hooks/useChatSession";
 import { ChatMessageList } from "./ChatMessageList";
+import { ChatQuickReplies } from "./ChatQuickReplies";
 import { AssistantTypingIndicator } from "@/features/ai/components/AssistantTypingIndicator";
 
 type ChatPanelProps = {
@@ -31,6 +32,7 @@ export function ChatPanel({
     history,
     sendMessage,
     handleInputKeyDown,
+    sendQuickReply,
   } = useChatSession({ historyEnabled });
 
   const isPage = variant === "page";
@@ -112,6 +114,10 @@ export function ChatPanel({
         onSubmit={sendMessage}
         className="border-t border-[var(--mama-pink)] bg-white p-3"
       >
+        <ChatQuickReplies
+          disabled={isSending || (usingHistory && history.isLoading)}
+          onSelect={sendQuickReply}
+        />
         <div className="flex items-end gap-2">
           <textarea
             value={input}

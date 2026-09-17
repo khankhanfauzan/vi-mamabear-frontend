@@ -3,6 +3,7 @@ import { useConversationHistory } from "./useConversationHistory";
 import {
   CONVERSATION_STORAGE_KEY,
   type ChatMessage,
+  type ChatProduct,
 } from "../types/chat.types";
 
 export const MAX_MESSAGE_LENGTH = 1000;
@@ -13,10 +14,36 @@ const OPENING_MESSAGE: ChatMessage = {
   content: "Hai Mama! Ada yang bisa MamaBear bantu hari ini?",
 };
 
-const MOCK_REPLIES = [
-  "Siap, Mama. Ceritakan saja kebutuhan Mama seputar produk atau pesanan, ya.",
-  "Terima kasih sudah menghubungi MamaBear. Tim kami akan bantu secepatnya.",
-  "Baik, Mama. Ada lagi yang ingin ditanyakan?",
+const SAMPLE_PRODUCTS: ChatProduct[] = [
+  {
+    id: 1,
+    name: "Kukis Almond Oat Mama Bear",
+    slug: "kukis-almond-oat-mama-bear",
+    category: "SUPERFOOD CAMILAN",
+    imageUrl: "/images/layout/logo.png",
+    price: 35000,
+    formattedPrice: "Rp 35.000",
+    rating: 4.9,
+    reviewCount: 14200,
+    totalSold: 500000,
+    shortDescription:
+      "Kaya serat & almond superfood untuk melancarkan ASI",
+  },
+];
+
+const MOCK_REPLIES: Array<{ content: string; products?: ChatProduct[] }> = [
+  {
+    content:
+      "Pilihan tepat sekali, Ma! Untuk camilan lezat bernutrisi tinggi, Mama Bear punya rekomendasi favorit para busui:",
+    products: SAMPLE_PRODUCTS,
+  },
+  {
+    content:
+      "Terima kasih sudah menghubungi MamaBear. Tim kami akan bantu secepatnya.",
+  },
+  {
+    content: "Baik, Mama. Ada lagi yang ingin ditanyakan?",
+  },
 ];
 
 function createId() {
@@ -76,7 +103,12 @@ export function useChatSession(options: { historyEnabled?: boolean } = {}) {
     window.setTimeout(() => {
       setMessages((prev) => [
         ...prev,
-        { id: createId(), role: "assistant", content: reply },
+        {
+          id: createId(),
+          role: "assistant",
+          content: reply.content,
+          products: reply.products,
+        },
       ]);
       setIsSending(false);
     }, 600);

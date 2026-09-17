@@ -120,7 +120,17 @@ export function useCheckout(initialAddresses: Address[], userEmail: string) {
               shippingMethod: defaultOption.service,
             });
             setCart((prev) =>
-              prev ? { ...updatedCart, items: prev.items } : updatedCart,
+              prev
+                ? {
+                    ...updatedCart,
+                    items: prev.items,
+                    promoCodeId: prev.promoCodeId,
+                    promoCodeString: prev.promoCodeString,
+                    promoCode: prev.promoCode,
+                    productDiscountIdr: prev.productDiscountIdr,
+                    shippingDiscountIdr: prev.shippingDiscountIdr,
+                  }
+                : updatedCart,
             );
           } catch (updateError) {
             console.error("Failed to sync default courier", updateError);
@@ -152,7 +162,19 @@ export function useCheckout(initialAddresses: Address[], userEmail: string) {
           courierCode: selectedOption.code,
           shippingMethod: selectedOption.service,
         });
-        setCart({ ...updatedCart, items: cart.items });
+        setCart((prev) =>
+          prev
+            ? {
+                ...updatedCart,
+                items: prev.items,
+                promoCodeId: prev.promoCodeId,
+                promoCodeString: prev.promoCodeString,
+                promoCode: prev.promoCode,
+                productDiscountIdr: prev.productDiscountIdr,
+                shippingDiscountIdr: prev.shippingDiscountIdr,
+              }
+            : updatedCart,
+        );
       } catch (error) {
         console.error("Failed to update cart courier selection", error);
       }
@@ -168,6 +190,9 @@ export function useCheckout(initialAddresses: Address[], userEmail: string) {
       const updatedCart = await fetchCart();
       setCart(updatedCart);
       setPromoCode("");
+      if (updatedCart) {
+        useCartStore.setState({ cart: updatedCart, items: updatedCart.items });
+      }
     } catch (error) {
       setPromoError(
         error instanceof Error ? error.message : "Kode promo tidak valid.",
@@ -184,6 +209,9 @@ export function useCheckout(initialAddresses: Address[], userEmail: string) {
       await removePromoCode();
       const updatedCart = await fetchCart();
       setCart(updatedCart);
+      if (updatedCart) {
+        useCartStore.setState({ cart: updatedCart, items: updatedCart.items });
+      }
     } catch (error) {
       setPromoError(
         error instanceof Error ? error.message : "Gagal menghapus promo.",

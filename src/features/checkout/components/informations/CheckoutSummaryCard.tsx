@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import { Cart } from "@/features/cart/types/cart.types";
 import { ShippingOption } from "@/features/address/types/shipping.types";
@@ -45,7 +45,6 @@ export function CheckoutSummaryCard({
   onApplyPromo,
   onRemovePromo,
 }: CheckoutSummaryCardProps) {
-  const [isEditingPromo, setIsEditingPromo] = useState(false);
   return (
     <div className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24">
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
@@ -105,7 +104,7 @@ export function CheckoutSummaryCard({
           <label className="block text-font-2 font-semibold text-[var(--mama-brown)] mb-3">
             Kode Promo
           </label>
-          {!promo.appliedPromo || isEditingPromo ? (
+          {!promo.appliedPromo ? (
             <div className="flex flex-col gap-2">
               <div className="flex gap-2">
                 <input
@@ -127,38 +126,19 @@ export function CheckoutSummaryCard({
               {promo.promoError && (
                 <p className="text-red-500 text-sm">{promo.promoError}</p>
               )}
-              {isEditingPromo && (
-                <button
-                  onClick={() => setIsEditingPromo(false)}
-                  className="text-gray-500 text-sm font-medium hover:underline self-start"
-                >
-                  Batal
-                </button>
-              )}
             </div>
           ) : (
             <div className="flex items-center justify-between p-3 border border-green-500 rounded-lg bg-green-50">
               <span className="font-semibold text-green-700 text-sm">
                 Promo: {promo.appliedPromo}
               </span>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => {
-                    setIsEditingPromo(true);
-                    promo.setPromoCode("");
-                  }}
-                  className="text-[var(--mama-hot-pink)] text-sm font-semibold hover:underline"
-                >
-                  Ganti
-                </button>
-                <button
-                  onClick={onRemovePromo}
-                  disabled={promo.isApplyingPromo}
-                  className="text-red-500 text-sm font-semibold hover:underline disabled:opacity-50"
-                >
-                  Hapus
-                </button>
-              </div>
+              <button
+                onClick={onRemovePromo}
+                disabled={promo.isApplyingPromo}
+                className="text-red-500 text-sm font-semibold hover:underline disabled:opacity-50"
+              >
+                Hapus
+              </button>
             </div>
           )}
         </div>
@@ -176,14 +156,19 @@ export function CheckoutSummaryCard({
             )}
           </div>
 
-          {totals.productDiscount > 0 && (
+          {promo.isApplyingPromo && totals.productDiscount > 0 ? (
+            <div className="flex justify-between text-font-2 text-green-600">
+              <span>Diskon Produk</span>
+              <div className="h-5 bg-gray-200 rounded w-16 animate-pulse"></div>
+            </div>
+          ) : totals.productDiscount > 0 ? (
             <div className="flex justify-between text-font-2 text-green-600">
               <span>Diskon Produk</span>
               <span className="font-bold">
                 -{formatRupiah(totals.productDiscount)}
               </span>
             </div>
-          )}
+          ) : null}
 
           <div className="flex justify-between text-font-2">
             <span className="text-gray-600">Ongkos Kirim</span>
@@ -198,14 +183,19 @@ export function CheckoutSummaryCard({
             )}
           </div>
 
-          {totals.shippingDiscount > 0 && (
+          {promo.isApplyingPromo && totals.shippingDiscount > 0 ? (
+            <div className="flex justify-between text-font-2 text-green-600">
+              <span>Diskon Ongkos Kirim (Promo)</span>
+              <div className="h-5 bg-gray-200 rounded w-16 animate-pulse"></div>
+            </div>
+          ) : totals.shippingDiscount > 0 ? (
             <div className="flex justify-between text-font-2 text-green-600">
               <span>Diskon Ongkos Kirim (Promo)</span>
               <span className="font-bold">
                 -{formatRupiah(totals.shippingDiscount)}
               </span>
             </div>
-          )}
+          ) : null}
 
           {/* Pajak (Tax) */}
           <div className="flex justify-between text-font-2">

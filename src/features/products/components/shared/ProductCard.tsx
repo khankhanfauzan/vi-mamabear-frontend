@@ -4,6 +4,9 @@ import { Product } from "@/features/products/types/products.types";
 import { ShoppingCart, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { ProductDetail } from "../../types/product.types";
+import React, { useState } from "react";
+import { AddToCartModal } from "./AddToCartModal";
 
 const formatSold = (value: number | string) => {
   if (typeof value === "string" && /[a-zA-Z+]/.test(value)) return value;
@@ -59,81 +62,116 @@ export default function ProductCard({
       }).format(parseInt(originalPriceStr, 10))
     : null;
 
+  // Membuka modal untuk varian
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [varian, setVarian] = useState(product.variants?.[0] || null);
+  const [quantity, setQuantity] = useState(1);
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsModalOpen(true);
+  };
+
   return (
     // TODO: this card is not uniform when using flex
-    <Link
-      href={`/products/${product.slug}`}
-      className="group flex overflow-hidden flex-col bg-white rounded-2xl hover:shadow-xl hover:shadow-pink-100/50 transition-all duration-300 border border-transparent hover:border-pink-100 cursor-pointer relative h-full min-w-[140px] max-w-[280px] w-full mx-auto"
-    >
-      {/* Image & Badges Container */}
-      <div className="relative aspect-square bg-stone-50 overflow-hidden">
-        <div className="absolute top-2 left-2 z-10 flex gap-1 flex-wrap">
-          {!!discount && (
-            <span className="text-[14px] font-bold px-1.5 py-0.5 bg-red-500 text-white shadow-sm w-fit">
-              {discount}%
-            </span>
-          )}
-          {badge && (
-            <span className="text-[14px] font-bold px-1.5 py-0.5 bg-pink-200 text-primary shadow-sm uppercase w-fit">
-              {badge}
-            </span>
-          )}
-        </div>
-
-        <Image
-          src={mainImage}
-          alt={product.name}
-          fill
-          sizes="(max-width: 768px) 50vw, 25vw"
-          className="object-cover object-center w-full h-full group-hover:scale-105 transition-transform duration-500"
-          unoptimized
-        />
-      </div>
-
-      {/* Product Details Section */}
-      <div className="flex flex-col py-3 px-4">
-        <h3 className="text-sm font-semibold text-stone-800 line-clamp-2 leading-tight group-hover:text-primary transition-colors mb-2">
-          {product.name}
-        </h3>
-
-        <div className="flex justify-between items-center">
-          <div>
-            <div className="flex items-center gap-1.5 mb-1">
-              <Star className="w-3.5 h-3.5 fill-primary text-primary" />
-              <span className="text-xs font-bold text-stone-600">
-                {rating.toFixed(1)}
+    <>
+      <Link
+        href={`/products/${product.slug}`}
+        className="group flex overflow-hidden flex-col bg-white rounded-2xl hover:shadow-xl hover:shadow-pink-100/50 transition-all duration-300 border border-transparent hover:border-pink-100 cursor-pointer relative h-full min-w-[140px] max-w-[280px] w-full mx-auto"
+      >
+        {/* Image & Badges Container */}
+        <div className="relative aspect-square bg-stone-50 overflow-hidden">
+          <div className="absolute top-2 left-2 z-10 flex gap-1 flex-wrap">
+            {!!discount && (
+              <span className="text-[14px] font-bold px-1.5 py-0.5 bg-red-500 text-white shadow-sm w-fit">
+                {discount}%
               </span>
-              <span className="text-[10px] font-medium text-stone-500 ml-1">
-                {sold} Terjual
+            )}
+            {badge && (
+              <span className="text-[14px] font-bold px-1.5 py-0.5 bg-pink-200 text-primary shadow-sm uppercase w-fit">
+                {badge}
               </span>
-            </div>
-
-            <div className="flex justify-between gap-2">
-              <div className="flex flex-col">
-                {!!discount && formattedOriginalPrice && (
-                  <span className="text-[10px] text-stone-400 line-through leading-none mb-0.5">
-                    {formattedOriginalPrice}
-                  </span>
-                )}
-                <span className="text-lg font-black text-red-500 tracking-tight">
-                  {formattedCurrentPrice}
-                </span>
-              </div>
-            </div>
+            )}
           </div>
 
-          <button
-            className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-md hover:bg-primary hover:scale-110 active:scale-95 transition-all shrink-0 pb-[-12rem]"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              // TODO: Add to cart logic here
-            }}
-          >
-            <ShoppingCart className="w-5 h-5" />
-          </button>
+          <Image
+            src={mainImage}
+            alt={product.name}
+            fill
+            sizes="(max-width: 768px) 50vw, 25vw"
+            className="object-cover object-center w-full h-full group-hover:scale-105 transition-transform duration-500"
+            unoptimized
+          />
         </div>
-      </div>
-    </Link>
+
+        {/* Product Details Section */}
+        <div className="flex flex-col py-3 px-4">
+          <h3 className="text-sm font-semibold text-stone-800 line-clamp-2 leading-tight group-hover:text-primary transition-colors mb-2">
+            {product.name}
+          </h3>
+
+          <div className="flex justify-between items-center">
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <Star className="w-3.5 h-3.5 fill-primary text-primary" />
+                <span className="text-xs font-bold text-stone-600">
+                  {rating.toFixed(1)}
+                </span>
+                <span className="text-[10px] font-medium text-stone-500 ml-1">
+                  {sold} Terjual
+                </span>
+              </div>
+
+              <div className="flex justify-between gap-2">
+                <div className="flex flex-col">
+                  {!!discount && formattedOriginalPrice && (
+                    <span className="text-[10px] text-stone-400 line-through leading-none mb-0.5">
+                      {formattedOriginalPrice}
+                    </span>
+                  )}
+                  <span className="text-lg font-black text-red-500 tracking-tight">
+                    {formattedCurrentPrice}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-md hover:bg-primary hover:scale-110 active:scale-95 transition-all shrink-0 pb-[-12rem]"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleAddToCart(e);
+              }}
+            >
+              <ShoppingCart className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </Link>
+
+      {/* Add To Cart Modal */}
+      <AddToCartModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        product={product as unknown as ProductDetail}
+        variants={product.variants || []}
+        currentVariant={varian}
+        selectedVariantId={varian?.id || null}
+        quantity={quantity}
+        // Add To Cart Logic
+        onVariantSelect={(id) => {
+          setVarian(product.variants?.find((v) => v.id === id) || null);
+        }}
+        onQuantityChange={(type) => {
+          if (type == "increase") {
+            setQuantity(quantity + 1);
+          } else if (type == "decrease") {
+            setQuantity(quantity - 1);
+          }
+        }}
+      />
+    </>
   );
 }

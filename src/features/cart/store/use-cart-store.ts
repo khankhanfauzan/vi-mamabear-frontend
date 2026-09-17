@@ -129,6 +129,7 @@ export const useCartStore = create<CartState>()(
             });
           }
           set({ items: newItems, isOpen: true });
+          await get().initializeCart();
         } catch (error) {
           console.error("[useCartStore] addItem failed:", error);
           throw error;
@@ -148,6 +149,7 @@ export const useCartStore = create<CartState>()(
             item.id === itemId ? { ...item, quantity: dbItem.quantity } : item,
           );
           set({ items: newItems });
+          await get().initializeCart();
         } catch (error) {
           console.error("[useCartStore] updateQuantity failed:", error);
           throw error;
@@ -164,6 +166,7 @@ export const useCartStore = create<CartState>()(
             (item) => item.id !== itemId,
           );
           set({ items: newItems });
+          await get().initializeCart();
         } catch (error) {
           console.error("[useCartStore] removeItem failed:", error);
           throw error;

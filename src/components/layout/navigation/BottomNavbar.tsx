@@ -10,6 +10,7 @@ import {
   User,
   MessageCircleMore,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface BottomNavProps {
   isLoggedIn: boolean;
@@ -21,6 +22,7 @@ interface BottomNavProps {
 
 export function BottomNav({ isLoggedIn }: BottomNavProps) {
   const pathname = usePathname() || "";
+  const isChatPage = pathname === "/chat" || pathname.startsWith("/chat/");
 
   // Check if the current route is exactly /products/[something]
   const isProductDetailPage = /^\/products\/[^\/]+$/.test(pathname);
@@ -50,12 +52,17 @@ export function BottomNav({ isLoggedIn }: BottomNavProps) {
         </Link>
 
         <Link
-          href="https://api.whatsapp.com/send/?phone=628888695757&text&type=phone_number&app_absent=0"
-          className="flex flex-col items-center justify-center w-full h-full text-[var(--mama-brown)] hover:text-primary transition-colors"
-          target="_blank"
+          href="/chat"
+          className={cn(
+            "flex h-full w-full flex-col items-center justify-center transition-colors hover:text-primary",
+            isChatPage
+              ? "text-[var(--mama-hot-pink)]"
+              : "text-[var(--mama-brown)]",
+          )}
+          aria-current={isChatPage ? "page" : undefined}
         >
-          <MessageCircleMore className="w-6 h-6" strokeWidth={2.5} />
-          <span className="text-[10px] mt-1 font-semibold">Chat</span>
+          <MessageCircleMore className="h-6 w-6" strokeWidth={2.5} />
+          <span className="mt-1 text-[10px] font-semibold">Chat</span>
         </Link>
 
         <Link

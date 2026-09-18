@@ -247,14 +247,19 @@ export function AddressForm() {
         {/* ROW 6: Label */}
         <div className="flex flex-col">
           <label className="text-[var(--mama-brown)] font-bold text-font-2 mb-2">
-            Atur Sebagai
+            Simpan Alamat Sebagai
           </label>
-          <input
-            type="text"
-            placeholder="Rumah/Kantor"
-            className="w-full border-0 border-b border-gray-300 focus:border-[var(--mama-hot-pink)] focus:ring-0 px-0 py-2 bg-transparent text-font-2 text-gray-800 outline-none transition-colors"
-            {...register("label", { required: "Label alamat wajib diisi" })}
-          />
+          <select
+            className="w-1/2 border-0 border-b border-gray-300 focus:border-[var(--mama-hot-pink)] focus:ring-0 px-0 py-2 bg-transparent text-font-2 text-gray-800 outline-none transition-colors cursor-pointer"
+            {...register("label", {
+              required: "Label alamat wajib diisi",
+            })}
+          >
+            <option value="">Pilih Label</option>
+            <option value="Rumah">Rumah</option>
+            <option value="Kantor">Kantor</option>
+            <option value="Apartemen">Apartemen</option>
+          </select>
         </div>
 
         {/* ROW 7: Buttons */}

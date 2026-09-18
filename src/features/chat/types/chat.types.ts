@@ -27,4 +27,10 @@ export type ConversationHistory = {
   messages: ChatMessage[];
 };
 
+export interface SendChatMessageResponse {
+  conversationId: string;
+  reply: string;
+  products?: ChatProduct[];
+}
+
 export const CONVERSATION_STORAGE_KEY = "mamabear-conversation-id";

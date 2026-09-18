@@ -2,6 +2,8 @@ import { apiClient } from "@/lib/api";
 import { ApiResponse } from "@/types/api.types";
 import { mockAiConversations } from "@/features/ai/mocks/conversations";
 import {
+  AiChatRequest,
+  AiChatResponse,
   AiConversation,
   AiConversationHistoryResult,
 } from "@/features/ai/types/conversation.types";
@@ -27,7 +29,7 @@ export async function fetchAiConversations(): Promise<AiConversationHistoryResul
       );
     }
 
-    const data = unwrapApiData(payload);
+    const data = unwrapApiData(payload, "Gagal memuat riwayat percakapan.");
 
     return {
       conversations: normalizeConversations(data),
@@ -41,6 +43,47 @@ export async function fetchAiConversations(): Promise<AiConversationHistoryResul
   }
 }
 
+export async function sendAiChatMessage(
+  message: string,
+  conversationId?: string,
+): Promise<AiChatResponse> {
+  const trimmedMessage = message.trim();
+
+  if (!trimmedMessage) {
+    throw new Error("Pesan tidak boleh kosong.");
+  }
+
+  const requestBody: AiChatRequest = {
+    message: trimmedMessage,
+    ...(conversationId ? { conversationId } : {}),
+  };
+
+  try {
+    const res = await apiClient.post("/ai/chat", requestBody);
+    const payload = await parseJsonResponse(res);
+
+    if (!res.ok) {
+      throw new Error(
+        readResponseMessage(payload) || "Gagal mengirim pesan ke AI.",
+      );
+    }
+
+    const data = unwrapApiData(payload, "Gagal mengirim pesan ke AI.");
+    const chatResponse = normalizeChatResponse(data);
+
+    if (!chatResponse) {
+      throw new Error("Response AI tidak sesuai format yang diharapkan.");
+    }
+
+    return chatResponse;
+  } catch (error) {
+    console.error("[conversationService] sendAiChatMessage failed:", error);
+    throw error instanceof Error
+      ? error
+      : new Error("Gagal mengirim pesan ke AI.");
+  }
+}
+
 async function parseJsonResponse(response: Response): Promise<unknown> {
   try {
     return await response.json();
@@ -49,7 +92,7 @@ async function parseJsonResponse(response: Response): Promise<unknown> {
   }
 }
 
-function unwrapApiData(payload: unknown): unknown {
+function unwrapApiData(payload: unknown, fallbackMessage: string): unknown {
   const body = toRecord(payload);
 
   if (!body) {
@@ -57,9 +100,7 @@ function unwrapApiData(payload: unknown): unknown {
   }
 
   if (body.success === false) {
-    throw new Error(
-      readResponseMessage(payload) || "Gagal memuat riwayat percakapan.",
-    );
+    throw new Error(readResponseMessage(payload) || fallbackMessage);
   }
 
   return "data" in body ? (payload as ApiResponse<unknown>).data : payload;
@@ -119,6 +160,36 @@ function normalizeConversation(payload: unknown): AiConversation | null {
     preview,
     createdAt: firstString(body.createdAt, body.created_at),
     updatedAt: firstString(body.updatedAt, body.updated_at, body.lastMessageAt),
+  };
+}
+
+function normalizeChatResponse(payload: unknown): AiChatResponse | null {
+  const body = toRecord(payload);
+
+  if (!body) {
+    return null;
+  }
+
+  const conversationId = firstString(
+    body.conversationId,
+    body.id,
+    body.threadId,
+  );
+  const reply = firstString(
+    body.reply,
+    body.message,
+    body.content,
+    body.answer,
+    body.response,
+  );
+
+  if (!conversationId || !reply) {
+    return null;
+  }
+
+  return {
+    conversationId,
+    reply,
   };
 }
 

@@ -1,9 +1,9 @@
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
+import { chatService } from "../services/chatService";
 import { useConversationHistory } from "./useConversationHistory";
 import {
   CONVERSATION_STORAGE_KEY,
   type ChatMessage,
-  type ChatProduct,
 } from "../types/chat.types";
 
 export const MAX_MESSAGE_LENGTH = 1000;
@@ -13,38 +13,6 @@ const OPENING_MESSAGE: ChatMessage = {
   role: "assistant",
   content: "Hai Mama! Ada yang bisa **MamaBear** bantu hari ini?",
 };
-
-const SAMPLE_PRODUCTS: ChatProduct[] = [
-  {
-    id: 1,
-    name: "Kukis Almond Oat Mama Bear",
-    slug: "kukis-almond-oat-mama-bear",
-    category: "SUPERFOOD CAMILAN",
-    imageUrl: "/images/layout/logo.png",
-    price: 35000,
-    formattedPrice: "Rp 35.000",
-    rating: 4.9,
-    reviewCount: 14200,
-    totalSold: 500000,
-    shortDescription:
-      "Kaya serat & almond superfood untuk melancarkan ASI",
-  },
-];
-
-const MOCK_REPLIES: Array<{ content: string; products?: ChatProduct[] }> = [
-  {
-    content:
-      "Pilihan tepat sekali, Ma! Untuk camilan lezat bernutrisi tinggi, Mama Bear punya rekomendasi favorit para busui:\n\n- **Kukis Almond Oat** — kaya serat\n- *Superfood* untuk busui\n\nSilakan pilih produk di bawah, ya.",
-    products: SAMPLE_PRODUCTS,
-  },
-  {
-    content:
-      "Terima kasih sudah menghubungi MamaBear. Tim kami akan bantu secepatnya.",
-  },
-  {
-    content: "Baik, Mama. Ada lagi yang ingin ditanyakan?",
-  },
-];
 
 function createId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -59,7 +27,6 @@ export function useChatSession(options: { historyEnabled?: boolean } = {}) {
     OPENING_MESSAGE,
   ]);
   const listRef = useRef<HTMLDivElement>(null);
-  const replyIndex = useRef(0);
 
   const history = useConversationHistory(conversationId, {
     enabled: historyEnabled,
@@ -85,7 +52,7 @@ export function useChatSession(options: { historyEnabled?: boolean } = {}) {
     list.scrollTo({ top: list.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = (event?: FormEvent, textOverride?: string) => {
+  const sendMessage = async (event?: FormEvent, textOverride?: string) => {
     event?.preventDefault();
     const text = (textOverride ?? input).trim();
     if (!text || text.length > MAX_MESSAGE_LENGTH || isSending) return;
@@ -97,21 +64,41 @@ export function useChatSession(options: { historyEnabled?: boolean } = {}) {
     setInput("");
     setIsSending(true);
 
-    const reply = MOCK_REPLIES[replyIndex.current % MOCK_REPLIES.length];
-    replyIndex.current += 1;
+    try {
+      const response = await chatService.sendChatMessage(text, conversationId);
 
-    window.setTimeout(() => {
+      if (response.conversationId && response.conversationId !== conversationId) {
+        setConversationId(response.conversationId);
+        try {
+          localStorage.setItem(CONVERSATION_STORAGE_KEY, response.conversationId);
+        } catch {
+          // ignore storage error
+        }
+      }
+
       setMessages((prev) => [
         ...prev,
         {
           id: createId(),
           role: "assistant",
-          content: reply.content,
-          products: reply.products,
+          content: response.reply,
+          products: response.products,
         },
       ]);
+    } catch (err) {
+      console.error("[useChatSession] sendChatMessage failed:", err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: createId(),
+          role: "assistant",
+          content:
+            "Maaf Mama, saat ini AI MamaBear sedang terkendala menghubungi server. Silakan coba kirim lagi sebentar ya.",
+        },
+      ]);
+    } finally {
       setIsSending(false);
-    }, 600);
+    }
   };
 
   const handleInputKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {

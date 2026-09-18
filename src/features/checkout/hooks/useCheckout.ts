@@ -9,6 +9,8 @@ import { createPayment } from "@/features/checkout/services/paymentService";
 import {
   fetchCart,
   updateCartItemCourier,
+  applyPromoCode,
+  removePromoCode,
 } from "@/features/cart/services/cartService";
 import { useCartStore } from "@/features/cart/store/use-cart-store";
 import { CreateOrderPayload } from "@/features/checkout/types/checkoutOrder.types";
@@ -30,6 +32,9 @@ export function useCheckout(initialAddresses: Address[], userEmail: string) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [notes, setNotes] = useState<string>("");
+  const [promoCode, setPromoCode] = useState<string>("");
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+  const [promoError, setPromoError] = useState<string | null>(null);
 
   // Derived Values
   const selectedAddress = initialAddresses.find(
@@ -115,7 +120,17 @@ export function useCheckout(initialAddresses: Address[], userEmail: string) {
               shippingMethod: defaultOption.service,
             });
             setCart((prev) =>
-              prev ? { ...updatedCart, items: prev.items } : updatedCart,
+              prev
+                ? {
+                    ...updatedCart,
+                    items: prev.items,
+                    promoCodeId: prev.promoCodeId,
+                    promoCodeString: prev.promoCodeString,
+                    promoCode: prev.promoCode,
+                    productDiscountIdr: prev.productDiscountIdr,
+                    shippingDiscountIdr: prev.shippingDiscountIdr,
+                  }
+                : updatedCart,
             );
           } catch (updateError) {
             console.error("Failed to sync default courier", updateError);
@@ -147,10 +162,62 @@ export function useCheckout(initialAddresses: Address[], userEmail: string) {
           courierCode: selectedOption.code,
           shippingMethod: selectedOption.service,
         });
-        setCart({ ...updatedCart, items: cart.items });
+        setCart((prev) =>
+          prev
+            ? {
+                ...updatedCart,
+                items: prev.items,
+                promoCodeId: prev.promoCodeId,
+                promoCodeString: prev.promoCodeString,
+                promoCode: prev.promoCode,
+                productDiscountIdr: prev.productDiscountIdr,
+                shippingDiscountIdr: prev.shippingDiscountIdr,
+              }
+            : updatedCart,
+        );
       } catch (error) {
         console.error("Failed to update cart courier selection", error);
       }
+    }
+  };
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return;
+    setIsApplyingPromo(true);
+    setPromoError(null);
+    try {
+      await applyPromoCode(promoCode.trim());
+      const updatedCart = await fetchCart();
+      setCart(updatedCart);
+      setPromoCode("");
+      if (updatedCart) {
+        useCartStore.setState({ cart: updatedCart, items: updatedCart.items });
+      }
+    } catch (error) {
+      setPromoError(
+        error instanceof Error ? error.message : "Kode promo tidak valid.",
+      );
+    } finally {
+      setIsApplyingPromo(false);
+    }
+  };
+
+  const handleRemovePromo = async () => {
+    setIsApplyingPromo(true);
+    setPromoError(null);
+    try {
+      await removePromoCode();
+      const updatedCart = await fetchCart();
+      setCart(updatedCart);
+      if (updatedCart) {
+        useCartStore.setState({ cart: updatedCart, items: updatedCart.items });
+      }
+    } catch (error) {
+      setPromoError(
+        error instanceof Error ? error.message : "Gagal menghapus promo.",
+      );
+    } finally {
+      setIsApplyingPromo(false);
     }
   };
 
@@ -234,7 +301,17 @@ export function useCheckout(initialAddresses: Address[], userEmail: string) {
       handleSelectAddress,
       handleSelectShipping,
       handleNotesChange,
+      handleApplyPromo,
+      handleRemovePromo,
       handleCheckout,
+    },
+    promo: {
+      promoCode,
+      setPromoCode,
+      isApplyingPromo,
+      promoError,
+      appliedPromo: cart?.promoCodeString || null,
+      promoObj: cart?.promoCode || null,
     },
   };
 }

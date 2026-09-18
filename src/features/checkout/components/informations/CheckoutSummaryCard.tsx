@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import { Cart } from "@/features/cart/types/cart.types";
-import {ShippingOption} from "@/features/address/types/shipping.types";
+import { ShippingOption } from "@/features/address/types/shipping.types";
 
 interface CheckoutSummaryCardProps {
   cart: Cart | null;
@@ -20,6 +20,16 @@ interface CheckoutSummaryCardProps {
   };
   onCheckout: () => void;
   formatRupiah: (amount: number) => string;
+  promo: {
+    promoCode: string;
+    setPromoCode: (val: string) => void;
+    isApplyingPromo: boolean;
+    promoError: string | null;
+    appliedPromo: string | null;
+    promoObj: Cart["promoCode"];
+  };
+  onApplyPromo: () => void;
+  onRemovePromo: () => void;
 }
 
 export function CheckoutSummaryCard({
@@ -31,6 +41,9 @@ export function CheckoutSummaryCard({
   totals,
   onCheckout,
   formatRupiah,
+  promo,
+  onApplyPromo,
+  onRemovePromo,
 }: CheckoutSummaryCardProps) {
   return (
     <div className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24">
@@ -86,6 +99,50 @@ export function CheckoutSummaryCard({
               })}
         </div>
 
+        {/* Promo Code Section */}
+        <div className="px-5 py-4 border-b border-gray-200">
+          <label className="block text-font-2 font-semibold text-[var(--mama-brown)] mb-3">
+            Kode Promo
+          </label>
+          {!promo.appliedPromo ? (
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="MAMABEAR"
+                  value={promo.promoCode}
+                  onChange={(e) => promo.setPromoCode(e.target.value)}
+                  className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-font-2 focus:outline-none focus:border-[var(--mama-hot-pink)] text-[var(--color-gray)] uppercase text-sm"
+                  disabled={promo.isApplyingPromo}
+                />
+                <button
+                  onClick={onApplyPromo}
+                  disabled={promo.isApplyingPromo || !promo.promoCode}
+                  className="bg-[var(--mama-hot-pink)] text-white px-5 py-2 rounded-lg font-bold text-font-2 text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                  {promo.isApplyingPromo ? "PROSES..." : "PAKAI"}
+                </button>
+              </div>
+              {promo.promoError && (
+                <p className="text-red-500 text-sm">{promo.promoError}</p>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center justify-between p-3 border border-green-500 rounded-lg bg-green-50">
+              <span className="font-semibold text-green-700 text-sm">
+                Promo: {promo.appliedPromo}
+              </span>
+              <button
+                onClick={onRemovePromo}
+                disabled={promo.isApplyingPromo}
+                className="text-red-500 text-sm font-semibold hover:underline disabled:opacity-50"
+              >
+                Hapus
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Calculations */}
         <div className="p-5 space-y-3 bg-white">
           <div className="flex justify-between text-font-2">
@@ -99,14 +156,19 @@ export function CheckoutSummaryCard({
             )}
           </div>
 
-          {totals.productDiscount > 0 && (
+          {promo.isApplyingPromo && totals.productDiscount > 0 ? (
+            <div className="flex justify-between text-font-2 text-green-600">
+              <span>Diskon Produk</span>
+              <div className="h-5 bg-gray-200 rounded w-16 animate-pulse"></div>
+            </div>
+          ) : totals.productDiscount > 0 ? (
             <div className="flex justify-between text-font-2 text-green-600">
               <span>Diskon Produk</span>
               <span className="font-bold">
                 -{formatRupiah(totals.productDiscount)}
               </span>
             </div>
-          )}
+          ) : null}
 
           <div className="flex justify-between text-font-2">
             <span className="text-gray-600">Ongkos Kirim</span>
@@ -121,14 +183,19 @@ export function CheckoutSummaryCard({
             )}
           </div>
 
-          {totals.shippingDiscount > 0 && (
+          {promo.isApplyingPromo && totals.shippingDiscount > 0 ? (
+            <div className="flex justify-between text-font-2 text-green-600">
+              <span>Diskon Ongkos Kirim (Promo)</span>
+              <div className="h-5 bg-gray-200 rounded w-16 animate-pulse"></div>
+            </div>
+          ) : totals.shippingDiscount > 0 ? (
             <div className="flex justify-between text-font-2 text-green-600">
               <span>Diskon Ongkos Kirim (Promo)</span>
               <span className="font-bold">
                 -{formatRupiah(totals.shippingDiscount)}
               </span>
             </div>
-          )}
+          ) : null}
 
           {/* Pajak (Tax) */}
           <div className="flex justify-between text-font-2">

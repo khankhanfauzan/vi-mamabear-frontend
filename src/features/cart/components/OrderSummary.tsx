@@ -88,11 +88,6 @@ export const OrderSummary = ({
           <div className="flex items-center justify-between p-3 border border-green-500 rounded-lg bg-green-50">
             <div className="flex flex-col">
               <span className="font-semibold text-green-700">Promo: {appliedPromo}</span>
-              {promoObj?.discountType === "FREE_SHIPPING" && (cart?.shippingCostIdr === 0 || cart?.shippingCostIdr === undefined) && (
-                <span className="text-xs text-green-600 mt-1">
-                  ✓ Diskon Ongkos Kirim akan dihitung otomatis saat memilih kurir di halaman Checkout.
-                </span>
-              )}
             </div>
             <button
               onClick={handleRemovePromo}
@@ -101,6 +96,16 @@ export const OrderSummary = ({
             >
               Hapus
             </button>
+          </div>
+        )}
+
+        {/* Free Shipping Badge */}
+        {appliedPromo && promoObj?.discountType === "FREE_SHIPPING" && (cart?.shippingCostIdr === 0 || cart?.shippingCostIdr === undefined) && (
+          <div className="mt-3 flex items-start gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200">
+            <span className="text-blue-600 mt-0.5 text-sm shrink-0">ℹ</span>
+            <p className="text-xs text-blue-700 leading-relaxed">
+              Diskon <strong> Gratis Ongkir</strong> akan diterapkan secara otomatis setelah Anda memilih kurir di halaman Checkout.
+            </p>
           </div>
         )}
       </div>

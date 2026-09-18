@@ -38,6 +38,7 @@ export function CheckoutView({
     totals,
     notes,
     actions,
+    promo,
   } = useCheckout(initialAddresses, userEmail);
 
   // Handle empty cart screen
@@ -223,6 +224,9 @@ export function CheckoutView({
           totals={totals}
           onCheckout={actions.handleCheckout}
           formatRupiah={formatRupiah}
+          promo={promo}
+          onApplyPromo={actions.handleApplyPromo}
+          onRemovePromo={actions.handleRemovePromo}
         />
       </div>
     </div>

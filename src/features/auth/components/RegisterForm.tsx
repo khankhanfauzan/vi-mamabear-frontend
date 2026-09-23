@@ -20,21 +20,11 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { RegisterPayload } from "../types/auth.types";
 import { useRegister } from "@/features/auth/hooks/useRegister";
-
-const formatPhoneNumberInput = (value: string) => {
-  let digits = value.replace(/\D/g, "");
-
-  while (digits.startsWith("62") || digits.startsWith("0")) {
-    digits = digits.startsWith("62")
-      ? digits.slice(2)
-      : digits.replace(/^0+/, "");
-  }
-
-  return digits;
-};
+import { formatPhoneNumberInput, isValidPhoneNumber } from "@/utils/phoneNumber";
 
 export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [invalidPhoneInput, setInvalidPhoneInput] = useState(false);
   const { loading, error, isSubmitted, handleRegister } = useRegister();
 
   const {
@@ -51,7 +41,7 @@ export function RegisterForm() {
   const { onChange: onPhoneChange, ...phoneRegister } = register("phone", {
     required: "Nomor handphone wajib diisi",
     validate: (value) =>
-      /^8\d{8,}$/.test(value || "") || "Nomor HP tidak valid",
+      isValidPhoneNumber(value || "") || "Nomor HP tidak valid",
   });
 
   /**
@@ -244,7 +234,7 @@ export function RegisterForm() {
             {/* Icon */}
             <Phone
               className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${
-                errors.phone
+                errors.phone || invalidPhoneInput
                   ? "text-destructive"
                   : "text-stone-400 group-focus-within:text-primary"
               }`}
@@ -253,7 +243,7 @@ export function RegisterForm() {
             {/* Input +62 */}
             <div
               className={`flex items-center pl-10 border-b ${
-                errors.phone
+                errors.phone || invalidPhoneInput
                   ? "border-destructive focus-visible:ring-destructive/20"
                   : "border-stone-200 focus-visible:ring-primary/20"
               }`}
@@ -269,18 +259,23 @@ export function RegisterForm() {
                 placeholder="81234567890"
                 {...phoneRegister}
                 onChange={(event) => {
-                  event.target.value = formatPhoneNumberInput(
-                    event.target.value,
+                  const formatted = formatPhoneNumberInput(event.target.value);
+                  setInvalidPhoneInput(
+                    event.target.value !== "" && formatted === "",
                   );
+                  event.target.value = formatted;
                   onPhoneChange(event);
                 }}
+                aria-invalid={Boolean(errors.phone || invalidPhoneInput)}
                 className={`pl-4 bg-white border-0 [&::placeholder]:text-[0.6rem] [&::placeholder]:text-stone-400 [&::placeholder]:font-semibold rounded-none`}
               />
             </div>
           </div>
 
-          {errors.phone && (
-            <p className="text-destructive ml-1">{errors.phone.message}</p>
+          {(errors.phone || invalidPhoneInput) && (
+            <p className="text-destructive ml-1">
+              {invalidPhoneInput ? "Nomor HP tidak valid" : errors.phone?.message}
+            </p>
           )}
         </div>
 

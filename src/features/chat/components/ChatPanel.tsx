@@ -1,7 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Loader2, Send, X } from "lucide-react";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { Loader2, LockKeyhole, Send, X } from "lucide-react";
 import Link from "next/link";
 import { MAX_MESSAGE_LENGTH, useChatSession } from "../hooks/useChatSession";
 import { ChatMessageList } from "./ChatMessageList";
@@ -15,6 +16,106 @@ type ChatPanelProps = {
 };
 
 export function ChatPanel({
+  variant = "widget",
+  onClose,
+  historyEnabled = true,
+}: ChatPanelProps) {
+  const { isLoggedIn, isLoading } = useAuth();
+
+  if (!isLoggedIn) {
+    return (
+      <ChatAccessPanel
+        variant={variant}
+        onClose={onClose}
+        isLoading={isLoading}
+      />
+    );
+  }
+
+  return (
+    <AuthenticatedChatPanel
+      variant={variant}
+      onClose={onClose}
+      historyEnabled={historyEnabled}
+    />
+  );
+}
+
+function panelClassName(isPage: boolean) {
+  return cn(
+    "flex flex-col overflow-hidden border border-[var(--mama-pink)] bg-white",
+    isPage
+      ? "h-[min(36rem,calc(100vh-12rem))] w-full rounded-2xl shadow-lg md:h-[min(40rem,calc(100vh-10rem))]"
+      : "h-[min(28rem,70vh)] w-[min(22rem,calc(100vw-2rem))] rounded-2xl shadow-2xl",
+  );
+}
+
+function ChatAccessPanel({
+  variant,
+  onClose,
+  isLoading,
+}: Pick<ChatPanelProps, "variant" | "onClose"> & { isLoading: boolean }) {
+  return (
+    <section
+      className={panelClassName(variant === "page")}
+      aria-label="Chat MamaBear"
+    >
+      <header className="flex items-center justify-between bg-[var(--mama-hot-pink)] px-4 py-3 text-white">
+        <div>
+          <p className="text-sm font-semibold">MamaBear Care</p>
+          <p className="text-[11px] text-white/85">Online • siap membantu</p>
+        </div>
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full p-1.5 hover:bg-white/15"
+            aria-label="Tutup chat"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </header>
+
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-[var(--mama-cream)]/50 px-6 py-8 text-center">
+        {isLoading ? (
+          <>
+            <Loader2 className="h-8 w-8 animate-spin text-[var(--mama-hot-pink)]" />
+            <p className="text-sm text-[var(--mama-brown)]">
+              Memeriksa sesi...
+            </p>
+          </>
+        ) : (
+          <>
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--mama-pink)] text-[var(--mama-hot-pink)]">
+              <LockKeyhole className="h-8 w-8" aria-hidden="true" />
+            </div>
+            <p className="text-sm leading-relaxed text-[var(--mama-brown)]">
+              Halo Ma! Yuk login atau daftar dulu untuk mulai berkonsultasi
+              dengan Mama Bear AI.
+            </p>
+            <div className="flex w-full gap-3">
+              <Link
+                href="/login"
+                className="flex-1 rounded-full bg-[var(--mama-hot-pink)] px-4 py-2 text-sm font-semibold text-white"
+              >
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="flex-1 rounded-full border border-[var(--mama-hot-pink)] bg-white px-4 py-2 text-sm font-semibold text-[var(--mama-hot-pink)]"
+              >
+                Daftar
+              </Link>
+            </div>
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function AuthenticatedChatPanel({
   variant = "widget",
   onClose,
   historyEnabled = true,
@@ -38,15 +139,7 @@ export function ChatPanel({
   const isPage = variant === "page";
 
   return (
-    <section
-      className={cn(
-        "flex flex-col overflow-hidden border border-[var(--mama-pink)] bg-white",
-        isPage
-          ? "h-[min(36rem,calc(100vh-12rem))] w-full rounded-2xl shadow-lg md:h-[min(40rem,calc(100vh-10rem))]"
-          : "h-[min(28rem,70vh)] w-[min(22rem,calc(100vw-2rem))] rounded-2xl shadow-2xl",
-      )}
-      aria-label="Chat MamaBear"
-    >
+    <section className={panelClassName(isPage)} aria-label="Chat MamaBear">
       <header className="flex items-center justify-between bg-[var(--mama-hot-pink)] px-4 py-3 text-white">
         <div>
           <p className="text-sm font-semibold">MamaBear Care</p>
@@ -105,9 +198,7 @@ export function ChatPanel({
         )}
 
         {/* Typing indicator: muncul saat AI sedang memproses balasan */}
-        {isSending && (
-          <AssistantTypingIndicator className="pt-1" />
-        )}
+        {isSending && <AssistantTypingIndicator className="pt-1" />}
       </div>
 
       <form

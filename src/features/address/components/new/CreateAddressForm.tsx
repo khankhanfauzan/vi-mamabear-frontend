@@ -1,24 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useAddressForm } from "../../hooks/useCreateAddressForm";
-
-const formatPhoneNumberInput = (value: string) => {
-  let digits = value.replace(/\D/g, "");
-
-  while (digits.startsWith("62") || digits.startsWith("0")) {
-    digits = digits.startsWith("62")
-      ? digits.slice(2)
-      : digits.replace(/^0+/, "");
-  }
-
-  return digits;
-};
+import { formatPhoneNumberInput, isValidPhoneNumber } from "@/utils/phoneNumber";
 
 /**
  * Address Creation Form matching the provided MamaBear UI specifications.
  */
 export function AddressForm() {
+  const [invalidPhoneInput, setInvalidPhoneInput] = useState(false);
   const {
     register,
     handleSubmit,
@@ -34,7 +24,7 @@ export function AddressForm() {
     {
       required: "Nomor handphone wajib diisi",
       validate: (value) =>
-        /^8\d{8,}$/.test(value || "") || "Nomor HP tidak valid",
+        isValidPhoneNumber(value || "") || "Nomor HP tidak valid",
     },
   );
 
@@ -81,16 +71,21 @@ export function AddressForm() {
                 className="w-full border-0 focus:ring-0 px-0 py-2 bg-transparent text-font-2 text-gray-800 outline-none"
                 {...phoneNumberRegister}
                 onChange={(event) => {
-                  event.target.value = formatPhoneNumberInput(
-                    event.target.value,
+                  const formatted = formatPhoneNumberInput(event.target.value);
+                  setInvalidPhoneInput(
+                    event.target.value !== "" && formatted === "",
                   );
+                  event.target.value = formatted;
                   onPhoneNumberChange(event);
                 }}
+                aria-invalid={Boolean(errors.phoneNumber || invalidPhoneInput)}
               />
             </div>
-            {errors.phoneNumber && (
+            {(errors.phoneNumber || invalidPhoneInput) && (
               <span className="text-red-500 text-font-1 mt-1">
-                {errors.phoneNumber.message}
+                {invalidPhoneInput
+                  ? "Nomor HP tidak valid"
+                  : errors.phoneNumber?.message}
               </span>
             )}
           </div>

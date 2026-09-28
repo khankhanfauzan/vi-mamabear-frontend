@@ -64,6 +64,7 @@ it("shows the chat composer for authenticated users", () => {
     remainingChars: 1000,
     canSend: false,
     history: { isLoading: false, error: null, refetch: jest.fn() },
+    resetSession: jest.fn(),
     sendMessage: jest.fn(),
     handleInputKeyDown: jest.fn(),
     sendQuickReply: jest.fn(),

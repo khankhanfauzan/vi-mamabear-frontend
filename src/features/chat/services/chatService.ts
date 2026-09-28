@@ -1,18 +1,37 @@
 import { apiClient } from "@/lib/api";
 import { ApiResponse } from "@/types/api.types";
-import type {
-  ConversationHistory,
-  SendChatMessageResponse,
+import {
+  CONVERSATION_STORAGE_KEY,
+  type ConversationHistory,
+  type SendChatMessageResponse,
 } from "../types/chat.types";
 import {
   normalizeChatProducts,
   parseConversationHistory,
 } from "../utils/parseConversationHistory";
 
+export class ConversationNotFoundError extends Error {
+  constructor(message = "Percakapan tidak ditemukan.") {
+    super(message);
+    this.name = "ConversationNotFoundError";
+    Object.setPrototypeOf(this, ConversationNotFoundError.prototype);
+  }
+}
+
+const OPAQUE_ERROR_SIGNATURES = ["prismaclient", "internal server error"];
+
 function readErrorMessage(payload: unknown, fallback: string) {
   const record = payload as { message?: string | string[] } | null;
-  if (!record?.message) return fallback;
-  return Array.isArray(record.message) ? record.message[0] : record.message;
+  const raw = Array.isArray(record?.message) ? record.message[0] : record?.message;
+  if (typeof raw !== "string" || raw.trim().length === 0) return fallback;
+  return raw;
+}
+
+function isOpaqueErrorMessage(message: string) {
+  const normalized = message.trim().toLowerCase();
+  return OPAQUE_ERROR_SIGNATURES.some((signature) =>
+    normalized.includes(signature),
+  );
 }
 
 export async function getConversationHistory(
@@ -30,13 +49,31 @@ export async function getConversationHistory(
     throw new Error("Masuk dulu untuk melihat riwayat percakapan.");
   }
 
-  if (res.status === 404) {
-    throw new Error("Percakapan tidak ditemukan.");
+  const errorMessage = readErrorMessage(payload, "");
+  const normalizedMessage = errorMessage.trim().toLowerCase();
+  const isNotFound =
+    res.status === 404 ||
+    (res.status < 500 &&
+      (normalizedMessage.includes("tidak ditemukan") ||
+        normalizedMessage.includes("not found")));
+
+  if (isNotFound) {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(CONVERSATION_STORAGE_KEY);
+    }
+    throw new ConversationNotFoundError();
   }
 
   if (!res.ok) {
+    const isServerFault =
+      res.status >= 500 || isOpaqueErrorMessage(errorMessage);
     throw new Error(
-      readErrorMessage(payload, `Gagal memuat riwayat percakapan (${res.status}).`),
+      isServerFault
+        ? "Gagal memuat riwayat percakapan. Silakan coba lagi sebentar ya."
+        : readErrorMessage(
+            payload,
+            `Gagal memuat riwayat percakapan (${res.status}).`,
+          ),
     );
   }
 

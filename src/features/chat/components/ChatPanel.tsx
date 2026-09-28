@@ -131,6 +131,7 @@ function AuthenticatedChatPanel({
     remainingChars,
     canSend,
     history,
+    resetSession,
     sendMessage,
     handleInputKeyDown,
     sendQuickReply,
@@ -181,13 +182,28 @@ function AuthenticatedChatPanel({
         ) : usingHistory && history.error ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 px-4 text-center">
             <p className="text-xs text-red-600">{history.error}</p>
-            <button
-              type="button"
-              onClick={() => void history.refetch()}
-              className="text-xs font-semibold text-[var(--mama-hot-pink)]"
-            >
-              Coba lagi
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => void history.refetch()}
+                className="text-xs font-semibold text-[var(--mama-hot-pink)]"
+              >
+                Coba lagi
+              </button>
+              <span
+                aria-hidden="true"
+                className="text-xs text-[var(--color-gray)]"
+              >
+                •
+              </span>
+              <button
+                type="button"
+                onClick={resetSession}
+                className="text-xs font-semibold text-[var(--mama-brown)] hover:underline"
+              >
+                Mulai baru
+              </button>
+            </div>
           </div>
         ) : messages.length === 0 ? (
           <p className="text-center text-xs text-[var(--color-gray)]">

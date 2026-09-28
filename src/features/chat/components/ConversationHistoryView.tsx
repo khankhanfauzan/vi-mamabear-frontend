@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertCircle, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { useConversationHistory } from "../hooks/useConversationHistory";
 import { CONVERSATION_STORAGE_KEY } from "../types/chat.types";
@@ -20,6 +21,12 @@ export function ConversationHistoryView({
   useEffect(() => {
     localStorage.setItem(CONVERSATION_STORAGE_KEY, conversationId);
   }, [conversationId]);
+
+  useEffect(() => {
+    if (error) {
+      localStorage.removeItem(CONVERSATION_STORAGE_KEY);
+    }
+  }, [error]);
 
   useEffect(() => {
     const list = listRef.current;
@@ -44,13 +51,21 @@ export function ConversationHistoryView({
           Gagal memuat percakapan
         </h2>
         <p className="mb-4 max-w-md text-font-2 text-red-600">{error}</p>
-        <button
-          type="button"
-          onClick={() => void refetch()}
-          className="rounded-full bg-[var(--mama-hot-pink)] px-5 py-2 text-sm font-semibold text-white hover:brightness-95"
-        >
-          Coba lagi
-        </button>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => void refetch()}
+            className="rounded-full border border-[var(--mama-hot-pink)] px-5 py-2 text-sm font-semibold text-[var(--mama-hot-pink)] hover:bg-[var(--mama-hot-pink)]/10"
+          >
+            Coba lagi
+          </button>
+          <Link
+            href="/chat"
+            className="rounded-full bg-[var(--mama-hot-pink)] px-5 py-2 text-sm font-semibold text-white hover:brightness-95"
+          >
+            Mulai Chat Baru
+          </Link>
+        </div>
       </div>
     );
   }

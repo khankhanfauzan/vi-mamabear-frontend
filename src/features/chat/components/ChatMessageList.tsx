@@ -4,7 +4,12 @@ import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { ChatMessage } from "../types/chat.types";
+import {
+  extractWhatsAppNumbers,
+  stripWhatsAppNumbers,
+} from "../utils/detectWhatsAppNumber";
 import { ProductChatCard } from "./ProductChatCard";
+import { WhatsAppButton } from "./WhatsAppButton";
 
 function formatTimestamp(value?: string) {
   if (!value) return null;
@@ -23,6 +28,31 @@ type ChatMessageListProps = {
   messages: ChatMessage[];
   showTimestamps?: boolean;
 };
+
+function AssistantMarkdown({ content }: { content: string }) {
+  const numbers = extractWhatsAppNumbers(content);
+  const markdownContent =
+    numbers.length > 0 ? stripWhatsAppNumbers(content) : content;
+
+  return (
+    <>
+      {markdownContent ? (
+        <div className="chat-markdown">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {markdownContent}
+          </ReactMarkdown>
+        </div>
+      ) : null}
+      {numbers.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {numbers.map((num) => (
+            <WhatsAppButton key={num} phoneNumber={num} />
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
 
 export function ChatMessageList({
   messages,
@@ -52,11 +82,7 @@ export function ChatMessageList({
                 {isUser ? (
                   <p className="whitespace-pre-wrap">{reply}</p>
                 ) : (
-                  <div className="chat-markdown">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {reply}
-                    </ReactMarkdown>
-                  </div>
+                  <AssistantMarkdown content={reply} />
                 )}
                 {timestamp && (
                   <p

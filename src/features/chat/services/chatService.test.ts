@@ -1,5 +1,9 @@
 import { apiClient } from "@/lib/api";
-import { chatService, sendChatMessage } from "./chatService";
+import {
+  chatService,
+  ConversationNotFoundError,
+  sendChatMessage,
+} from "./chatService";
 
 jest.mock("@/lib/api", () => ({
   apiClient: {
@@ -81,5 +85,121 @@ describe("chatService.sendChatMessage", () => {
     });
 
     await expect(sendChatMessage("halo")).rejects.toThrow("Token AI habis.");
+  });
+});
+
+describe("chatService.getConversationHistory", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    localStorage.clear();
+  });
+
+  it("throws ConversationNotFoundError and clears localStorage on 404", async () => {
+    localStorage.setItem("mamabear-conversation-id", "test-conv-id");
+
+    (apiClient.get as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 404,
+      json: async () => ({
+        statusCode: 404,
+        message: "Percakapan tidak ditemukan.",
+      }),
+    });
+
+    const request = chatService.getConversationHistory("test-conv-id");
+
+    await expect(request).rejects.toBeInstanceOf(ConversationNotFoundError);
+    await expect(request).rejects.toThrow("Percakapan tidak ditemukan.");
+
+    expect(localStorage.getItem("mamabear-conversation-id")).toBeNull();
+  });
+
+  it("treats a 4xx 'not found' message as a missing conversation", async () => {
+    localStorage.setItem("mamabear-conversation-id", "test-conv-id");
+
+    (apiClient.get as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 400,
+      json: async () => ({ statusCode: 400, message: "Conversation not found" }),
+    });
+
+    await expect(
+      chatService.getConversationHistory("test-conv-id"),
+    ).rejects.toBeInstanceOf(ConversationNotFoundError);
+
+    expect(localStorage.getItem("mamabear-conversation-id")).toBeNull();
+  });
+
+  it("hides raw Prisma internals behind a friendly message on 5xx", async () => {
+    localStorage.setItem("mamabear-conversation-id", "stale-conv-id");
+
+    (apiClient.get as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      json: async () => ({
+        success: false,
+        statusCode: 500,
+        message: ["PrismaClientKnownRequestError"],
+        data: null,
+      }),
+    });
+
+    await expect(
+      chatService.getConversationHistory("stale-conv-id"),
+    ).rejects.toThrow(
+      "Gagal memuat riwayat percakapan. Silakan coba lagi sebentar ya.",
+    );
+
+    expect(localStorage.getItem("mamabear-conversation-id")).toBe(
+      "stale-conv-id",
+    );
+  });
+
+  it("does not treat a 5xx 'not found' message as a missing conversation", async () => {
+    localStorage.setItem("mamabear-conversation-id", "stale-conv-id");
+
+    (apiClient.get as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      json: async () => ({ statusCode: 500, message: "Model not found" }),
+    });
+
+    await expect(
+      chatService.getConversationHistory("stale-conv-id"),
+    ).rejects.toThrow(
+      "Gagal memuat riwayat percakapan. Silakan coba lagi sebentar ya.",
+    );
+
+    expect(localStorage.getItem("mamabear-conversation-id")).toBe(
+      "stale-conv-id",
+    );
+  });
+
+  it("keeps surfacing readable messages from 4xx responses", async () => {
+    (apiClient.get as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 403,
+      json: async () => ({ statusCode: 403, message: ["Akses ditolak."] }),
+    });
+
+    await expect(
+      chatService.getConversationHistory("test-conv-id"),
+    ).rejects.toThrow("Akses ditolak.");
+  });
+
+  it("requests history for the given conversation id", async () => {
+    (apiClient.get as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        success: true,
+        data: { conversationId: "conv-1", messages: [] },
+      }),
+    });
+
+    const history = await chatService.getConversationHistory("conv 1");
+
+    expect(apiClient.get).toHaveBeenCalledWith("/ai/history/conv%201");
+    expect(history.messages).toEqual([]);
   });
 });

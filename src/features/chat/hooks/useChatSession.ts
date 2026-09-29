@@ -1,4 +1,11 @@
-import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
+import {
+  FormEvent,
+  KeyboardEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { chatService } from "../services/chatService";
 import { useConversationHistory } from "./useConversationHistory";
 import {
@@ -28,8 +35,17 @@ export function useChatSession(options: { historyEnabled?: boolean } = {}) {
   ]);
   const listRef = useRef<HTMLDivElement>(null);
 
+  const resetSession = useCallback(() => {
+    setConversationId(null);
+    setLocalMessages([OPENING_MESSAGE]);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(CONVERSATION_STORAGE_KEY);
+    }
+  }, []);
+
   const history = useConversationHistory(conversationId, {
     enabled: historyEnabled,
+    onNotFound: resetSession,
   });
   const usingHistory = Boolean(conversationId);
   const messages = usingHistory ? history.messages : localMessages;
@@ -118,6 +134,7 @@ export function useChatSession(options: { historyEnabled?: boolean } = {}) {
     remainingChars,
     canSend,
     history,
+    resetSession,
     sendMessage,
     handleInputKeyDown,
     sendQuickReply: (label: string) => {

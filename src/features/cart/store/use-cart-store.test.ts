@@ -73,6 +73,8 @@ describe("useCartStore", () => {
         expiresAt: new Date().toISOString(),
         items: [buildCartItem()],
         totalWeight: 100,
+        productDiscountIdr: 0,
+        shippingDiscountIdr: 0,
       };
       (cartService.fetchCart as jest.Mock).mockResolvedValue(dbCart);
 

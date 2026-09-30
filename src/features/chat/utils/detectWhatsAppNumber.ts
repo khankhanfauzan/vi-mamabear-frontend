@@ -16,7 +16,7 @@ export function normalizeToWaLink(phone: string): string {
 }
 
 export function extractWhatsAppNumbers(text: string): string[] {
-  return [...new Set(text.match(waRegex()) ?? [])];
+  return Array.from(new Set(text.match(waRegex()) ?? []));
 }
 
 export function stripWhatsAppNumbers(text: string): string {

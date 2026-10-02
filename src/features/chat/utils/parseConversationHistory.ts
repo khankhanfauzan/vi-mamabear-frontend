@@ -4,6 +4,7 @@ import type {
   ChatRole,
   ConversationHistory,
 } from "../types/chat.types";
+import { normalizeChatResponseType } from "./chatResponseType";
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   if (value && typeof value === "object" && !Array.isArray(value)) {
@@ -83,6 +84,7 @@ export function normalizeChatMessage(raw: unknown, index: number): ChatMessage {
         ? String(item.timestamp)
         : undefined,
     products: normalizeChatProducts(item.products),
+    type: normalizeChatResponseType(item.type),
   };
 }
 

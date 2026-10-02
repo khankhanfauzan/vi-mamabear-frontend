@@ -99,6 +99,7 @@ export function useChatSession(options: { historyEnabled?: boolean } = {}) {
           role: "assistant",
           content: response.reply,
           products: response.products,
+          type: response.type,
         },
       ]);
     } catch (err) {

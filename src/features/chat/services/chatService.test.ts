@@ -73,6 +73,79 @@ describe("chatService.sendChatMessage", () => {
     expect(response.conversationId).toBe("conv-456");
     expect(response.reply).toBe("Pesan berhasil dijawab.");
     expect(response.products).toBeUndefined();
+    expect(response.type).toBeUndefined();
+  });
+
+  it("returns type clarification and no products for an ambiguous message", async () => {
+    (apiClient.post as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        success: true,
+        message: "Pesan berhasil diproses",
+        data: {
+          conversationId: "conv-clarification",
+          reply:
+            "Boleh cerita dulu, Ma, lagi cari produk untuk kebutuhan apa? Misalnya pelancar ASI, nutrisi kehamilan, atau camilan sehat?",
+          products: [],
+          blocked: false,
+          type: "clarification",
+        },
+      }),
+    });
+
+    const response = await sendChatMessage("rekomendasiin dong", "conv-clarification");
+
+    expect(response.type).toBe("clarification");
+    expect(response.products).toBeUndefined();
+    expect(response.reply).toContain("Boleh cerita dulu");
+  });
+
+  it("returns type answer when the message is specific", async () => {
+    (apiClient.post as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        success: true,
+        data: {
+          conversationId: "conv-answer",
+          reply: "Halo Ma! Mama Bear punya pompa ASI elektrik.",
+          products: [
+            {
+              id: 7,
+              name: "MamaBear Electric Pump",
+              slug: "mamabear-electric-pump",
+              formattedPrice: "Rp 450.000",
+            },
+          ],
+          type: "answer",
+        },
+      }),
+    });
+
+    const response = await sendChatMessage("ada pompa ASI elektrik ga?", "conv-answer");
+
+    expect(response.type).toBe("answer");
+    expect(response.products).toHaveLength(1);
+  });
+
+  it("ignores an unknown type value instead of surfacing it", async () => {
+    (apiClient.post as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        success: true,
+        data: {
+          conversationId: "conv-weird",
+          reply: "Halo Ma!",
+          type: "something-new",
+        },
+      }),
+    });
+
+    const response = await sendChatMessage("halo");
+
+    expect(response.type).toBeUndefined();
   });
 
   it("throws if API returns non-ok status with custom message", async () => {

@@ -8,6 +8,7 @@ import {
   extractWhatsAppNumbers,
   stripWhatsAppNumbers,
 } from "../utils/detectWhatsAppNumber";
+import { isClarificationResponse } from "../utils/chatResponseType";
 import { ProductChatCard } from "./ProductChatCard";
 import { WhatsAppButton } from "./WhatsAppButton";
 
@@ -63,6 +64,7 @@ export function ChatMessageList({
       {messages.map((message) => {
         const timestamp = showTimestamps ? formatTimestamp(message.createdAt) : null;
         const isUser = message.role === "user";
+        const isClarification = !isUser && isClarificationResponse(message);
         const reply = message.content;
 
         return (
@@ -94,8 +96,14 @@ export function ChatMessageList({
                     {timestamp}
                   </p>
                 )}
+                {isClarification && (
+                  <p className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-[var(--mama-cream)] px-2 py-0.5 text-[10px] font-semibold text-[var(--mama-hot-pink)]">
+                    MamaBear butuh info lebih
+                  </p>
+                )}
               </div>
               {!isUser &&
+                !isClarification &&
                 message.products &&
                 message.products.length > 0 && (
                   <ProductChatCard data={message.products} />

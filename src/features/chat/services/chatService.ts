@@ -5,6 +5,7 @@ import {
   type ConversationHistory,
   type SendChatMessageResponse,
 } from "../types/chat.types";
+import { normalizeChatResponseType } from "../utils/chatResponseType";
 import {
   normalizeChatProducts,
   parseConversationHistory,
@@ -158,6 +159,7 @@ export async function sendChatMessage(
     conversationId: convId || conversationId || `conv-${Date.now()}`,
     reply,
     products,
+    type: normalizeChatResponseType(target.type),
   };
 }
 

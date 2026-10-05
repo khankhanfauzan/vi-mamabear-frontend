@@ -1,8 +1,9 @@
-import { NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { decodeJwt } from "jose";
-import { API_BASE_URL } from "@/lib/config";
-import { JWT } from "next-auth/jwt";
+import { NextAuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { decodeJwt } from 'jose';
+import { API_BASE_URL } from '@/lib/config';
+import { JWT } from 'next-auth/jwt';
+import { fetchWithRetry } from './api';
 
 interface DecodedJWT {
   sub?: string;
@@ -27,11 +28,11 @@ const SHORT_SESSION_LIMIT = 8 * 60 * 60 * 1000; // 8 hours (for non-remember-me)
  */
 async function refreshAccessToken(token: JWT) {
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token.refreshToken}`
+    const response = await fetchWithRetry(`${API_BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token.refreshToken}`,
       },
     });
     const refreshedTokens = await response.json();
@@ -50,8 +51,8 @@ async function refreshAccessToken(token: JWT) {
         token.refreshToken,
     };
   } catch (error) {
-    console.error("RefreshAccessTokenError", error);
-    return { ...token, error: "RefreshAccessTokenError" };
+    console.error('RefreshAccessTokenError', error);
+    return { ...token, error: 'RefreshAccessTokenError' };
   }
 }
 
@@ -61,22 +62,22 @@ async function refreshAccessToken(token: JWT) {
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      name: "Credentials",
+      name: 'Credentials',
       credentials: {
-        email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" },
-        remember: { label: "Remember", type: "text" },
+        email: { label: 'Email', type: 'text' },
+        password: { label: 'Password', type: 'password' },
+        remember: { label: 'Remember', type: 'text' },
       },
       async authorize(credentials) {
         try {
           if (credentials?.email && credentials?.password) {
-            const res = await fetch(`${API_BASE_URL}/auth/login`, {
-              method: "POST",
+            const res = await fetchWithRetry(`${API_BASE_URL}/auth/login`, {
+              method: 'POST',
               body: JSON.stringify({
                 email: credentials.email,
                 password: credentials.password,
               }),
-              headers: { "Content-Type": "application/json" },
+              headers: { 'Content-Type': 'application/json' },
             });
 
             const { data, success, message } = await res.json();
@@ -86,24 +87,24 @@ export const authOptions: NextAuthOptions = {
               const decoded = decodeJwt(accessToken) as DecodedJWT;
 
               return {
-                id: decoded.sub || decoded.id || "",
-                name: decoded.name || "User",
+                id: decoded.sub || decoded.id || '',
+                name: decoded.name || 'User',
                 email: decoded.email,
-                role: decoded.role || "USER",
+                role: decoded.role || 'USER',
                 accessToken,
                 refreshToken,
-                remember: credentials.remember === "true",
+                remember: credentials.remember === 'true',
               };
             }
-            throw new Error(message || "Invalid credentials");
+            throw new Error(message || 'Invalid credentials');
           }
 
           return null;
         } catch (error: unknown) {
-          console.error("[NextAuth Authorize Error]:", error);
+          console.error('[NextAuth Authorize Error]:', error);
           const err = error as Error;
           // Pass the error message to the login page
-          throw new Error(err.message || "Authentication service unavailable");
+          throw new Error(err.message || 'Authentication service unavailable');
         }
       },
     }),
@@ -134,7 +135,7 @@ export const authOptions: NextAuthOptions = {
 
       // Check if we've hit the hard session limit (enforces "Remember Me" logic)
       if (Date.now() > (token.sessionHardLimit as number)) {
-        return { ...token, error: "RefreshAccessTokenError" };
+        return { ...token, error: 'RefreshAccessTokenError' };
       }
 
       // Access token has expired, try to update it
@@ -155,11 +156,11 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: "/login",
-    error: "/login",
+    signIn: '/login',
+    error: '/login',
   },
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
     // Set the cookie maxAge to 7 days, but the logic inside
     maxAge: 7 * 24 * 60 * 60,
   },

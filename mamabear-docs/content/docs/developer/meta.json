@@ -1,0 +1,5 @@
+{
+  "title": "Developer Guide",
+  "description": "Panduan internal untuk tim yang mengerjakan MamaBear.",
+  "pages": ["index", "arsitektur", "menambah-halaman"]
+}

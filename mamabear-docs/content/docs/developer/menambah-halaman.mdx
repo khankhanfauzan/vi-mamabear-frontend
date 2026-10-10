@@ -1,0 +1,28 @@
+---
+title: Menambah halaman
+description: Langkah menambah halaman MDX ke User Guide atau Developer Guide.
+---
+
+## User Guide
+
+1. Buat file di `content/docs/user`, misalnya `promo.mdx`.
+2. Isi frontmatter `title` dan `description`.
+3. Tambahkan `"promo"` ke array `pages` di `content/docs/user/meta.json`.
+
+URL halaman itu menjadi `/docs/user/promo`. Halaman ini publik.
+
+## Developer Guide
+
+Langkahnya sama, dengan folder `content/docs/developer` dan `meta.json` di folder itu. URL-nya berada di bawah `/docs/developer` dan ikut Basic Auth.
+
+Jangan menulis kata sandi, token, atau isi `.env` di file MDX.
+
+## Cek lokal
+
+Dari folder `mamabear-docs`:
+
+```bash
+npm run dev
+```
+
+Buka `/docs/user` tanpa login. Buka `/docs/developer` dan isi user serta password dari `.env.local`.

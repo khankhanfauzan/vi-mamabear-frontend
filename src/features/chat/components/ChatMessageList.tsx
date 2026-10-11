@@ -9,6 +9,7 @@ import {
   stripWhatsAppNumbers,
 } from "../utils/detectWhatsAppNumber";
 import { isClarificationResponse } from "../utils/chatResponseType";
+import { ChatProductDisclaimer } from "./ChatProductDisclaimer";
 import { ProductChatCard } from "./ProductChatCard";
 import { WhatsAppButton } from "./WhatsAppButton";
 
@@ -65,6 +66,8 @@ export function ChatMessageList({
         const timestamp = showTimestamps ? formatTimestamp(message.createdAt) : null;
         const isUser = message.role === "user";
         const isClarification = !isUser && isClarificationResponse(message);
+        const showProducts =
+          !isUser && !isClarification && Boolean(message.products?.length);
         const reply = message.content;
 
         return (
@@ -102,12 +105,12 @@ export function ChatMessageList({
                   </p>
                 )}
               </div>
-              {!isUser &&
-                !isClarification &&
-                message.products &&
-                message.products.length > 0 && (
+              {showProducts && message.products && (
+                <>
+                  <ChatProductDisclaimer />
                   <ProductChatCard data={message.products} />
-                )}
+                </>
+              )}
             </div>
           </div>
         );

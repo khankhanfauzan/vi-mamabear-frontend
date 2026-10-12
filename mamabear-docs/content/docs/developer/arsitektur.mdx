@@ -1,0 +1,26 @@
+---
+title: Arsitektur
+description: Dua aplikasi Next.js yang terpisah, toko dan dokumentasi.
+---
+
+## Toko
+
+Aplikasi toko ada di root repositori `vi-mamabear-frontend`.
+
+- `src/app` menyimpan route App Router: `(shop)`, `(auth)`, dan `admin`.
+- `src/features` menyimpan logika per domain, misalnya `products`, `cart`, `checkout`, dan `chat`.
+- `src/components` menyimpan UI yang dipakai lebih dari satu fitur.
+- `src/lib` menyimpan klien API dan sesi NextAuth.
+
+Variabel toko yang dipakai aplikasi adalah `NEXT_PUBLIC_API_URL` dan `NEXTAUTH_SECRET`. Nilainya tidak ditulis di dokumentasi ini.
+
+## Dokumentasi
+
+Situs ini adalah aplikasi Next.js terpisah di folder `mamabear-docs`, memakai Fumadocs dan MDX.
+
+- `content/docs/user` menjadi `/docs/user`.
+- `content/docs/developer` menjadi `/docs/developer`.
+- `proxy.ts` menolak permintaan ke prefix developer sebelum konten dikirim.
+- Pencarian publik dan `/llms.txt` hanya mengindeks User Guide.
+
+Sidebar User Guide tidak memuat judul halaman developer. Tautan **Developer Guide** di navigasi atas hanya membuka gerbang Basic Auth.

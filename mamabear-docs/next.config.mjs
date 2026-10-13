@@ -8,6 +8,8 @@ const withMDX = createMDX();
 const config = {
   reactStrictMode: true,
   agentRules: false,
+  assetPrefix:
+    process.env.DOCS_ASSET_PREFIX || 'https://vi-mamabear-frontend-n5v4.vercel.app',
   turbopack: {
     root: path.dirname(fileURLToPath(import.meta.url)),
   },

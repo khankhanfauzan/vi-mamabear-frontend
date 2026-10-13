@@ -5,7 +5,7 @@ export function baseOptions(): BaseLayoutProps {
   return {
     nav: {
       title: appName,
-      url: '/',
+      url: '/docs',
     },
     links: [
       {

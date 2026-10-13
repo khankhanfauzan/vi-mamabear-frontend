@@ -1,0 +1,12 @@
+{
+  "title": "Frontend Guide",
+  "description": "Dokumentasi arsitektur, fitur toko, state management, dan komponen UI MamaBear Frontend.",
+  "pages": [
+    "index",
+    "arsitektur",
+    "state-dan-api",
+    "komponen-ui",
+    "setup-lokal"
+  ]
+}
+

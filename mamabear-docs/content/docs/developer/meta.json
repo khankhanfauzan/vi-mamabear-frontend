@@ -1,5 +1,12 @@
 {
   "title": "Developer Guide",
-  "description": "Panduan internal untuk tim yang mengerjakan MamaBear.",
-  "pages": ["index", "arsitektur", "menambah-halaman"]
+  "description": "Panduan internal untuk tim engineering (Frontend & Backend) MamaBear.",
+  "pages": [
+    "index",
+    "panduan-dokumentasi",
+    "---Frontend---",
+    "frontend",
+    "---Backend---",
+    "backend"
+  ]
 }

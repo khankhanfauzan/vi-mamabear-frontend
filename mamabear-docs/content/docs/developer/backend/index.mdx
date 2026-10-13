@@ -1,0 +1,29 @@
+---
+title: Ringkasan Backend
+description: Gambaran umum arsitektur server, tech stack, dan layanan API MamaBear.
+---
+
+MamaBear Backend adalah layanan RESTful API yang menangani manajemen katalog produk, autentikasi pelanggan & admin, keranjang belanja, checkout transaksi, dan webhook pembayaran.
+
+Bagian ini merupakan dokumentasi teknis internal khusus untuk developer MamaBear.
+
+## Informasi Repositori & Server
+
+- **Repository**: [GitHub vi-mamabear-backend](https://github.com/khankhanfauzan/vi-mamabear-backend)
+- **Base URL (Production)**: `https://vi-mamabear-backend.onrender.com/api`
+- **Deployment Platform**: Render Web Service
+- **Arsitektur Utama**: REST API dengan format respon JSON seragam
+
+<Callout type="info">
+  Aplikasi frontend MamaBear mem-proxy permintaan `/api/backend/*` langsung ke server backend production di Render.
+</Callout>
+
+## Topik Dokumentasi Backend
+
+<Cards>
+  <Card title="Arsitektur Backend" href="/docs/developer/backend/arsitektur" description="Pola layering Controller - Service - Repository dan struktur folder." />
+  <Card title="Standar & Referensi API" href="/docs/developer/backend/api-reference" description="Format request/response, autentikasi JWT, dan katalog endpoint." />
+  <Card title="Database & Skema" href="/docs/developer/backend/database" description="Desain tabel, relasi data, skema migrasi, dan seeders." />
+  <Card title="Setup Lokal" href="/docs/developer/backend/setup-lokal" description="Panduan menjalankan backend di lingkungan pengembangan lokal." />
+</Cards>
+

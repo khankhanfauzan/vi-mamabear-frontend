@@ -1,0 +1,105 @@
+---
+title: Panduan Penulisan Dokumentasi
+description: SOP dan standar penulisan dokumen MDX untuk tim Frontend dan Backend MamaBear.
+---
+
+Situs dokumentasi MamaBear dibangun menggunakan **Fumadocs** dan **MDX**. Semua panduan teknis (*development*) diletakkan di dalam jalur `/docs/developer` agar terlindungi di bawah autentikasi internal.
+
+Dokumen ini menjelaskan standar format penulisan agar seluruh dokumentasi (FE maupun BE) konsisten, rapi, dan mudah dibaca.
+
+---
+
+## Struktur Folder & Penamaan File
+
+1. **Format Nama File**:
+   - Selalu gunakan `kebab-case.mdx` (huruf kecil semua dengan pemisah `-`).
+   - Contoh: `manajemen-order.mdx`, `auth-service.mdx`.
+2. **File Induk**:
+   - Setiap sub-folder wajib memiliki `index.mdx` sebagai halaman pembuka.
+3. **Sidebar Navigation**:
+   - Daftarkan nama file baru ke dalam berkas `meta.json` di folder terkait.
+
+---
+
+## Format Header (Frontmatter Wajib)
+
+Setiap file `.mdx` harus diawali dengan frontmatter di baris teratas:
+
+```yaml
+---
+title: Judul Halaman yang Jelas
+description: Ringkasan 1-2 kalimat mengenai topik yang dibahas di halaman ini.
+---
+```
+
+<Callout type="warn">
+  **Jangan** menambahkan Heading 1 (`# Judul`) di dalam isi teks, karena judul halaman sudah otomatis dirender oleh sistem dari `title` di frontmatter. Gunakan mulai dari `##` (H2).
+</Callout>
+
+---
+
+## Komponen yang Didukung
+
+### 1. Callout (Kotak Informasi)
+
+```mdx
+<Callout type="info">Informasi tambahan penting.</Callout>
+<Callout type="warn">Peringatan untuk diperhatikan.</Callout>
+<Callout type="error">Hal berbahaya yang dilarang.</Callout>
+```
+
+### 2. Tabs (Perbandingan Request/Response)
+
+````mdx
+<Tabs items={['Request JSON', 'Response JSON']}>
+  <Tab value="Request JSON">
+    ```json
+    { "product_id": "123", "qty": 1 }
+    ```
+  </Tab>
+  <Tab value="Response JSON">
+    ```json
+    { "status": "success", "order_id": "abc" }
+    ```
+  </Tab>
+</Tabs>
+````
+
+### 3. Steps (Langkah Berurutan)
+
+```mdx
+<Steps>
+  <Step>
+    #### Langkah Pertama
+    Keterangan langkah pertama...
+  </Step>
+  <Step>
+    #### Langkah Kedua
+    Keterangan langkah kedua...
+  </Step>
+</Steps>
+```
+
+---
+
+## Menyematkan Screenshot & Berkas
+
+### A. Menyematkan Gambar / Screenshot
+- **Via URL GitHub Raw** (dari repo BE):
+  ```mdx
+  ![Diagram ERD](https://raw.githubusercontent.com/khankhanfauzan/vi-mamabear-backend/main/docs/assets/erd.png)
+  ```
+- **Via Folder Public di Docs**:
+  Simpan gambar di `mamabear-docs/public/docs/backend/nama-file.png`, lalu panggil:
+  ```mdx
+  ![Diagram Arsitektur](/docs/backend/nama-file.png)
+  ```
+
+### B. Menyematkan Lampiran (Postman / OpenAPI)
+Gunakan link unduhan Markdown biasa:
+```mdx
+- 📦 [Download Postman Collection](https://raw.githubusercontent.com/.../collection.json)
+```
+
+Untuk panduan lengkap siap kirim ke repositori Backend, silakan rujuk ke berkas [PANDUAN_DOKUMENTASI_BE.md](file:///Users/fauzankhan/Fauzan/Project/RevoU/next/project/virtual-internship/vi-mamabear/mamabear-frontend/PANDUAN_DOKUMENTASI_BE.md) di root project.
+

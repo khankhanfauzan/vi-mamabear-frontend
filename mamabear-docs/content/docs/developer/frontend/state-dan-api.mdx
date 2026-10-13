@@ -1,0 +1,118 @@
+---
+title: State Management & Integrasi API
+description: Arsitektur pengelolaan state klien menggunakan Zustand dan konsumsi REST API menggunakan openapi-fetch.
+---
+
+Aplikasi frontend MamaBear memadukan state lokal di memori klien dengan data remote dari backend REST API melalui pendekatan yang efisien dan bertipe aman (*type-safe*).
+
+## 1. Global State Management (Zustand)
+
+Kami menggunakan **Zustand** untuk mengelola state global yang perlu diakses oleh banyak komponen tanpa prop drilling (seperti keranjang belanja dan preferensi UI).
+
+### Contoh Store Keranjang Belanja
+
+```typescript title="src/store/use-cart-store.ts"
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image?: string;
+}
+
+interface CartStore {
+  items: CartItem[];
+  addItem: (item: CartItem) => void;
+  removeItem: (id: string) => void;
+  updateQuantity: (id: string, qty: number) => void;
+  clearCart: () => void;
+}
+
+export const useCartStore = create<CartStore>()(
+  persist(
+    (set) => ({
+      items: [],
+      addItem: (newItem) =>
+        set((state) => {
+          const existing = state.items.find((i) => i.id === newItem.id);
+          if (existing) {
+            return {
+              items: state.items.map((i) =>
+                i.id === newItem.id ? { ...i, quantity: i.quantity + newItem.quantity } : i
+              ),
+            };
+          }
+          return { items: [...state.items, newItem] };
+        }),
+      removeItem: (id) =>
+        set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
+      updateQuantity: (id, qty) =>
+        set((state) => ({
+          items: state.items.map((i) => (i.id === id ? { ...i, quantity: qty } : i)),
+        })),
+      clearCart: () => set({ items: [] }),
+    }),
+    {
+      name: 'mamabear-cart-storage',
+    }
+  )
+);
+```
+
+---
+
+## 2. Konsumsi REST API (`openapi-fetch`)
+
+Untuk menjamin keselarasan antara API backend dan frontend tanpa risiko salah ketik nama field, kami menggunakan **`openapi-fetch`** yang dipadukan dengan tipe yang di-generate otomatis dari spesifikasi OpenAPI Backend.
+
+### Skrip Generator Tipe OpenAPI
+Tipe data diperbarui secara otomatis dari backend menggunakan skrip:
+
+```bash
+npm run generate:api
+```
+Skrip ini membaca OpenAPI JSON backend dan meng-output berkas tipe di `src/types/openapi/api.d.ts`.
+
+### Contoh Pemanggilan API Type-Safe
+
+```typescript title="src/lib/api-client.ts"
+import createClient from 'openapi-fetch';
+import type { paths } from '@/types/openapi/api';
+
+export const apiClient = createClient<paths>({
+  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://vi-mamabear-backend.onrender.com/api',
+});
+```
+
+Contoh pemanggilan endpoint produk:
+
+```typescript title="src/features/products/api/get-products.ts"
+import { apiClient } from '@/lib/api-client';
+
+export async function fetchProducts() {
+  const { data, error } = await apiClient.GET('/products', {
+    params: {
+      query: { limit: 20 },
+    },
+  });
+
+  if (error) {
+    throw new Error('Gagal mengambil data produk');
+  }
+
+  return data;
+}
+```
+
+---
+
+## 3. Autentikasi Pengguna (NextAuth.js)
+
+Autentikasi dikelola oleh **NextAuth.js** dengan JWT session strategy:
+- Kredensial login dikirimkan ke endpoint `/api/auth/login` backend.
+- Token JWT disimpan di dalam session cookie terenkripsi.
+- Komponen klien mengakses sesi dengan hook `useSession()` dari `next-auth/react`.
+

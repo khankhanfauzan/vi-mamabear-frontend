@@ -1,0 +1,81 @@
+---
+title: Database & Skema
+description: Desain tabel data, relasi antar entitas, strategi migrasi, dan seed data backend MamaBear.
+---
+
+Dokumen ini menjelaskan struktur basis data yang digunakan oleh layanan Backend MamaBear.
+
+## Entity Relationship (ERD Ringkas)
+
+```mermaid
+erDiagram
+    USERS ||--o{ ORDERS : places
+    USERS {
+        string id PK
+        string name
+        string email UK
+        string password_hash
+        string role
+        datetime created_at
+    }
+    PRODUCTS ||--o{ ORDER_ITEMS : contains
+    PRODUCTS {
+        string id PK
+        string name
+        int price
+        int stock
+        string description
+        string category
+    }
+    ORDERS ||--|{ ORDER_ITEMS : includes
+    ORDERS {
+        string id PK
+        string user_id FK
+        int total_amount
+        string status
+        string payment_url
+        datetime created_at
+    }
+    ORDER_ITEMS {
+        string id PK
+        string order_id FK
+        string product_id FK
+        int quantity
+        int price_at_purchase
+    }
+```
+
+---
+
+## Manajemen Migrasi Database
+
+Seluruh perubahan skema basis data wajib dicatat melalui skrip migrasi agar dapat direproduksi di lingkungan lokal, staging, dan production.
+
+<Steps>
+  <Step>
+    #### Membuat File Migrasi Baru
+    Jika ada penambahan kolom atau tabel baru:
+    ```bash
+    npm run migration:generate -- name_of_migration
+    ```
+  </Step>
+
+  <Step>
+    #### Menjalankan Migrasi ke Database Lokal
+    ```bash
+    npm run migration:run
+    ```
+  </Step>
+
+  <Step>
+    #### Menjalankan Seeder (Data Awal Produk & Admin)
+    ```bash
+    npm run seed
+    ```
+  </Step>
+</Steps>
+
+<Callout type="warn">
+  Jangan pernah mengubah file migrasi yang sudah pernah di-merge dan dijalankan pada database production. Selalu buat file migrasi baru untuk setiap perubahan skema.
+</Callout>
+

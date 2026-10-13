@@ -1,0 +1,74 @@
+---
+title: Komponen UI & Styling
+description: Standar sistem desain antarmuka MamaBear menggunakan shadcn/ui, Radix UI Primitives, dan Tailwind CSS.
+---
+
+Sistem antarmuka MamaBear mengadopsi pendekatan berbasis **shadcn/ui** yang dikombinasikan dengan utility-first CSS dari **Tailwind CSS**. Komponen UI bersifat modular, mudah dikustomisasi, dan memiliki aksesibilitas bawaan (a11y).
+
+## 1. Komponen UI Primitif (`src/components/ui/`)
+
+Komponen dasar antarmuka diletakkan pada folder `src/components/ui/`. Komponen ini merupakan blok bangunan (*building blocks*) yang digunakan di seluruh fitur:
+
+- `button.tsx`: Tombol aksi primer, sekunder, outline, dan ghost.
+- `dialog.tsx`: Modal popup berbasis Radix UI Dialog.
+- `sheet.tsx`: Panel geser samping (drawer keranjang dan menu mobile).
+- `input.tsx`: Elemen form input terstandarisasi.
+- `badge.tsx`: Label status pesanan dan kategori produk.
+- `card.tsx`: Kontainer kartu produk dan artikel.
+
+### Contoh Kustomisasi Tombol dengan `cva`
+
+Kami menggunakan `class-variance-authority` (cva) untuk mengelola varian komponen secara type-safe:
+
+```tsx title="src/components/ui/button.tsx"
+import { cva, type VariantProps } from 'class-variance-authority';
+
+const buttonVariants = cva(
+  'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50',
+  {
+    variants: {
+      variant: {
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+        outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
+      },
+      size: {
+        default: 'h-10 px-4 py-2',
+        sm: 'h-9 rounded-md px-3',
+        lg: 'h-11 rounded-md px-8',
+        icon: 'h-10 w-10',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  }
+);
+```
+
+---
+
+## 2. Palet Warna & Desain Token
+
+Aplikasi menggunakan tema warna bernuansa hangat dan ramah keluarga:
+
+- **Primary**: Warna utama identitas MamaBear (merah muda / peach hangat).
+- **Secondary**: Warna aksen pelengkap.
+- **Muted**: Warna latar abu-abu netral untuk kontras yang nyaman di mata.
+- **Destructive**: Warna indikator peringatan atau pembatalan.
+
+<Callout type="info">
+  Selalu gunakan utility class bertema semantik (seperti `bg-primary`, `text-muted-foreground`) daripada hardcoded hex color seperti `#ff0000` agar konsistensi tema tetap terjaga.
+</Callout>
+
+---
+
+## 3. Ikon & Animasi
+
+- **Ikon**: Menggunakan pustaka resmi `lucide-react`.
+- **Notifikasi Toast**: Menggunakan `sonner` untuk menampilkan feedback visual saat item berhasil dimasukkan ke keranjang atau form berhasil dikirim.
+- **Carousel Banner**: Menggunakan `embla-carousel-react` untuk banner promo di halaman utama.
+

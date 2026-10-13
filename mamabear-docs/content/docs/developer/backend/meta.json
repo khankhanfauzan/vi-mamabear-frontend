@@ -1,0 +1,12 @@
+{
+  "title": "Backend Guide",
+  "description": "Dokumentasi teknis arsitektur, API, database, dan deployment backend MamaBear.",
+  "pages": [
+    "index",
+    "arsitektur",
+    "api-reference",
+    "database",
+    "setup-lokal"
+  ]
+}
+

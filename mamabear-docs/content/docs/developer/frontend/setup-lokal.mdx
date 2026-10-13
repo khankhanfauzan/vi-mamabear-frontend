@@ -1,0 +1,97 @@
+---
+title: Setup Frontend di Lokal
+description: Panduan instalasi dependensi, konfigurasi environment variables, dan menjalankan pengujian toko lokal.
+---
+
+Panduan ini memandu developer untuk menyiapkan environment lokal dan menjalankan aplikasi toko MamaBear beserta aplikasi dokumentasinya.
+
+## Prasyarat Lingkungan (*Prerequisites*)
+
+- **Node.js**: Versi `>= 18.17.0` (direkomendasikan Node 20 LTS)
+- **Paket Manajer**: `npm` versi `>= 9.x`
+
+---
+
+## Langkah Instalasi & Menjalankan Toko
+
+<Steps>
+  <Step>
+    #### Klon Repositori Frontend
+    ```bash
+    git clone https://github.com/khankhanfauzan/vi-mamabear-frontend.git
+    cd vi-mamabear-frontend
+    ```
+  </Step>
+
+  <Step>
+    #### Pasang Dependensi Proyek
+    ```bash
+    npm install
+    ```
+  </Step>
+
+  <Step>
+    #### Konfigurasi Environment Variables
+    Salin berkas contoh environment:
+    ```bash
+    cp .env.example .env
+    ```
+    Sesuaikan variabel penting di `.env`:
+    ```bash title=".env"
+    NEXT_PUBLIC_API_URL=https://vi-mamabear-backend.onrender.com/api
+    NEXTAUTH_URL=http://localhost:3000
+    NEXTAUTH_SECRET=rahasia-nextauth-lokal-mamabear-2026
+    DOCS_APP_URL=http://localhost:3001
+    ```
+  </Step>
+
+  <Step>
+    #### Jalankan Server Pengembangan Toko
+    ```bash
+    npm run dev
+    ```
+    Buka `http://localhost:3000` di peramban untuk melihat toko MamaBear.
+  </Step>
+</Steps>
+
+---
+
+## Menjalankan Aplikasi Dokumentasi (Fumadocs)
+
+Aplikasi dokumentasi berada di subfolder `mamabear-docs`:
+
+<Steps>
+  <Step>
+    #### Masuk ke Folder Dokumentasi & Pasang Dependensi
+    ```bash
+    cd mamabear-docs
+    npm install
+    ```
+  </Step>
+
+  <Step>
+    #### Jalankan Server Dokumentasi
+    ```bash
+    npm run dev
+    ```
+    Aplikasi dokumentasi akan aktif di `http://localhost:3001` (atau port alternatif berikutnya).
+  </Step>
+</Steps>
+
+---
+
+## Menjalankan Pengujian Otomatis (Testing)
+
+Proyek toko dilengkapi dengan unit test berbasis **Jest** dan **React Testing Library**:
+
+```bash
+# Menjalankan seluruh unit test
+npm run test
+
+# Menjalankan test dalam mode watch (interaktif saat ngoding)
+npm run test:watch
+
+# Menjalankan pemeriksaan linter ESLint
+npm run lint
+```
+

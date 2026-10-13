@@ -1,0 +1,66 @@
+---
+title: Setup Backend di Lokal
+description: Langkah-langkah menjalankan server MamaBear Backend dan database di komputer lokal.
+---
+
+Panduan ini memandu developer untuk menyiapkan environment lokal dan menjalankan server backend MamaBear.
+
+## Prasyarat Lingkungan (*Prerequisites*)
+
+Pastikan perangkat lokal Anda telah terpasang:
+- **Node.js** versi `>= 18.x`
+- **npm** atau **pnpm**
+- **PostgreSQL** atau **Docker** (jika menjalankan database via container)
+
+---
+
+## Langkah Instalasi
+
+<Steps>
+  <Step>
+    #### Klon Repositori Backend
+    ```bash
+    git clone https://github.com/khankhanfauzan/vi-mamabear-backend.git
+    cd vi-mamabear-backend
+    ```
+  </Step>
+
+  <Step>
+    #### Pasang Dependensi Node.js
+    ```bash
+    npm install
+    ```
+  </Step>
+
+  <Step>
+    #### Konfigurasi Environment Variables
+    Salin berkas template environment:
+    ```bash
+    cp .env.example .env
+    ```
+    Sesuaikan variabel penting di `.env`:
+    ```bash title=".env"
+    PORT=5000
+    NODE_ENV=development
+    DATABASE_URL=postgresql://postgres:password@localhost:5432/mamabear_db
+    JWT_SECRET=rahasia-jwt-lokal-mamabear-2026
+    CORS_ORIGIN=http://localhost:3000
+    ```
+  </Step>
+
+  <Step>
+    #### Jalankan Migrasi & Seeder Database
+    ```bash
+    npm run db:migrate
+    npm run db:seed
+    ```
+  </Step>
+
+  <Step>
+    #### Jalankan Server Pengembangan
+    ```bash
+    npm run dev
+    ```
+    Server backend akan aktif di `http://localhost:5000`. Periksa endpoint kesehatan (*health check*) di `http://localhost:5000/api/health`.
+  </Step>
+</Steps>

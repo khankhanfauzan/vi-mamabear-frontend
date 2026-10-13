@@ -1,0 +1,33 @@
+---
+title: Ringkasan Frontend
+description: Gambaran umum aplikasi toko online MamaBear, tech stack, dan prinsip perancangan antarmuka.
+---
+
+MamaBear Frontend adalah aplikasi e-commerce modern yang melayani pelanggan dalam memilih dan membeli produk kehamilan, persalinan, dan menyusui, serta menyediakan kanal konsultasi interaktif melalui MamaBear Care.
+
+Aplikasi ini dibangun menggunakan ekosistem **Next.js App Router** dengan pendekatan arsitektur berbasis fitur (*feature-driven*).
+
+## Informasi Repositori & Stack Teknologi
+
+- **Framework**: Next.js 14 (App Router)
+- **Bahasa**: TypeScript (Strict Mode)
+- **Komponen UI**: shadcn/ui berbasis Radix UI Primitives
+- **Styling**: Tailwind CSS
+- **State Management**: Zustand
+- **Klien API**: `openapi-fetch` + tipe otomatis dari OpenAPI Backend
+- **Autentikasi**: NextAuth.js (JWT Session)
+- **Dokumentasi Terintegrasi**: Next.js 16 + Fumadocs di subfolder `mamabear-docs/`
+
+<Callout type="info">
+  Situs dokumentasi yang sedang Anda baca ini merupakan aplikasi Next.js terpisah di folder `mamabear-docs`, yang di-deploy ke Vercel dan di-proxy di jalur `/docs`.
+</Callout>
+
+## Topik Dokumentasi Frontend
+
+<Cards>
+  <Card title="Arsitektur Aplikasi" href="/docs/developer/frontend/arsitektur" description="Pola App Router, pemisahan Server vs Client Components, dan arsitektur fitur." />
+  <Card title="State & Integrasi API" href="/docs/developer/frontend/state-dan-api" description="Manajemen state global dengan Zustand dan konsumsi REST API menggunakan openapi-fetch." />
+  <Card title="Komponen UI & Styling" href="/docs/developer/frontend/komponen-ui" description="Penggunaan shadcn/ui, konfigurasi Tailwind CSS, dan desain token responsif." />
+  <Card title="Setup Lokal & Testing" href="/docs/developer/frontend/setup-lokal" description="Cara mengklon, setup .env, menjalankan toko lokal, dan pengujian unit test Jest." />
+</Cards>
+

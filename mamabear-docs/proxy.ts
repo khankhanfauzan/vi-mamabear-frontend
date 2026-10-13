@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
 import {
   isDeveloperAuthorized,
+  isPrefetchRequest,
   isProtectedDocsPath,
   unauthorizedDocsResponse,
 } from '@/lib/docs-auth';
@@ -18,6 +19,10 @@ const { rewrite: rewriteSuffix } = rewritePath(
 
 export default function proxy(request: NextRequest) {
   if (isProtectedDocsPath(request.nextUrl.pathname) && !isDeveloperAuthorized(request)) {
+    if (isPrefetchRequest(request)) {
+      return new NextResponse(null, { status: 204 });
+    }
+
     return unauthorizedDocsResponse();
   }
 

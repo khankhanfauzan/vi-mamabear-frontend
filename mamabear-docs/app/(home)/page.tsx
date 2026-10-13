@@ -6,12 +6,14 @@ const sections = [
     title: 'User Guide',
     access: 'Publik',
     description: 'Cara berbelanja, mengelola akun, dan memakai chat MamaBear Care.',
+    prefetch: true,
   },
   {
     href: '/docs/developer',
     title: 'Developer Guide',
     access: 'Internal',
     description: 'Arsitektur aplikasi dan cara menambah halaman. Butuh Basic Auth.',
+    prefetch: false,
   },
 ];
 
@@ -28,6 +30,7 @@ export default function HomePage() {
           <Link
             key={section.href}
             href={section.href}
+            prefetch={section.prefetch}
             className="rounded-xl border p-5 text-left transition-colors hover:bg-fd-accent"
           >
             <p className="text-xs font-medium uppercase tracking-wide text-fd-muted-foreground">

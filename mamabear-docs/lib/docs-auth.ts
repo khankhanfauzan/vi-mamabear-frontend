@@ -15,6 +15,17 @@ export function isProtectedDocsPath(pathname: string) {
   );
 }
 
+export function isPrefetchRequest(request: Request) {
+  const headers = request.headers;
+  return (
+    headers.has('next-router-prefetch') ||
+    headers.has('next-router-segment-prefetch') ||
+    headers.get('x-middleware-prefetch') === '1' ||
+    headers.get('purpose')?.toLowerCase().includes('prefetch') === true ||
+    headers.get('sec-purpose')?.toLowerCase().includes('prefetch') === true
+  );
+}
+
 function safeEqual(left: string, right: string) {
   const encoder = new TextEncoder();
   const a = encoder.encode(left);

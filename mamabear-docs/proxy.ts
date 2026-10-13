@@ -17,13 +17,16 @@ const { rewrite: rewriteSuffix } = rewritePath(
   `${docsContentRoute}{/*path}/content.md`,
 );
 
-export default function proxy(request: NextRequest) {
-  if (isProtectedDocsPath(request.nextUrl.pathname) && !isDeveloperAuthorized(request)) {
+export default async function proxy(request: NextRequest) {
+  if (isProtectedDocsPath(request.nextUrl.pathname)) {
     if (isPrefetchRequest(request)) {
       return new NextResponse(null, { status: 204 });
     }
 
-    return unauthorizedDocsResponse();
+    const authorized = await isDeveloperAuthorized(request);
+    if (!authorized) {
+      return unauthorizedDocsResponse(request, request.nextUrl.pathname);
+    }
   }
 
   const result = rewriteSuffix(request.nextUrl.pathname);

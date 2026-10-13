@@ -6,7 +6,7 @@ import { createFromSource } from 'fumadocs-core/search/server';
 const publicSearch = createFromSource(publicSource);
 const fullSearch = createFromSource(source);
 
-export function GET(request: Request) {
-  if (isDeveloperAuthorized(request)) return fullSearch.GET(request);
+export async function GET(request: Request) {
+  if (await isDeveloperAuthorized(request)) return fullSearch.GET(request);
   return publicSearch.GET(request);
 }

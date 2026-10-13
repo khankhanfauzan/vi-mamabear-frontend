@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 
+export const DOCS_COOKIE_NAME = 'docs-session';
+
 const PROTECTED_PREFIXES = [
   '/docs/developer',
   '/llms.mdx/docs/developer',
   '/og/docs/developer',
 ];
 
-export function isProtectedDocsPath(pathname: string) {
+export function isProtectedDocsPath(pathname: string): boolean {
   return PROTECTED_PREFIXES.some(
     (prefix) =>
       pathname === prefix ||
@@ -15,7 +17,7 @@ export function isProtectedDocsPath(pathname: string) {
   );
 }
 
-export function isPrefetchRequest(request: Request) {
+export function isPrefetchRequest(request: Request): boolean {
   const headers = request.headers;
   return (
     headers.has('next-router-prefetch') ||
@@ -26,7 +28,7 @@ export function isPrefetchRequest(request: Request) {
   );
 }
 
-function safeEqual(left: string, right: string) {
+function safeEqual(left: string, right: string): boolean {
   const encoder = new TextEncoder();
   const a = encoder.encode(left);
   const b = encoder.encode(right);
@@ -40,7 +42,36 @@ function safeEqual(left: string, right: string) {
   return mismatch === 0;
 }
 
-export function isDeveloperAuthorized(request: Request) {
+export async function createSessionToken(): Promise<string> {
+  const password = process.env.DOCS_PASSWORD ?? '';
+  const salt = process.env.DOCS_SESSION_SECRET ?? 'mamabear-docs-salt-2026';
+  const data = new TextEncoder().encode(`${password}:${salt}`);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+export async function isDocsSessionValid(request: Request): Promise<boolean> {
+  const password = process.env.DOCS_PASSWORD;
+  if (!password) return false;
+
+  const cookieHeader = request.headers.get('cookie') ?? '';
+  const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${DOCS_COOKIE_NAME}=([^;]+)`));
+  if (!match) return false;
+
+  const token = decodeURIComponent(match[1]);
+  const expectedToken = await createSessionToken();
+  return safeEqual(token, expectedToken);
+}
+
+export async function isDeveloperAuthorized(request: Request): Promise<boolean> {
+  // 1. Check Cookie Session
+  if (await isDocsSessionValid(request)) {
+    return true;
+  }
+
+  // 2. Fallback: Check HTTP Basic Auth (for curl, scripts, etc.)
   const password = process.env.DOCS_PASSWORD;
   if (!password) return false;
 
@@ -63,11 +94,28 @@ export function isDeveloperAuthorized(request: Request) {
   return safeEqual(user, expectedUser) && safeEqual(pwd, password);
 }
 
-export function unauthorizedDocsResponse() {
+export function getDocsLoginUrl(request: Request, pathname?: string): URL {
+  const reqUrl = new URL(request.url);
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || reqUrl.host;
+  const proto = request.headers.get('x-forwarded-proto') || (reqUrl.protocol.replace(':', '')) || 'https';
+  const loginUrl = new URL('/docs/login', `${proto}://${host}`);
+  const nextTarget = pathname || reqUrl.pathname;
+  if (nextTarget && nextTarget !== '/docs/login') {
+    loginUrl.searchParams.set('next', nextTarget);
+  }
+  return loginUrl;
+}
+
+export function unauthorizedDocsResponse(request?: Request, pathname?: string): NextResponse {
+  // If this is a page navigation on developer docs, redirect to custom login page
+  if (request && pathname && pathname.startsWith('/docs/developer')) {
+    const loginUrl = getDocsLoginUrl(request, pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // For API or non-HTML endpoints, return 401 without WWW-Authenticate header
+  // so browser does not trigger native popup dialog.
   return new NextResponse('Auth Required', {
     status: 401,
-    headers: {
-      'WWW-Authenticate': 'Basic realm="MamaBear Developer Docs", charset="UTF-8"',
-    },
   });
 }

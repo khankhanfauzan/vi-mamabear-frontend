@@ -8,8 +8,17 @@ const withMDX = createMDX();
 const config = {
   reactStrictMode: true,
   agentRules: false,
+  assetPrefix: process.env.DOCS_ASSET_PREFIX || '/docs-assets',
   turbopack: {
     root: path.dirname(fileURLToPath(import.meta.url)),
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/docs-assets/_next/:path*',
+        destination: '/_next/:path*',
+      },
+    ];
   },
 };
 

@@ -1,0 +1,160 @@
+---
+title: Checkout & Pembayaran
+description: Panduan lengkap melakukan checkout di MamaBear — dari memilih alamat pengiriman, menghitung ongkos kirim, hingga menyelesaikan pembayaran.
+---
+
+Checkout adalah proses mengubah isi keranjang menjadi pesanan yang dikirim ke Mama.
+Pastikan sudah **login** dan keranjang sudah terisi sebelum memulai.
+
+<Callout type="info">
+  Halaman checkout hanya bisa diakses setelah login. Jika belum masuk, Mama akan diarahkan ke halaman login terlebih dahulu.
+</Callout>
+
+---
+
+## Alur Checkout Lengkap
+
+<Steps>
+  <Step>
+    ### Buka Keranjang & Mulai Checkout
+
+    Klik ikon 🛒 di navbar, periksa produk yang ada di keranjang, lalu klik tombol **Lanjut ke Checkout**.
+
+    {/* 📸 PLACEHOLDER SCREENSHOT
+        Tambahkan screenshot halaman Keranjang (tombol "Lanjut ke Checkout" terlihat).
+        Simpan file ke: mamabear-docs/public/docs/user/mamabear-keranjang-checkout.webp
+        Lalu ganti komentar ini dengan:
+        ![Keranjang belanja siap checkout](/docs/user/mamabear-keranjang-checkout.webp)
+    */}
+  </Step>
+  <Step>
+    ### Pilih Alamat Pengiriman
+
+    Di halaman checkout, Mama akan diminta memilih tujuan pengiriman:
+
+    - **Alamat tersimpan** — pilih dari daftar alamat yang sudah disimpan sebelumnya
+    - **Tambah alamat baru** — isi nama penerima, nomor telepon, dan alamat lengkap termasuk kelurahan dan kecamatan
+
+    <Callout type="info">
+      Semakin lengkap alamat yang diisi (termasuk kelurahan/kecamatan), semakin akurat ongkos kirim yang dihitung.
+    </Callout>
+
+    {/* 📸 PLACEHOLDER SCREENSHOT
+        Tambahkan screenshot seksi pilih alamat di halaman checkout.
+        Simpan file ke: mamabear-docs/public/docs/user/mamabear-checkout-alamat.webp
+        Lalu ganti komentar ini dengan:
+        ![Pilih alamat pengiriman saat checkout](/docs/user/mamabear-checkout-alamat.webp)
+    */}
+  </Step>
+  <Step>
+    ### Pilih Layanan Pengiriman
+
+    Setelah alamat dipilih, sistem secara otomatis menghitung ongkos kirim berdasarkan lokasi Mama. Pilih kurir dan jenis layanan (reguler, express, dll.) yang sesuai.
+
+    {/* 📸 PLACEHOLDER SCREENSHOT
+        Tambahkan screenshot bagian pilih kurir dan ongkir.
+        Simpan file ke: mamabear-docs/public/docs/user/mamabear-checkout-ongkir.webp
+        Lalu ganti komentar ini dengan:
+        ![Pilihan kurir dan ongkos kirim](/docs/user/mamabear-checkout-ongkir.webp)
+    */}
+
+    <Callout type="warn">
+      Jika opsi pengiriman tidak muncul, pastikan alamat sudah dipilih dengan lengkap — terutama kolom kelurahan/kecamatan.
+    </Callout>
+  </Step>
+  <Step>
+    ### Tambahkan Catatan (Opsional)
+
+    Jika ada instruksi khusus untuk penjual atau kurir (misalnya: "Jangan dibunyikan bel saat barang tiba" atau "Hubungi via WA sebelum dikirim"), tuliskan di kolom **Catatan Pesanan**.
+  </Step>
+  <Step>
+    ### Periksa Ringkasan Pesanan
+
+    Sebelum membayar, periksa kembali:
+
+    | Item | Yang Perlu Dicek |
+    |------|-----------------|
+    | Produk & Jumlah | Pastikan varian dan kuantitas sudah benar |
+    | Alamat Tujuan | Pastikan nama penerima dan alamat lengkap |
+    | Layanan Pengiriman | Kurir dan estimasi waktu sesuai |
+    | Kode Promo | Pastikan promo sudah diterapkan di keranjang |
+    | Total Pembayaran | Subtotal + ongkir − diskon promo |
+
+    {/* 📸 PLACEHOLDER SCREENSHOT
+        Tambahkan screenshot halaman ringkasan order sebelum bayar.
+        Simpan file ke: mamabear-docs/public/docs/user/mamabear-checkout-ringkasan.webp
+        Lalu ganti komentar ini dengan:
+        ![Ringkasan pesanan sebelum pembayaran](/docs/user/mamabear-checkout-ringkasan.webp)
+    */}
+  </Step>
+  <Step>
+    ### Selesaikan Pembayaran
+
+    Klik **Bayar Sekarang**. Mama akan diarahkan ke halaman pembayaran untuk menyelesaikan transaksi menggunakan metode pembayaran yang tersedia.
+
+    {/* 📸 PLACEHOLDER SCREENSHOT
+        Tambahkan screenshot halaman pembayaran / payment gateway.
+        Simpan file ke: mamabear-docs/public/docs/user/mamabear-pembayaran.webp
+        Lalu ganti komentar ini dengan:
+        ![Halaman pembayaran MamaBear](/docs/user/mamabear-pembayaran.webp)
+    */}
+
+    <Callout type="info">
+      Setelah pembayaran berhasil, Mama akan mendapatkan konfirmasi dan pesanan bisa dilacak di menu **Akun → Pesanan**.
+    </Callout>
+  </Step>
+</Steps>
+
+---
+
+## Menyimpan Alamat untuk Checkout Lebih Cepat
+
+Simpan alamat pengiriman di menu **Akun → Alamat** sebelum checkout. Dengan begitu, Mama tidak perlu mengisi ulang alamat setiap kali berbelanja.
+
+Baca panduan lengkapnya di [Akun & Pesanan](/docs/user/akun#mengelola-alamat-pengiriman).
+
+---
+
+## Melacak Status Pesanan
+
+Setelah pembayaran berhasil, status pesanan bisa dipantau dari menu **Akun → Pesanan**:
+
+| Status | Artinya |
+|--------|---------|
+| **Menunggu Pembayaran** | Pesanan dibuat, menunggu konfirmasi pembayaran |
+| **Diproses** | Pembayaran diterima, pesanan sedang disiapkan |
+| **Dikirim** | Paket sudah dikirimkan oleh kurir |
+| **Selesai** | Pesanan diterima oleh Mama |
+
+{/* 📸 PLACEHOLDER SCREENSHOT
+    Tambahkan screenshot halaman daftar pesanan / order status.
+    Simpan file ke: mamabear-docs/public/docs/user/mamabear-status-pesanan.webp
+    Lalu ganti komentar ini dengan:
+    ![Daftar pesanan dan status pengiriman](/docs/user/mamabear-status-pesanan.webp)
+*/}
+
+---
+
+## Pertanyaan Umum tentang Checkout
+
+**Kenapa tidak bisa lanjut ke checkout?**
+Pastikan sudah login. Checkout memerlukan akun yang aktif dan terverifikasi.
+
+**Ongkir tidak muncul setelah memilih alamat?**
+Coba pilih ulang alamat dan pastikan kolom kelurahan/kecamatan sudah terisi. Jika masih bermasalah, coba refresh halaman.
+
+**Apakah bisa mengubah pesanan setelah bayar?**
+Pesanan yang sudah dibayar tidak bisa diubah secara langsung. Hubungi MamaBear Care melalui [chat](/docs/user/chat) untuk bantuan.
+
+**Kode promo tidak bisa dipakai di checkout?**
+Kode promo hanya bisa diterapkan di halaman **Keranjang**, sebelum melanjutkan ke checkout. Kembali ke keranjang dan terapkan kode di sana.
+
+---
+
+## Selanjutnya
+
+<Cards>
+  <Card title="👤 Akun & Pesanan" href="/docs/user/akun" description="Lihat riwayat pesanan dan kelola alamat pengiriman." />
+  <Card title="❓ FAQ" href="/docs/user/faq" description="Pertanyaan umum seputar pengiriman dan pembayaran." />
+</Cards>
+

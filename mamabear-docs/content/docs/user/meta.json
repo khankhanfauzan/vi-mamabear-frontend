@@ -1,5 +1,5 @@
 {
-  "title": "User Guide",
-  "description": "Panduan publik untuk berbelanja di MamaBear.",
-  "pages": ["index", "belanja", "akun", "chat"]
+  "title": "Panduan Pengguna",
+  "description": "Panduan lengkap untuk berbelanja di MamaBear.",
+  "pages": ["index", "memulai", "belanja", "checkout", "akun", "chat", "faq"]
 }

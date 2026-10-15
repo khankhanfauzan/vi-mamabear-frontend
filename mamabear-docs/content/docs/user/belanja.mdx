@@ -1,21 +1,145 @@
 ---
-title: Belanja
-description: Cara mencari produk, mengisi keranjang, dan checkout.
+title: Belanja di MamaBear
+description: Panduan lengkap mencari produk, menggunakan filter katalog, melihat detail produk, mengisi keranjang, dan menerapkan kode promo.
 ---
 
-## Cari produk
+MamaBear menyediakan ribuan produk kebutuhan ibu dan bayi yang bisa Mama temukan
+dengan mudah melalui katalog, kategori, maupun fitur pencarian.
 
-Buka katalog dari beranda atau menu kategori. Tiap kartu produk menampilkan nama dan harga. Pilih produk untuk melihat deskripsi, varian, dan stok.
+## Menjelajahi Beranda
 
-Pencarian ada di bagian atas situs. Ketik nama produk, lalu buka hasil yang sesuai.
+Saat pertama membuka MamaBear, Mama akan disambut oleh beranda yang menampilkan:
+- **Banner promosi** — bergeser otomatis setiap beberapa detik
+- **Kategori produk** — akses cepat ke kelompok produk tertentu
+- **Produk unggulan** — pilihan produk populer yang direkomendasikan
 
-## Keranjang
+![Halaman utama MamaBear dengan banner produk dan navigasi kategori](/docs/frontend/mamabear-homepage.webp)
 
-Tambah produk dari halaman detail. Ikon keranjang menampilkan jumlah barang. Di halaman keranjang, ubah jumlah atau hapus barang sebelum lanjut.
+---
 
-## Checkout
+## Katalog Produk
 
-1. Buka keranjang, lalu pilih lanjut ke checkout.
-2. Isi alamat pengiriman. Alamat yang sudah disimpan bisa dipilih ulang.
-3. Periksa ringkasan pesanan, ongkir, dan promo.
-4. Selesaikan pembayaran. Status pesanan bisa dilihat dari menu akun.
+Buka halaman **Produk** dari menu navigasi atas, atau klik salah satu kategori di beranda.
+
+![Katalog produk MamaBear dengan panel filter dan daftar produk](/docs/frontend/mamabear-product-catalog.webp)
+
+### Menggunakan Filter
+
+Di halaman katalog, tersedia panel filter di sisi kiri (desktop) atau tombol filter (mobile):
+
+| Filter | Fungsi |
+|--------|--------|
+| **Kategori** | Tampilkan produk dari kategori tertentu saja |
+| **Rentang Harga** | Atur batas harga minimum dan maksimum |
+| **Stok** | Tampilkan hanya produk yang masih tersedia |
+| **Rating** | Saring berdasarkan penilaian pembeli |
+
+<Callout type="info">
+  Beberapa produk tersedia dalam varian (misalnya ukuran atau rasa). Varian bisa dipilih di halaman detail produk.
+</Callout>
+
+### Tampilan Mobile
+
+Pada perangkat mobile, katalog otomatis menyesuaikan tampilan menjadi lebih ringkas dan nyaman di layar kecil.
+
+<img src="/docs/frontend/mamabear-mobile-view.webp" alt="Tampilan beranda MamaBear pada perangkat mobile" width="390" style={{ maxWidth: '100%', height: 'auto', borderRadius: '12px' }} />
+
+---
+
+## Mencari Produk
+
+![Hasil pencarian produk di MamaBear](/docs/frontend/mamabear-search.webp)
+
+Gunakan kolom **Pencarian** di bagian atas situs untuk mencari produk secara spesifik:
+
+<Steps>
+  <Step>
+    ### Klik Kolom Pencarian
+    Klik ikon kaca pembesar atau kolom pencarian di navbar atas.
+  </Step>
+  <Step>
+    ### Ketik Nama Produk
+    Saran produk akan muncul **secara otomatis** saat Mama mengetik. Klik salah satu saran untuk langsung ke produk tersebut.
+  </Step>
+  <Step>
+    ### Tekan Enter untuk Semua Hasil
+    Tekan **Enter** atau klik tombol cari untuk melihat seluruh hasil pencarian di halaman `/search`.
+  </Step>
+</Steps>
+
+<Callout type="info">
+  MamaBear menyimpan **5 pencarian terakhir** di perangkat Mama. Klik kolom pencarian untuk melihat riwayat pencarian sebelumnya.
+</Callout>
+
+---
+
+## Detail Produk
+
+Klik kartu produk mana saja untuk masuk ke halaman detail.
+
+![Halaman detail produk MamaBear dengan galeri, pilihan varian, jumlah, dan deskripsi](/docs/frontend/mamabear-product-detail.webp)
+
+Di halaman detail tersedia informasi lengkap:
+
+| Bagian | Keterangan |
+|--------|-----------|
+| **Galeri Foto** | Beberapa foto produk — klik untuk memperbesar |
+| **Nama & Harga** | Harga ditampilkan sesuai varian yang dipilih |
+| **Pilihan Varian** | Pilih ukuran, rasa, atau tipe produk (jika tersedia) |
+| **Jumlah** | Atur berapa unit yang ingin dibeli |
+| **Stok** | Jumlah stok tersisa ditampilkan |
+| **Deskripsi** | Informasi produk, cara pakai, dan komposisi |
+| **Produk Terkait** | Rekomendasi produk serupa |
+
+---
+
+## Menambahkan ke Keranjang
+
+<Steps>
+  <Step>
+    ### Pilih Varian (jika ada)
+    Jika produk memiliki varian (ukuran, rasa, dll.), pilih terlebih dahulu sebelum menambahkan ke keranjang.
+  </Step>
+  <Step>
+    ### Atur Jumlah
+    Gunakan tombol **+** dan **−** untuk menentukan jumlah yang ingin dibeli. Jumlah maksimum mengikuti stok yang tersedia untuk varian tersebut.
+  </Step>
+  <Step>
+    ### Klik "Tambah ke Keranjang"
+    Produk akan masuk ke keranjang. Ikon 🛒 di navbar akan memperbarui jumlah item secara otomatis.
+  </Step>
+</Steps>
+
+<Callout type="info">
+  Mama bisa langsung klik ikon keranjang di navbar untuk melihat **ringkasan keranjang** tanpa harus membuka halaman penuh.
+</Callout>
+
+---
+
+## Mengelola Keranjang
+
+![Keranjang MamaBear dengan daftar produk, jumlah, ringkasan belanja, dan kolom kode promo](/docs/frontend/mamabear-cart.webp)
+
+Buka halaman **Keranjang** dengan mengklik ikon 🛒 di pojok kanan atas.
+
+### Yang Bisa Dilakukan di Keranjang
+
+- **Ubah jumlah** — klik tombol + atau − di sebelah produk
+- **Hapus produk** — klik ikon hapus untuk menghilangkan produk dari keranjang
+- **Terapkan kode promo** — masukkan kode di kolom promo dan klik Terapkan
+- **Lihat ringkasan** — subtotal, ongkir, dan total belanja ditampilkan di sisi kanan (atau bawah di mobile)
+
+<Callout type="warn">
+  Kode promo dimasukkan di **halaman Keranjang**, bukan di halaman checkout. Pastikan kode sudah diterapkan sebelum melanjutkan.
+</Callout>
+
+Setelah siap, klik **Lanjut ke Checkout** untuk memilih alamat pengiriman dan menyelesaikan pembayaran.
+
+---
+
+## Selanjutnya
+
+<Cards>
+  <Card title="📦 Checkout & Pembayaran" href="/docs/user/checkout" description="Panduan lengkap memilih alamat, menghitung ongkir, dan menyelesaikan pembayaran." />
+  <Card title="❓ Ada Masalah?" href="/docs/user/faq" description="Lihat FAQ untuk pertanyaan umum seputar belanja dan produk." />
+</Cards>

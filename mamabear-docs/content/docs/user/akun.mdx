@@ -1,20 +1,149 @@
 ---
-title: Akun
-description: Masuk, daftar, dan kelola pesanan Mama.
+title: Akun & Pesanan
+description: Cara masuk, mendaftar, mengelola profil, menyimpan alamat pengiriman, dan melacak riwayat pesanan di MamaBear.
 ---
 
-## Masuk dan daftar
+Akun MamaBear memungkinkan Mama menyimpan alamat pengiriman, melacak pesanan, dan
+mengakses fitur-fitur yang memerlukan identitas seperti keranjang dan checkout.
 
-Pilih **Login** untuk masuk, atau **Daftar** jika belum punya akun. Gunakan email dan kata sandi yang didaftarkan.
+---
 
-Lupa kata sandi bisa diajukan dari halaman login. Tautan reset dikirim ke email tersebut.
+## Masuk ke Akun (Login)
 
-## Pesanan dan alamat
+<Steps>
+  <Step>
+    ### Klik Tombol Login
+    Pilih tombol **Login** di pojok kanan atas situs.
 
-Setelah masuk, menu akun memuat:
+    {/* 📸 PLACEHOLDER SCREENSHOT
+        Tambahkan screenshot halaman Login.
+        Simpan file ke: mamabear-docs/public/docs/user/mamabear-login.webp
+        Lalu ganti komentar ini dengan:
+        ![Halaman login MamaBear](/docs/user/mamabear-login.webp)
+    */}
+  </Step>
+  <Step>
+    ### Masukkan Email & Password
+    Isi **Email** dan **Password** yang didaftarkan. Centang **Ingat saya** agar tidak perlu login ulang dalam waktu dekat.
+  </Step>
+  <Step>
+    ### Klik "Masuk Sekarang"
+    Setelah berhasil masuk, Mama diarahkan ke beranda. Ikon akun di navbar menunjukkan status sudah login.
+  </Step>
+</Steps>
 
-- data profil
-- daftar pesanan dan detailnya
-- alamat pengiriman yang tersimpan
+---
 
-Simpan alamat yang sering dipakai supaya checkout berikutnya lebih singkat.
+## Lupa Kata Sandi
+
+<Steps>
+  <Step>
+    ### Klik "Lupa sandi?"
+    Di halaman login, klik tautan **Lupa sandi?** yang ada di bawah kolom password.
+  </Step>
+  <Step>
+    ### Masukkan Email
+    Isi email yang terdaftar di akun MamaBear Mama.
+  </Step>
+  <Step>
+    ### Cek Kotak Masuk Email
+    MamaBear akan mengirimkan tautan reset password ke email tersebut. Klik tautan dalam email untuk membuat password baru.
+
+    <Callout type="warn">
+      Tautan reset password hanya berlaku **sementara**. Jika sudah kedaluwarsa, ulangi proses dari langkah pertama.
+    </Callout>
+  </Step>
+  <Step>
+    ### Buat Password Baru
+    Ikuti instruksi di halaman reset untuk membuat password baru. Setelah selesai, login menggunakan password yang baru.
+  </Step>
+</Steps>
+
+---
+
+## Informasi Akun
+
+![Halaman informasi akun MamaBear dengan nama dan email](/docs/frontend/mamabear-account-info.webp)
+
+Setelah login, buka menu **Akun** (klik ikon akun di pojok kanan atas) untuk melihat:
+
+| Menu | Isi |
+|------|-----|
+| **Informasi Akun** | Nama lengkap dan email yang terdaftar |
+| **Pesanan** | Daftar semua riwayat pembelian |
+| **Alamat** | Daftar alamat pengiriman tersimpan |
+
+---
+
+## Melihat Riwayat Pesanan
+
+Buka **Akun → Pesanan** untuk melihat semua transaksi belanja Mama.
+
+{/* 📸 PLACEHOLDER SCREENSHOT
+    Tambahkan screenshot halaman daftar pesanan.
+    Simpan file ke: mamabear-docs/public/docs/user/mamabear-pesanan.webp
+    Lalu ganti komentar ini dengan:
+    ![Daftar pesanan di akun MamaBear](/docs/user/mamabear-pesanan.webp)
+*/}
+
+### Detail Pesanan
+
+Klik pesanan mana saja untuk melihat informasi lengkap:
+
+- **Produk yang dibeli** — nama, varian, jumlah, dan harga
+- **Alamat pengiriman** — tujuan pengiriman yang digunakan
+- **Status pesanan** — progres pengiriman saat ini
+- **Total pembayaran** — rincian biaya termasuk ongkir
+
+<Callout type="info">
+  Mama juga bisa mengunduh **invoice** dari halaman detail pesanan untuk keperluan dokumen atau reimbursement.
+</Callout>
+
+---
+
+## Mengelola Alamat Pengiriman
+
+Buka **Akun → Alamat** untuk mengelola daftar alamat pengiriman.
+
+{/* 📸 PLACEHOLDER SCREENSHOT
+    Tambahkan screenshot halaman daftar alamat.
+    Simpan file ke: mamabear-docs/public/docs/user/mamabear-alamat.webp
+    Lalu ganti komentar ini dengan:
+    ![Halaman kelola alamat pengiriman](/docs/user/mamabear-alamat.webp)
+*/}
+
+### Menambah Alamat Baru
+
+<Steps>
+  <Step>
+    ### Klik "Tambah Alamat"
+    Di halaman Alamat, klik tombol untuk menambah alamat baru.
+  </Step>
+  <Step>
+    ### Isi Detail Alamat
+    Lengkapi form dengan:
+    - **Nama Penerima** — siapa yang akan menerima paket
+    - **Nomor Telepon** — untuk dihubungi kurir
+    - **Alamat Jalan** — nama jalan, nomor rumah, RT/RW
+    - **Kelurahan & Kecamatan** — wajib untuk kalkulasi ongkir
+    - **Kota & Provinsi**
+    - **Kode Pos**
+  </Step>
+  <Step>
+    ### Simpan Alamat
+    Klik **Simpan**. Alamat akan muncul sebagai pilihan saat checkout berikutnya.
+  </Step>
+</Steps>
+
+<Callout type="info">
+  Mama bisa menyimpan **lebih dari satu alamat** — misalnya alamat rumah dan alamat kantor — dan memilih yang sesuai saat checkout.
+</Callout>
+
+---
+
+## Selanjutnya
+
+<Cards>
+  <Card title="📦 Checkout & Pembayaran" href="/docs/user/checkout" description="Pelajari cara checkout dan menggunakan alamat tersimpan." />
+  <Card title="💬 MamaBear Care" href="/docs/user/chat" description="Tanya AI asisten untuk rekomendasi produk." />
+</Cards>

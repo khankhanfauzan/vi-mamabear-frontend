@@ -3,11 +3,12 @@
   "description": "Dokumentasi teknis arsitektur, API, database, dan layanan backend MamaBear.",
   "pages": [
     "index",
+    "setup-lokal",
     "arsitektur",
     "api-reference",
+    "database-schema",
     "fitur-ai",
     "product-guardrail",
-    "database",
     "pemeliharaan"
   ]
 }

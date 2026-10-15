@@ -3,6 +3,26 @@ title: Pemeliharaan Backend
 description: "Operasional backend MamaBear: deploy Docker dan PM2, log Pino, migrasi Prisma, reset dan seed data, serta monitoring berkala."
 ---
 
+## Prosedur yang Dikonfirmasi pada Source Audit
+
+Package backend pada commit 8118516 menyediakan build (prisma generate lalu nest build), start:prod, start:migrate, test, test:e2e, dan test:cov. main.ts menggunakan PORT atau fallback 3000; PrismaService membuka koneksi DATABASE_URL. Prosedur deployment harus memakai revision dan environment yang ditetapkan pemilik backend. Tidak dijalankan migrasi, seed, reset, atau server backend dalam audit ini.
+
+<Callout type="warn">
+  Dockerfile dan docker-compose.yml pada path root tidak ditemukan pada tree source audit; package juga tidak menyediakan script seed. Instruksi Docker, akun database contoh, reset/seed, CI, dan insiden di arsip bawah berasal dari dokumentasi lama dan belum dapat dikonfirmasi untuk revision ini. Jangan menggunakannya sebagai runbook deployment saat ini. Konfigurasi Render dan bukti CI belum diperiksa.
+</Callout>
+
+Referensi saat ini: [ringkasan backend](/docs/developer/backend), [database](/docs/developer/backend/database), serta [development dan deployment](/docs/developer/development/deployment).
+
+<details>
+<summary>Arsip catatan operasional dari branch docs 078fee8, belum disahkan untuk source audit</summary>
+
+
+
+<Callout type="info">
+  Halaman ini dipertahankan dari branch docs `078fee8`. Source publik commit `8118516` tersedia untuk konteks; rincian operasional, threshold, kualitas guardrail, dan perintah yang tidak disebut dalam audit belum diuji ulang. Gunakan [ringkasan backend](/docs/developer/backend) dan [audit](/docs/developer/development/audit-repository) untuk batas informasi terverifikasi.
+</Callout>
+
+
 Operasional backend MamaBear: deploy, log, migrasi database, reset seed, dan
 monitoring. Untuk fitur AI lihat [fitur-ai](/docs/developer/backend/fitur-ai), untuk setup
 lokal lihat [index](/docs/developer/backend).
@@ -181,3 +201,6 @@ Checklist harian/mingguan:
   secret CI/.env menunjuk cloud yang dinonaktifkan. Perbaikinya mengganti
   kredensial, bukan mengubah seed. Kasus ini menggagalkan semua run CI di step
   `Run seeder`.
+
+
+</details>

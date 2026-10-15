@@ -1,0 +1,133 @@
+---
+title: Inventaris Endpoint
+description: Seluruh operasi dari OpenAPI publik MamaBear dengan parameter dan anotasi keamanan yang tersedia.
+---
+
+## Asal dan Cara Membaca
+
+Snapshot dibaca dari [OpenAPI resmi](https://vi-mamabear-backend.onrender.com/api-json) pada 15 Oktober 2026 (Asia/Jakarta). Inventaris ini dihasilkan ulang dengan `node scripts/docs/generate-api-reference.mjs` dari root repository. Bukti tersimpan di `docs/evidence/api-contract.json`; contoh Swagger dihapus dari snapshot agar tidak menyalin contoh kredensial.
+
+Anotasi bearer adalah metadata OpenAPI. Tidak adanya anotasi bukan bukti endpoint publik; adanya anotasi juga tidak selalu sama dengan guard runtime. Controller auth/cart/payment menunjukkan perbedaan tersebut. Tidak dilakukan pemanggilan endpoint admin atau mutasi untuk menguji akses.
+
+| Method | Path lengkap | Tag / operasi | Parameter | Anotasi keamanan |
+| --- | --- | --- | --- | --- |
+| GET | `/api` | AppController_getHello | Tidak dicantumkan | Tidak dicantumkan |
+| GET | `/api/cart` | CartController_getCart | Tidak dicantumkan | JwtAuthGuard |
+| DELETE | `/api/cart` | CartController_clearCart | Tidak dicantumkan | JwtAuthGuard |
+| GET | `/api/cart/totals` | CartController_getCartTotals | Tidak dicantumkan | JwtAuthGuard |
+| POST | `/api/cart/merge` | CartController_mergeCart | Tidak dicantumkan | JwtAuthGuard |
+| POST | `/api/cart/validate` | CartController_validateCart | Tidak dicantumkan | JwtAuthGuard |
+| POST | `/api/cart/items` | CartController_addToCart | Tidak dicantumkan | JwtAuthGuard |
+| PATCH | `/api/cart/items/{id}` | CartController_updateItem | path: id | JwtAuthGuard |
+| DELETE | `/api/cart/items/{id}` | CartController_removeItem | path: id | JwtAuthGuard |
+| DELETE | `/api/cart/{id}/courier` | CartController_clearCartCourierInformation | path: id | JwtAuthGuard |
+| PATCH | `/api/cart/{id}/courier` | CartController_updateCourierInformation | path: id | JwtAuthGuard |
+| POST | `/api/cart/promo` | CartController_applyPromo | Tidak dicantumkan | JwtAuthGuard |
+| DELETE | `/api/cart/promo` | CartController_removePromo | Tidak dicantumkan | JwtAuthGuard |
+| GET | `/api/auth/me` | AuthController_me | Tidak dicantumkan | JwtAuthGuard / JwtAuthGuard |
+| POST | `/api/auth/login` | AuthController_login | Tidak dicantumkan | JwtAuthGuard |
+| POST | `/api/auth/register` | AuthController_register | Tidak dicantumkan | JwtAuthGuard |
+| POST | `/api/auth/logout` | AuthController_logout | Tidak dicantumkan | JwtAuthGuard / JwtAuthGuard |
+| POST | `/api/auth/refresh` | AuthController_refresh | Tidak dicantumkan | JwtAuthGuard |
+| POST | `/api/auth/forgot-password` | AuthController_forgotPassword | Tidak dicantumkan | JwtAuthGuard |
+| POST | `/api/auth/reset-password/{token}` | AuthController_resetPassword | path: token | JwtAuthGuard |
+| GET | `/api/auth/verify-email/{token}` | AuthController_verifyEmail | path: token | JwtAuthGuard |
+| POST | `/api/admin/promo` | PromoController_create | Tidak dicantumkan | Tidak dicantumkan |
+| GET | `/api/admin/promo` | PromoController_findAll[0] | query: page; query: limit | Tidak dicantumkan |
+| GET | `/api/admin/promos` | PromoController_findAll[1] | query: page; query: limit | Tidak dicantumkan |
+| GET | `/api/admin/promo/{id}` | PromoController_findOne | path: id | Tidak dicantumkan |
+| PATCH | `/api/admin/promo/{id}` | PromoController_update | path: id | Tidak dicantumkan |
+| DELETE | `/api/admin/promo/{id}` | PromoController_remove | path: id | Tidak dicantumkan |
+| GET | `/api/products` | ProductsController_findAll | query: cursor; query: limit | Tidak dicantumkan |
+| GET | `/api/products/search` | ProductsController_searchForProducts | query: q; query: cursor; query: limit | Tidak dicantumkan |
+| GET | `/api/products/filter` | ProductsController_filterProducts | query: categories; query: highlights; query: minPrice; query: maxPrice; query: inStock; query: priceAscending; query: creationDateAscending; query: popularAscending; query: ratingAscending; query: search; query: similarityThreshold; query: cursor; query: limit | Tidak dicantumkan |
+| GET | `/api/products/search/suggestions` | ProductsController_suggestAutocomplete | query: q; query: cursor; query: limit; query: minChars; query: similarityThreshold | Tidak dicantumkan |
+| GET | `/api/products/{slug}` | ProductsController_findOneBySlug | path: slug | Tidak dicantumkan |
+| GET | `/api/products/{slug}/related` | ProductsController_findRelatedProductsBySlug | path: slug | Tidak dicantumkan |
+| GET | `/api/products/{slug}/variants` | ProductsController_getProductVariantBySlug | path: slug | Tidak dicantumkan |
+| GET | `/api/products/{slug}/reviews` | ProductsController_findAllReviewsOfProductBySlug | path: slug; query: cursor; query: limit; query: minRating; query: maxRating; query: sortBy; query: sortOrder | Tidak dicantumkan |
+| POST | `/api/products/{slug}/reviews` | ProductsController_createReviewForProduct | path: slug | JwtAuthGuard |
+| GET | `/api/products/{slug}/reviews/summary` | ProductsController_getReviewSummaryOfProductWithSlug | path: slug | Tidak dicantumkan |
+| PATCH | `/api/products/{slug}/reviews/{reviewId}/upvote` | ProductsController_upvoteReviewOfProduct | path: reviewId | JwtAuthGuard |
+| GET | `/api/admin/products` | ProductsAdminController_findAllAdmin | query: page; query: limit; query: search; query: similarityThreshold; query: categoryId; query: isActive; query: minPrice; query: maxPrice; query: inStock; query: sortBy; query: sortOrder | JwtAuthGuard |
+| POST | `/api/admin/products` | ProductsAdminController_create | Tidak dicantumkan | JwtAuthGuard |
+| DELETE | `/api/admin/products/bulk-delete` | ProductsAdminController_bulkDelete | Tidak dicantumkan | JwtAuthGuard |
+| PATCH | `/api/admin/products/bulk-publish` | ProductsAdminController_bulkUpdateProductStatus | Tidak dicantumkan | JwtAuthGuard |
+| GET | `/api/admin/products/export` | ProductsAdminController_exportProduct | Tidak dicantumkan | JwtAuthGuard |
+| GET | `/api/admin/products/{id}` | ProductsAdminController_findOne | path: id | JwtAuthGuard |
+| PUT | `/api/admin/products/{id}` | ProductsAdminController_update | path: id | JwtAuthGuard |
+| DELETE | `/api/admin/products/{id}` | ProductsAdminController_remove | path: id | JwtAuthGuard |
+| POST | `/api/admin/products/{id}/duplicate` | ProductsAdminController_duplicateProduct | path: id | JwtAuthGuard |
+| POST | `/api/admin/products/{id}/variants` | ProductsAdminController_createProductVariant | path: id | JwtAuthGuard |
+| GET | `/api/admin/products/{id}/variants` | ProductsAdminController_getProductVariant | path: id | JwtAuthGuard |
+| GET | `/api/admin/products/{id}/reviews` | ProductsAdminController_findAllReviewsOfProduct | path: id; query: cursor; query: limit; query: minRating; query: maxRating; query: sortBy; query: sortOrder | JwtAuthGuard |
+| DELETE | `/api/admin/products/{id}/reviews/{reviewId}` | ProductsAdminController_removeReview | path: reviewId | JwtAuthGuard |
+| POST | `/api/admin/products/{id}/variants/{variantId}/discount` | ProductsAdminController_createDiscount | path: variantId | JwtAuthGuard |
+| PUT | `/api/admin/products/variants/{id}` | ProductsAdminController_updateVariant | path: id | JwtAuthGuard |
+| DELETE | `/api/admin/products/variants/{id}` | ProductsAdminController_deleteVariant | path: id | JwtAuthGuard |
+| DELETE | `/api/admin/products/reviews/{id}` | ProductsAdminController_removeReviewStandalone | path: id | JwtAuthGuard |
+| GET | `/api/admin/users` | AdminUsersController_findAllAdmin | query: page; query: limit; query: search; query: role; query: isVerified; query: sortBy; query: sortOrder | Tidak dicantumkan |
+| POST | `/api/admin/users` | SuperAdminUsersController_create | Tidak dicantumkan | Tidak dicantumkan |
+| GET | `/api/admin/users/{id}` | AdminUsersController_findOne | path: id | Tidak dicantumkan |
+| DELETE | `/api/admin/users/{id}` | SuperAdminUsersController_remove | path: id | Tidak dicantumkan |
+| PUT | `/api/admin/users/{id}/role` | SuperAdminUsersController_updateRole | path: id | Tidak dicantumkan |
+| PUT | `/api/admin/users/{id}/status` | SuperAdminUsersController_updateStatus | path: id | Tidak dicantumkan |
+| GET | `/api/admin/customers/export` | AdminCustomersController_export | query: page; query: limit; query: search; query: isVerified; query: sortBy; query: sortOrder | JwtAuthGuard |
+| GET | `/api/admin/customers` | AdminCustomersController_findAll | query: page; query: limit; query: search; query: isVerified; query: sortBy; query: sortOrder | JwtAuthGuard |
+| GET | `/api/admin/customers/{id}` | AdminCustomersController_findOne | path: id | JwtAuthGuard |
+| PUT | `/api/admin/customers/{id}/status` | AdminCustomersController_updateCustomerStatus | path: id | JwtAuthGuard |
+| GET | `/api/health` | HealthController_health | Tidak dicantumkan | Tidak dicantumkan |
+| GET | `/api/categories` | CategoryController_findAll | Tidak dicantumkan | Tidak dicantumkan |
+| GET | `/api/categories/{slug}` | CategoryController_findOne | path: slug | Tidak dicantumkan |
+| POST | `/api/admin/categories` | CategoryAdminController_create | Tidak dicantumkan | JwtAuthGuard |
+| PUT | `/api/admin/categories/{id}` | CategoryAdminController_update | path: id | JwtAuthGuard |
+| DELETE | `/api/admin/categories/{id}` | CategoryAdminController_delete | path: id | JwtAuthGuard |
+| GET | `/api/admin/upload/signature` | UploadController_getUploadSignature | Tidak dicantumkan | JwtAuthGuard |
+| POST | `/api/admin/upload/image` | UploadController_uploadSingleImage | Tidak dicantumkan | JwtAuthGuard |
+| POST | `/api/admin/upload/images` | UploadController_uploadMultipleImages | Tidak dicantumkan | JwtAuthGuard |
+| GET | `/api/admin/upload/images` | UploadController_findAllImages | Tidak dicantumkan | JwtAuthGuard |
+| DELETE | `/api/admin/upload/image/{id}` | UploadController_deleteImage | path: id | JwtAuthGuard |
+| GET | `/api/highlights` | HighlightsController_findAll | Tidak dicantumkan | Tidak dicantumkan |
+| GET | `/api/highlights/{id}` | HighlightsController_findOne | path: id | Tidak dicantumkan |
+| POST | `/api/admin/highlights` | HighlightsAdminController_create | Tidak dicantumkan | JwtAuthGuard |
+| PATCH | `/api/admin/highlights/{id}` | HighlightsAdminController_update | path: id | JwtAuthGuard |
+| DELETE | `/api/admin/highlights/{id}` | HighlightsAdminController_remove | path: id | JwtAuthGuard |
+| POST | `/api/payment/create` | PaymentController_createTransaction | Tidak dicantumkan | JwtAuthGuard |
+| POST | `/api/payment/notification` | PaymentController_handleNotification | Tidak dicantumkan | JwtAuthGuard |
+| POST | `/api/order/{id}/cancel` | OrderController_cancelOrder | path: id | JwtAuthGuard |
+| GET | `/api/order/{id}/invoice` | OrderController_getInvoice | path: id | JwtAuthGuard |
+| GET | `/api/order/{id}` | OrderController_findOne | path: id | JwtAuthGuard |
+| GET | `/api/order` | OrderController_findAll | query: cursor; query: limit; query: search; query: status; query: startDate; query: endDate | JwtAuthGuard |
+| POST | `/api/order` | OrderController_createOrderAfterCheckout | Tidak dicantumkan | JwtAuthGuard |
+| GET | `/api/admin/order/{id}/invoice` | OrderAdminController_getInvoice | path: id | JwtAuthGuard |
+| GET | `/api/admin/order/export` | OrderAdminController_exportOrders | Tidak dicantumkan | JwtAuthGuard |
+| GET | `/api/admin/order` | OrderAdminController_findAllOrders | query: page; query: limit; query: search; query: status; query: paymentMethod; query: startDate; query: endDate; query: sortBy; query: sortOrder | JwtAuthGuard |
+| GET | `/api/admin/order/{id}` | OrderAdminController_findOrderById | path: id | JwtAuthGuard |
+| POST | `/api/admin/order/{id}/cancel` | OrderAdminController_cancelOrder | path: id | JwtAuthGuard |
+| PATCH | `/api/admin/order/{id}/status` | OrderAdminController_update | path: id | JwtAuthGuard |
+| PATCH | `/api/admin/order/{id}/tracking` | OrderAdminController_updateTrackingNumber | path: id | JwtAuthGuard |
+| GET | `/api/admin/settings` | SettingsAdminController_findAll | Tidak dicantumkan | JwtAuthGuard |
+| GET | `/api/admin/settings/{key}` | SettingsAdminController_findOne | path: key | JwtAuthGuard |
+| PUT | `/api/admin/settings/{key}` | SettingsAdminController_update | path: key | JwtAuthGuard |
+| GET | `/api/shipping/province` | ShippingController_findAllProvince | Tidak dicantumkan | JwtAuthGuard |
+| GET | `/api/shipping/city/{provinceId}` | ShippingController_findCitiesByProvinceId | path: provinceId | JwtAuthGuard |
+| GET | `/api/shipping/district/{cityId}` | ShippingController_findDistrictsByCityId | path: cityId | JwtAuthGuard |
+| GET | `/api/shipping/subdistrict/{districtId}` | ShippingController_findSubdistrictsByDistrictId | path: districtId | JwtAuthGuard |
+| POST | `/api/shipping/cost` | ShippingController_calculateShippingCost | Tidak dicantumkan | JwtAuthGuard |
+| POST | `/api/me/addresses` | AddressesController_addMyAddress | Tidak dicantumkan | JwtAuthGuard |
+| GET | `/api/me/addresses` | AddressesController_findMyAddresses | Tidak dicantumkan | JwtAuthGuard |
+| GET | `/api/me/addresses/{id}` | AddressesController_findMyAddress | path: id | JwtAuthGuard |
+| PUT | `/api/me/addresses/{id}` | AddressesController_updateMyAddress | path: id | JwtAuthGuard |
+| DELETE | `/api/me/addresses/{id}` | AddressesController_deleteMyAddress | path: id | JwtAuthGuard |
+| GET | `/api/admin/reports/dashboard` | ReportsController_getDashboard | Tidak dicantumkan | JwtAuthGuard |
+| GET | `/api/admin/reports/sales` | ReportsController_getSalesReport | Tidak dicantumkan | JwtAuthGuard |
+| GET | `/api/admin/reports/products` | ReportsController_getProductPerformance | Tidak dicantumkan | JwtAuthGuard |
+| GET | `/api/admin/reports/products/export` | ReportsController_exportProducts | Tidak dicantumkan | JwtAuthGuard |
+| GET | `/api/admin/reports/sales/export` | ReportsController_exportSales | Tidak dicantumkan | JwtAuthGuard |
+| GET | `/api/admin/activity-logs` | AdminActivityLogController_findAll | query: page; query: limit; query: action; query: entity; query: startDate; query: endDate; query: sortBy; query: sortOrder | JwtAuthGuard |
+| POST | `/api/ai/chat` | Kirim pesan ke AI | Tidak dicantumkan | JwtAuthGuard |
+| GET | `/api/ai/conversations` | List percakapan AI pengguna | Tidak dicantumkan | JwtAuthGuard |
+| GET | `/api/ai/history/{conversationId}` | Riwayat percakapan AI | path: conversationId | JwtAuthGuard |
+| DELETE | `/api/ai/conversations/{conversationId}` | Hapus percakapan AI | path: conversationId | JwtAuthGuard |
+
+Jumlah operasi pada snapshot: **118**. Request body/response utama dijelaskan pada [Referensi API](/docs/developer/backend/api-reference).

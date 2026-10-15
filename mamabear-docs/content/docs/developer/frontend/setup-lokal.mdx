@@ -1,97 +1,87 @@
 ---
-title: Setup Frontend di Lokal
-description: Panduan instalasi dependensi, konfigurasi environment variables, dan menjalankan pengujian toko lokal.
+title: Setup Lokal Frontend
+description: Instalasi npm, environment kedua aplikasi, serta perintah pengujian yang tersedia.
 ---
 
-Panduan ini memandu developer untuk menyiapkan environment lokal dan menjalankan aplikasi toko MamaBear beserta aplikasi dokumentasinya.
+## Prasyarat
 
-## Prasyarat Lingkungan (*Prerequisites*)
-
-- **Node.js**: Versi `>= 18.17.0` (direkomendasikan Node 20 LTS)
-- **Paket Manajer**: `npm` versi `>= 9.x`
-
----
-
-## Langkah Instalasi & Menjalankan Toko
+Gunakan npm dan package-lock.json masing-masing aplikasi. Toko dan docs mempunyai dependency/engine berbeda; audit menggunakan Node 22. Jangan memakai batas minimum Next.js 14 untuk aplikasi Next.js 16.
 
 <Steps>
   <Step>
-    #### Klon Repositori Frontend
-    ```bash
-    git clone https://github.com/khankhanfauzan/vi-mamabear-frontend.git
-    cd vi-mamabear-frontend
-    ```
-  </Step>
 
-  <Step>
-    #### Pasang Dependensi Proyek
-    ```bash
-    npm install
-    ```
-  </Step>
+### Instal Toko
 
-  <Step>
-    #### Konfigurasi Environment Variables
-    Salin berkas contoh environment:
-    ```bash
-    cp .env.example .env
-    ```
-    Sesuaikan variabel penting di `.env`:
-    ```bash title=".env"
-    NEXT_PUBLIC_API_URL=https://vi-mamabear-backend.onrender.com/api
-    NEXTAUTH_URL=http://localhost:3000
-    NEXTAUTH_SECRET=rahasia-nextauth-lokal-mamabear-2026
-    DOCS_APP_URL=http://localhost:3001
-    ```
-  </Step>
-
-  <Step>
-    #### Jalankan Server Pengembangan Toko
-    ```bash
-    npm run dev
-    ```
-    Buka `http://localhost:3000` di peramban untuk melihat toko MamaBear.
-  </Step>
-</Steps>
-
----
-
-## Menjalankan Aplikasi Dokumentasi (Fumadocs)
-
-Aplikasi dokumentasi berada di subfolder `mamabear-docs`:
-
-<Steps>
-  <Step>
-    #### Masuk ke Folder Dokumentasi & Pasang Dependensi
-    ```bash
-    cd mamabear-docs
-    npm install
-    ```
-  </Step>
-
-  <Step>
-    #### Jalankan Server Dokumentasi
-    ```bash
-    npm run dev
-    ```
-    Aplikasi dokumentasi akan aktif di `http://localhost:3001` (atau port alternatif berikutnya).
-  </Step>
-</Steps>
-
----
-
-## Menjalankan Pengujian Otomatis (Testing)
-
-Proyek toko dilengkapi dengan unit test berbasis **Jest** dan **React Testing Library**:
-
-```bash
-# Menjalankan seluruh unit test
-npm run test
-
-# Menjalankan test dalam mode watch (interaktif saat ngoding)
-npm run test:watch
-
-# Menjalankan pemeriksaan linter ESLint
-npm run lint
+```bash title="Terminal root repository"
+npm ci
 ```
 
+  </Step>
+  <Step>
+
+### Siapkan Environment
+
+Salin .env.example ke .env.local. Template root memuat deklarasi berulang dan contoh secret yang tidak boleh dipakai untuk deployment. Tetapkan satu nilai per variabel pada file lokal.
+
+| Variabel | Penggunaan |
+| --- | --- |
+| NEXT_PUBLIC_API_URL | URL backend termasuk /api; terlihat browser |
+| NEXTAUTH_SECRET | Secret acak sisi server; tanpa prefix publik |
+| NEXTAUTH_URL | URL toko lokal/deployment |
+| DOCS_APP_URL | URL docs, misalnya http://localhost:3001 |
+
+Jangan commit file env atau menyalin nilai secret ke MDX.
+
+  </Step>
+  <Step>
+
+### Jalankan Toko
+
+```bash title="Terminal root"
+npm run dev
+```
+
+Script menjalankan lint sebelum Next dev. Port default 3000. Di PowerShell yang memblokir npm.ps1, gunakan npm.cmd/npx.cmd tanpa mengubah execution policy sistem.
+
+  </Step>
+  <Step>
+
+### Jalankan Docs
+
+```bash title="Terminal kedua"
+cd mamabear-docs
+npm ci
+npm run dev -- --port 3001
+```
+
+Salin .env.example docs ke .env.local dan isi DOCS_PASSWORD lokal serta DOCS_SESSION_SECRET. DOCS_USER dipakai fallback Basic Auth. Login di /docs/login tidak memakai akun NextAuth toko. Tanpa DOCS_PASSWORD, Developer Guide ditolak.
+
+  </Step>
+</Steps>
+
+## Perintah Verifikasi
+
+<Tabs items={['Toko', 'Docs']}>
+  <Tab value="Toko">
+
+```bash title="Root repository"
+npm run lint
+npx tsc --noEmit --incremental false
+npm test -- --runInBand
+npm run build
+```
+
+  </Tab>
+  <Tab value="Docs">
+
+```bash title="mamabear-docs"
+npm run docs:validate
+npm run lint
+npm run types:check
+npm run build
+```
+
+  </Tab>
+</Tabs>
+
+[Quality Assurance](/docs/developer/development/quality-assurance) mencatat hasil aktual; keberadaan perintah bukan klaim semua pemeriksaan lolos.

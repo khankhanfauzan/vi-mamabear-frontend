@@ -1,0 +1,22 @@
+---
+title: Gambar & Asset
+description: Penyimpanan asset, remote image, upload multipart, dan screenshot dokumentasi.
+---
+
+## Asset Toko
+
+Gambar statis: root `public/images`; ikon: public/icons. Referensi memakai URL root situs. next/image dipakai pada logo/banner/produk. Tipe ProductImage menyimpan publicId, imageUrl, dimensi, format, file size, dan sortOrder.
+
+next.config.mjs mengizinkan remote image dari example.com/images, raw.githubusercontent.com, dan res.cloudinary.com. Allowlist tidak membuktikan semua asset berasal dari host tersebut. Source backend mengonfirmasi Cloudinary melalui modul/service. Nilai cloud/API secret deployment tidak disalin ke docs.
+
+## Upload
+
+adminProductService.uploadProductImages mengirim FormData ke POST `/api/admin/upload/images`; hook create/edit menggabungkan response upload dengan sortOrder. `adminCategoryService.uploadCategoryImage` memakai apiClient.postImage ke `/api/admin/upload/image`.
+
+Lokasi: `src/features/admin/products/services/adminProductService.ts` serta `src/features/admin/categories/services/adminCategoryService.ts`. Wrapper tidak menetapkan Content-Type JSON untuk FormData. Error ditangani service/form sesuai implementasi tiap modul. Audit tidak mengunggah atau mengubah gambar produksi.
+
+## Asset Dokumentasi
+
+Screenshot frontend disimpan di `mamabear-docs/public/docs/frontend`, Swagger/response publik aman di `mamabear-docs/public/docs/backend`. URL MDX dimulai `/docs/frontend/` atau `/docs/backend/`. Karena public asset dapat dibuka tanpa login, gunakan tampilan publik atau screenshot akun yang data pribadinya sudah disamarkan. Kontrak dan bukti JSON tetap di source repository `docs/evidence`.
+
+[Galeri screenshot](/docs/developer/screenshots) menampilkan halaman toko pada desktop dan mobile, serta Swagger API. Metadata gambar disimpan di `docs/evidence/screenshots.json`.

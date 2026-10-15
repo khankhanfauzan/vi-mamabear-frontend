@@ -1,0 +1,47 @@
+---
+title: Audit Repository & Akses Internal
+description: Kondisi checkout, asal Fumadocs, proteksi developer, permukaan publik, dan batas audit.
+---
+
+## Checkout dan Sumber Docs
+
+Checkout VIMB-29 pada 4a3aaba awalnya bersih dan hanya memuat toko Next.js 14. Tidak ada Fumadocs/MDX/route docs. Remote tracking branch origin/fumadocs pada 078fee8 sudah memuat mamabear-docs dan PANDUAN_DOKUMENTASI_FE.md.
+
+Aplikasi docs dan SOP dipulihkan dari branch itu tanpa merge fitur bisnis. User Guide, SOP, halaman AI/guardrail/pemeliharaan dipertahankan. Informasi frontend/API/database yang tidak sesuai diganti berdasarkan bukti pada URL existing. Collection dan struktur docs tetap memakai content/docs.
+
+## Proteksi yang Dipertahankan
+
+- Middleware toko: NextAuth untuk account/admin/dashboard; tidak mencakup docs.
+- Proxy docs menjalankan isProtectedDocsPath/isDeveloperAuthorized sebelum merender developer HTML, markdown, atau OG.
+- Prefix: /docs/developer, /llms.mdx/docs/developer, /og/docs/developer, termasuk nested path/suffix yang dikenali helper.
+- POST /docs/api/login membuat cookie HttpOnly, SameSite lax, secure pada production, masa tujuh hari.
+- lib/docs-auth.ts menolak developer bila DOCS_PASSWORD kosong. Cookie session dan fallback HTTP Basic Auth adalah mekanisme existing.
+- /api/search memakai publicSource tanpa otorisasi dan full source setelah otorisasi. llms.txt/llms-full.txt hanya User Guide.
+
+Shared password docs bukan identitas/role developer per orang. Bentuk token deterministik serta fallback salt adalah desain existing. Penguatan autentikasi berada di luar scope dan tidak dilakukan. Unit/smoke test bukan audit keamanan menyeluruh.
+
+## Asset Publik
+
+Berkas public docs dapat dibuka tanpa login. Asset mencakup screenshot storefront, Swagger, response publik, serta informasi akun dengan nama dan email disamarkan. Tidak ada screenshot dashboard, alamat/order, cookie/token, atau form dengan password. Kontrak dan bukti JSON tersimpan di source repository docs/evidence, bukan public asset.
+
+## Temuan
+
+| Temuan | Dampak |
+| --- | --- |
+| openapi-fetch tidak menjadi client aktif | Klaim type-safe otomatis dikoreksi |
+| Store cart ada di features/cart | Path dan alur dikoreksi |
+| Tidak ada features/chat atau ui/sheet.tsx | Peta memakai features/ai dan MiniCartDropdown |
+| Root rewrite/generate API masih Railway | Dicatat tanpa mengubah backend integration |
+| message runtime array, tipe string | Risiko kontrak existing |
+| minRating tidak diserialisasi | Tidak diklaim selesai |
+| Anotasi bearer berbeda guard controller | Metadata dan source dibedakan |
+| Suggestions limit=1 mendapat 400 | Bukti probe publik disimpan |
+| Contoh endpoint/schema lama tidak sesuai | Halaman diperbaiki tanpa mengubah API/database |
+
+## Batas
+
+Source backend pada commit publik tertentu belum dapat dicocokkan dengan hash deployment. Tidak dijalankan test backend/database/payment/AI. Halaman operasional AI lama tidak seluruhnya diuji ulang dan diberi catatan bukti. Konfigurasi/secret hosting produksi tidak dibaca atau diubah.
+
+## Perbaikan Pendukung Terbatas
+
+Komponen Tabs/Tab/Steps/Step bawaan Fumadocs didaftarkan pada renderer agar contoh SOP dapat dirender. Dua handler markdown/OG menambahkan await pada pemeriksaan otorisasi async yang sudah ada; proxy utama tetap dipertahankan. Handler markdown/OG juga menjadi force-dynamic karena otorisasi membaca header request dan tidak kompatibel dengan fallback static. Ini memastikan hasil pemeriksaan handler digunakan pada setiap request, tanpa mengubah login atau hak akses. TypeScript docs dipin ke 5.9.3 untuk kompatibilitas typescript-eslint; tidak menonaktifkan rule/type check.

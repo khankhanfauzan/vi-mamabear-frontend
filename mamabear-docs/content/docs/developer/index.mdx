@@ -1,39 +1,48 @@
 ---
-title: Developer Guide
-description: Pusat dokumentasi teknis internal untuk tim engineering (Frontend & Backend) MamaBear.
+title: Developer Overview
+description: Arsitektur, ruang lingkup, sumber terverifikasi, dan peta panduan engineering MamaBear.
 ---
 
-Bagian ini khusus untuk tim internal MamaBear. Seluruh dokumentasi teknis development terlindungi oleh sistem autentikasi internal.
+## Tujuan Proyek
 
-User Guide di `/docs/user` tetap publik. Jangan menaruh rahasia, token, kredensial produksi, atau URL internal yang belum boleh dibaca publik di halaman user.
+MamaBear adalah e-commerce kebutuhan ibu pada masa kehamilan, persalinan, menyusui, dan perawatan setelah melahirkan. Frontend menghubungkan katalog, pencarian, keranjang, checkout, akun, administrasi, dan percakapan dengan layanan backend. Kode memisahkan UI, state, dan komunikasi data menurut fitur.
 
-## Panduan Penulisan & Standar
+<Callout type="info">
+  Audit: 15 Oktober 2026 (Asia/Jakarta). Status tersedia di source, tercantum di OpenAPI, dan diamati pada deployment dibedakan. Screenshot membuktikan tampilan saat capture; transaksi, pembayaran, dan akun pelanggan belum diuji end-to-end.
+</Callout>
 
-Sebelum mulai berkontribusi menulis dokumentasi teknis, pastikan untuk membaca SOP dan panduan format:
+## Arsitektur Sistem
+
+```text title="Komponen MamaBear"
+Browser
+  +-- Toko Next.js 14: src/app dan src/features
+  |     +-- Server Component -> native fetch -> REST API /api
+  |     +-- Client -> service -> apiClient/native fetch -> REST API
+  |     +-- NextAuth -> backend /auth/login dan /auth/refresh
+  +-- /docs -> rewrite -> mamabear-docs (Next.js 16/Fumadocs)
+        +-- /docs/user: publik
+        +-- /docs/developer: login internal atau HTTP Basic Auth
+Backend NestJS -> Controller -> Service/Repository -> Prisma -> PostgreSQL
+```
+
+## Sumber Terverifikasi
+
+| Sumber | Bukti dan batas |
+| --- | --- |
+| [Repository frontend](https://github.com/khankhanfauzan/vi-mamabear-frontend) | Remote origin; source toko pada checkout `4a3aaba` |
+| Branch `origin/fumadocs`, commit `078fee8` | Sumber aplikasi docs dan SOP yang dipulihkan; fitur bisnis branch tersebut tidak digabungkan |
+| [Frontend Vercel](https://vi-mamabear-frontend.vercel.app/) | Homepage, katalog, detail, hasil pencarian, dan viewport mobile diamati |
+| [SOP internal](https://vi-mamabear-frontend.vercel.app/docs/developer/panduan-dokumentasi) | Dibaca melalui login resmi memakai akses yang diberikan; kredensial tidak disimpan |
+| [Backend source](https://github.com/khankhanfauzan/vi-mamabear-backend/tree/811851650796c06d4f4a6f5ca22b833c730385d6) | Package, bootstrap, schema, controller, service, dan guard dibaca pada commit `8118516`; kesamaan commit deployment belum dibuktikan |
+| [Swagger](https://vi-mamabear-backend.onrender.com/api) dan [OpenAPI](https://vi-mamabear-backend.onrender.com/api-json) | HTTP 200; kontrak deployment diperiksa terpisah dari source |
+
+## Peta Panduan
+
 <Cards>
-  <Card title="Panduan Penulisan Dokumentasi" href="/docs/developer/panduan-dokumentasi" description="Standar format MDX, frontmatter, komponen interaktif, dan penyematan aset untuk tim FE & BE." />
-</Cards>
-
----
-
-## Modul Dokumentasi
-
-### 1. Frontend Guide
-Dokumentasi aplikasi toko Next.js App Router, state management, komponen UI, dan integrasi API:
-<Cards>
-  <Card title="Ringkasan Frontend" href="/docs/developer/frontend" description="Gambaran umum aplikasi toko, tech stack, dan prinsip perancangan." />
-  <Card title="Arsitektur Aplikasi" href="/docs/developer/frontend/arsitektur" description="Struktur Next.js App Router dan pendekatan feature-driven di src/features." />
-  <Card title="State & Integrasi API" href="/docs/developer/frontend/state-dan-api" description="Manajemen state dengan Zustand dan pemanggilan REST API via openapi-fetch." />
-  <Card title="Komponen UI & Styling" href="/docs/developer/frontend/komponen-ui" description="Desain sistem dengan shadcn/ui, Radix Primitives, dan Tailwind CSS." />
-  <Card title="Setup Lokal & Testing" href="/docs/developer/frontend/setup-lokal" description="Cara menjalankan toko lokal, setup environment, dan unit testing Jest." />
-</Cards>
-
-### 2. Backend Guide
-Dokumentasi server REST API, otentikasi JWT, relasi database, dan deployment:
-<Cards>
-  <Card title="Ringkasan Backend" href="/docs/developer/backend" description="Gambaran umum server REST API, repositori, dan layanan MamaBear." />
-  <Card title="Arsitektur Backend" href="/docs/developer/backend/arsitektur" description="Pola layering Controller - Service - Repository dan struktur folder." />
-  <Card title="Standar & Referensi API" href="/docs/developer/backend/api-reference" description="Konvensi response JSON, otentikasi JWT, dan katalog endpoint." />
-  <Card title="Database & Skema" href="/docs/developer/backend/database" description="Desain tabel data, relasi ERD, migrasi, dan seeders." />
-  <Card title="Setup Lokal Backend" href="/docs/developer/backend/setup-lokal" description="Langkah menjalankan server backend dan database di lokal." />
+  <Card title="Frontend" href="/docs/developer/frontend" description="Routing, fitur aktual, komponen, state, autentikasi, dan asset." />
+  <Card title="Backend" href="/docs/developer/backend" description="Source terverifikasi, endpoint, validasi, dan database." />
+  <Card title="Integrasi Sistem" href="/docs/developer/integration" description="Alur request, response, token, dan error handling." />
+  <Card title="Screenshot Aplikasi" href="/docs/developer/screenshots" description="Website publik dan Swagger aktual dengan sumber serta viewport." />
+  <Card title="Development & Deployment" href="/docs/developer/development" description="Setup, audit akses, QA, dan prasyarat rilis." />
+  <Card title="SOP" href="/docs/developer/panduan-dokumentasi" description="Standar penulisan MDX MamaBear." />
 </Cards>

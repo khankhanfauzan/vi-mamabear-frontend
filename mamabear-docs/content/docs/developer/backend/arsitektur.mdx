@@ -1,243 +1,46 @@
 ---
-title: Arsitektur Sistem
-description: Komponen backend MamaBear (controller, service, repository), data model Prisma, endpoint AI, penanganan error, rate limiting, dan strategi pengujian.
+title: Arsitektur Backend
+description: Bootstrap NestJS, controller/service, JWT, validation pipe, response transformer, dan akses Prisma.
 ---
 
-## Ringkasan
+## Dasar Verifikasi
 
-MamaBear adalah platform e-commerce yang fokus pada produk ibu dan bayi. Sprint 2 ini menambahkan **fitur AI Assistant** yang bisa membantu pengguna dengan pertanyaan seputar kesehatan ibu hamil, menyusui, dan perawatan bayi — dengan **guardrail medis** agar jawaban tetap aman dan tidak berbahaya.
+Referensi: [source commit 8118516](https://github.com/khankhanfauzan/vi-mamabear-backend/tree/811851650796c06d4f4a6f5ca22b833c730385d6), terutama src/main.ts, src/app.module.ts, controller/service, guard, interceptor/filter, dan Prisma schema. Deployment dapat menggunakan revision berbeda.
 
-## Goals
+## Request Lifecycle
 
-1. Pengguna bisa bertanya seputar kesehatan ibu & bayi langsung dari aplikasi
-2. AI hanya memberikan informasi umum — **bukan diagnosis atau pengganti dokter**
-3. Semua percakapan tersimpan untuk audit dan perbaikan layanan
-4. Guardrail medis memblokir pertanyaan berisiko tinggi
-
-## Architecture
-
-```text
-┌─────────────┐     ┌──────────────────┐     ┌──────────────┐
-│  Frontend   │────▶│  Backend API     │────▶│  OpenRouter   │
-│  (Chat UI)  │◀────│  (NestJS Module) │◀────│  (LLM API)   │
-└─────────────┘     └──────────────────┘     └──────────────┘
-                           │
-                           ▼
-                    ┌──────────────┐
-                    │  PostgreSQL  │
-                    │  (Chat History)│
-                    └──────────────┘
+```text title="Alur request backend"
+HTTP /api/*
+ -> cookie-parser dan konfigurasi CORS
+ -> Controller + guard/throttler sesuai dekorator
+ -> ValidationPipe (transform=true, whitelist=true)
+ -> Service domain -> Repository/Prisma -> PostgreSQL
+ -> TransformInterceptor -> envelope JSON
+Exception -> AllExceptionsFilter -> status HTTP dan envelope error
 ```
 
-### Components
+main.ts menggunakan global prefix /api. CORS memakai credentials true, metode GET/POST/PUT/DELETE/PATCH, serta Content-Type/Authorization. Origin berasal dari CORS_ORIGIN, localhost, dan domain frontend yang ditentukan source; nilai env Render belum diinspeksi.
 
-| Component | Responsibility |
-|---|---|
-| **AI Controller** | Endpoint REST: `/ai/chat`, `/ai/history` |
-| **AI Service** | Orchestrate: validasi → guardrail → call LLM → simpan |
-| **Guardrail Service** | Cek input/output sebelum & sesudah LLM call |
-| **Chat Repository** | CRUD percakapan ke database |
-| **OpenRouter Client** | HTTP client ke OpenRouter API |
+ValidationPipe melakukan transform dan whitelist. forbidNonWhitelisted tidak diaktifkan, sehingga jangan menyatakan semua field tak dikenal ditolak. Validasi rinci berasal dari DTO; OpenAPI tidak memuat semua aturan runtime.
 
-## Data Model (Prisma Schema)
+## Domain dan Data
 
-```prisma
-model AiConversation {
-  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId      String      @db.Uuid
-  user        User        @relation(fields: [userId], references: [id])
-  messages    AiMessage[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-}
+AppModule mengimpor modul per domain. OrderController menerima DTO dan identitas JWT, lalu memanggil OrderService. Detail order menggunakan subject pengguna. ProductsController meneruskan filter/pagination/slug ke ProductsService. Pemisahan Repository tidak seragam, sehingga tidak semua modul diasumsikan mempunyai lapisan itu.
 
-model AiMessage {
-  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  conversationId  String          @db.Uuid
-  conversation    AiConversation  @relation(fields: [conversationId], references: [id])
-  role            AiRole
-  content         String
-  blocked         Boolean         @default(false)
-  blockReason     String?
-  tokensUsed      Int             @default(0)
-  model           String          @default("openrouter/default")
-  createdAt       DateTime        @default(now())
-}
+PrismaService memakai PrismaPg dengan DATABASE_URL, connect saat module init dan disconnect saat module destroy. [Database](/docs/developer/backend/database) menjelaskan relasi tanpa mengakses data produksi.
 
-enum AiRole {
-  USER
-  ASSISTANT
-  SYSTEM
-}
-```
+## Authentication dan Authorization
 
-## API Endpoints
+JwtStrategy membaca bearer dari Authorization dan memverifikasi JWT_ACCESS_SECRET. Hasil validate memuat sub/name/email/role. AuthService menerbitkan access token 15 menit serta refresh token tujuh hari. Refresh memverifikasi secret, hash tersimpan, dan expiry sebelum rotasi. RolesGuard membaca metadata role pada route yang memakainya.
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/ai/chat` | Kirim pesan, dapatkan jawaban AI |
-| `GET` | `/ai/history/:conversationId` | Ambil riwayat percakapan |
-| `GET` | `/ai/conversations` | List semua percakapan user |
-| `DELETE` | `/ai/conversations/:id` | Hapus percakapan |
+Anotasi bearer pada class AuthController juga muncul di Swagger login/register/forgot/reset/verify, tetapi method tersebut tidak memasang JwtAuthGuard. Refresh memakai RefreshGuard. Cart memakai optional JWT pada beberapa operasi. PaymentController memasang JWT pada create; notification tidak memasangnya pada method. Ini bukan kesimpulan bahwa webhook bebas seluruh validasi: detail keamanan payment service perlu diaudit tersendiri dan webhook tidak dipanggil dalam pekerjaan docs.
 
-### Request — POST /ai/chat
+## Response dan Error
 
-```json
-{
-  "conversationId": "optional-uuid",
-  "message": "Apakah aman minum vitamin saat hamil trimester 1?"
-}
-```
+TransformInterceptor mengembalikan success/statusCode/message (array)/data/timestamp, dengan pemisahan ServiceResult dan payload biasa. AllExceptionsFilter mempertahankan status HttpException, menormalisasi pesan menjadi array, dan mengisi data null. Exception lain menjadi HTTP 500 dengan pesan generik jika NODE_ENV production; log memakai Pino.
 
-### Response
+Source hanya mendaftarkan Swagger ketika NODE_ENV bukan production. Ketersediaan Swagger saat audit tidak digunakan untuk menebak nilai env Render.
 
-```json
-{
-  "success": true,
-  "message": "Pesan berhasil diproses",
-  "data": {
-    "conversationId": "uuid",
-    "reply": "Vitamin prenatal umumnya aman diminum saat hamil trimester 1...",
-    "blocked": false
-  }
-}
-```
+## AI dan Layanan Lain
 
-## Guardrail Medis
-
-Guardrail adalah lapisan keamanan yang memastikan AI tidak memberikan informasi berbahaya.
-
-### Input Guardrails (sebelum ke LLM)
-
-| Rule | Action |
-|---|---|
-| Pertanyaan mengandung gejala darurat (sesak nafas, pendarahan) | **Block** → Sarankan hubungi IGD |
-| Permintaan resep obat / dosis | **Block** → Sarankan konsultasi dokter |
-| Pertanyaan di luar scope (kesehatan ibu & bayi) | **Redirect** → "Saya hanya bisa membantu seputar kesehatan ibu dan bayi" |
-
-### Output Guardrails (setelah dari LLM)
-
-| Rule | Action |
-|---|---|
-| Jawaban mengandung diagnosis medis | **Block** → Ganti dengan disclaimer |
-| Jawaban mengandung rekomendasi obat spesifik | **Block** → Sarankan konsultasi dokter |
-| Jawaban terlalu panjang | **Truncate** → Max 500 karakter |
-
-### System Prompt
-
-```text
-Kamu adalah asisten kesehatan untuk MamaBear, platform produk ibu dan bayi.
-
-Batasan kamu:
-- Hanya jawab pertanyaan seputar kesehatan ibu hamil, menyusui, dan perawatan bayi
-- JANGAN pernah memberikan diagnosis medis
-- JANGAN merekomendasikan obat atau dosis spesifik
-- Selalu sarankan untuk berkonsultasi dengan dokter untuk masalah serius
-- Gunakan bahasa Indonesia yang mudah dipahami
-- Jawaban maksimal 3-4 kalimat
-
-Jika pengguna bertanya di luar scope, balas:
-"Maaf, saya hanya bisa membantu pertanyaan seputar kesehatan ibu dan bayi. Untuk pertanyaan lain, silakan hubungi customer service kami."
-```
-
-## OpenRouter Integration
-
-### Configuration
-
-```bash
-OPENROUTER_API_KEY=sk-or-...
-OPENROUTER_MODEL=google/gemini-2.0-flash-001
-OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
-```
-
-### Request Flow
-
-```text
-User Message
-    │
-    ▼
-Input Guardrail Check
-    │
-    ├── BLOCKED → Return blocked response
-    │
-    ▼
-Build Prompt (system + history + user message)
-    │
-    ▼
-Call OpenRouter API (POST /chat/completions)
-    │
-    ▼
-Output Guardrail Check
-    │
-    ├── BLOCKED → Return blocked response
-    │
-    ▼
-Save to Database
-    │
-    ▼
-Return Response
-```
-
-## Environment Variables
-
-```bash
-# AI Configuration
-OPENROUTER_API_KEY=
-OPENROUTER_MODEL=google/gemini-2.0-flash-001
-OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
-
-# Guardrail
-AI_MAX_TOKENS=500
-AI_MAX_INPUT_LENGTH=1000
-```
-
-## File Structure
-
-```text
-src/ai/
-├── ai.module.ts
-├── ai.controller.ts
-├── ai.controller.spec.ts
-├── ai.service.ts
-├── ai.service.spec.ts
-├── ai.repository.ts
-├── guardrail/
-│   ├── guardrail.service.ts
-│   ├── guardrail.service.spec.ts
-│   └── blocked-keywords.ts
-├── openrouter/
-│   ├── openrouter.client.ts
-│   └── openrouter.client.spec.ts
-└── dto/
-    ├── chat.dto.ts
-    └── chat-response.dto.ts
-```
-
-## Error Handling
-
-| Error | HTTP Status | Message |
-|---|---|---|
-| Input terlalu panjang | 400 | "Pesan terlalu panjang. Maksimal 1000 karakter." |
-| Input mengandung konten berbahaya | 400 | "Pesan diblokir oleh sistem keamanan." |
-| OpenRouter API error | 502 | "AI sedang tidak tersedia. Silakan coba lagi nanti." |
-| Rate limit exceeded | 429 | "Terlalu banyak permintaan. Silakan tunggu sebentar." |
-
-## Rate Limiting
-
-- Max **10 pesan per menit** per user (menggunakan ThrottlerModule yang sudah ada)
-- Max **50 percakapan aktif** per user
-
-## Testing Strategy
-
-1. **Unit tests** — Guardrail logic, service methods
-2. **Mock OpenRouter** — Jangan hit API asli di test
-3. **Guardrail test cases** — Minimal 5 variasi kalimat per rule
-4. **Manual E2E test** — Chat via Postman/frontend
-
-## Future Considerations
-
-- Streaming response (SSE) untuk UX lebih baik
-- Voice input/output
-- Multi-language support
-- Integration dengan produk MamaBear (rekomendasi produk AI)
-- Analytics dashboard untuk melihat pertanyaan populer
+Source AI memiliki controller/service/repository, guardrail input/output, pemeriksaan produk, dan OpenRouter client. Kualitas jawaban, akurasi embedding, availability provider, dan performa produksi belum diuji. Detail existing dipertahankan di [Fitur AI](/docs/developer/backend/fitur-ai) serta [Guardrail Produk](/docs/developer/backend/product-guardrail).

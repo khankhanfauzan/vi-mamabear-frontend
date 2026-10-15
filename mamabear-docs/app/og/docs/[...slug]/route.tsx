@@ -2,14 +2,15 @@ import { isDeveloperAuthorized, unauthorizedDocsResponse } from '@/lib/docs-auth
 import { source } from '@/lib/source';
 import { notFound } from 'next/navigation';
 import { generateOGImage } from 'fumadocs-ui/og';
-import { appName, getPageImageUrl } from '@/lib/shared';
+import { appName } from '@/lib/shared';
 
-export const revalidate = false;
+// Authorization reads request headers; render these images per request.
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request, { params }: RouteContext<'/og/docs/[...slug]'>) {
   const { slug } = await params;
   const pageSlugs = slug.slice(0, -1);
-  if (pageSlugs[0] === 'developer' && !isDeveloperAuthorized(request)) {
+  if (pageSlugs[0] === 'developer' && !(await isDeveloperAuthorized(request))) {
     return unauthorizedDocsResponse();
   }
 
@@ -23,12 +24,3 @@ export async function GET(request: Request, { params }: RouteContext<'/og/docs/[
   });
 }
 
-export function generateStaticParams() {
-  return source
-    .getPages()
-    .filter((page) => page.slugs[0] !== 'developer')
-    .map((page) => ({
-      lang: page.locale,
-      slug: getPageImageUrl(page).segments,
-    }));
-}

@@ -1,74 +1,46 @@
 ---
-title: Komponen UI & Styling
-description: Standar sistem desain antarmuka MamaBear menggunakan shadcn/ui, Radix UI Primitives, dan Tailwind CSS.
+title: Komponen UI & Responsive Design
+description: Komponen aktual, layout, feedback, token styling, serta batas verifikasi responsive.
 ---
 
-Sistem antarmuka MamaBear mengadopsi pendekatan berbasis **shadcn/ui** yang dikombinasikan dengan utility-first CSS dari **Tailwind CSS**. Komponen UI bersifat modular, mudah dikustomisasi, dan memiliki aksesibilitas bawaan (a11y).
+## Komponen Shared
 
-## 1. Komponen UI Primitif (`src/components/ui/`)
+`src/components/ui` memuat button, dialog, input, label, checkbox, badge, card, alert, dropdown-menu, carousel, chart, skeleton, spinner, dan sonner. Komponen menggunakan Radix UI, class-variance-authority, helper cn, dan utility Tailwind. Tidak ditemukan sheet.tsx; mini cart ada di `src/features/cart/components/MiniCartDropdown.tsx`.
 
-Komponen dasar antarmuka diletakkan pada folder `src/components/ui/`. Komponen ini merupakan blok bangunan (*building blocks*) yang digunakan di seluruh fitur:
+| Tujuan | Implementasi | Alur dan feedback |
+| --- | --- | --- |
+| Aksi | ui/button.tsx | Varian cva dan asChild memakai Slot.Root Radix |
+| Dialog | ui/dialog.tsx, products/components/shared/AddToCartModal.tsx | Pemilihan produk/varian; error ditangani alur cart |
+| Kartu | products/components/shared/ProductCard.tsx | Data katalog, harga, tautan detail |
+| Loading | ProductSkeletonCard, detail loading.tsx, ui/spinner.tsx | Membedakan loading dari daftar kosong |
+| Notifikasi | Sonner dan hook cart | Toast sukses/gagal; tidak menggantikan validasi backend |
+| Navigasi | components/layout/navigation | Pencarian, menu, akun, navigasi mobile |
 
-- `button.tsx`: Tombol aksi primer, sekunder, outline, dan ghost.
-- `dialog.tsx`: Modal popup berbasis Radix UI Dialog.
-- `sheet.tsx`: Panel geser samping (drawer keranjang dan menu mobile).
-- `input.tsx`: Elemen form input terstandarisasi.
-- `badge.tsx`: Label status pesanan dan kategori produk.
-- `card.tsx`: Kontainer kartu produk dan artikel.
+Path pada tabel relatif terhadap src/features atau src/components sesuai modul.
 
-### Contoh Kustomisasi Tombol dengan `cva`
+## Styling
 
-Kami menggunakan `class-variance-authority` (cva) untuk mengelola varian komponen secara type-safe:
+Token ada di `src/app/globals.css` dan tailwind.config.ts. Class semantik berdampingan dengan CSS variable MamaBear. Font toko: Geist lokal dan Quicksand dari next/font/google. Docs mempunyai stylesheet, Tailwind 4, dan font sendiri; konfigurasi tidak digabungkan dengan Tailwind 3 toko.
 
-```tsx title="src/components/ui/button.tsx"
-import { cva, type VariantProps } from 'class-variance-authority';
+HeroSection memakai carousel. Highlight menggunakan grid dua kolom dan empat kolom pada md; panel gambar newsletter hidden md:block; shell admin memakai padding sidebar pada lg.
 
-const buttonVariants = cva(
-  'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50',
-  {
-    variants: {
-      variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
-        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-        outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
-        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
-      },
-      size: {
-        default: 'h-10 px-4 py-2',
-        sm: 'h-9 rounded-md px-3',
-        lg: 'h-11 rounded-md px-8',
-        icon: 'h-10 w-10',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-      size: 'default',
-    },
-  }
-);
-```
+## Responsive yang Diamati
 
----
+Homepage diuji pada 1440 x 1000 dan 390 x 844. Pada viewport mobile, scrollWidth dokumen sama dengan 390 sehingga tidak ada overflow horizontal pada pengukuran tersebut. Seluruh halaman/breakpoint dan aksesibilitas keyboard/pembaca layar belum diaudit menyeluruh.
 
-## 2. Palet Warna & Desain Token
+<Tabs items={['Desktop', 'Mobile']}>
+  <Tab value="Desktop">
 
-Aplikasi menggunakan tema warna bernuansa hangat dan ramah keluarga:
+![Homepage desktop MamaBear dengan navigasi atas dan banner produk](/docs/frontend/mamabear-homepage.webp)
 
-- **Primary**: Warna utama identitas MamaBear (merah muda / peach hangat).
-- **Secondary**: Warna aksen pelengkap.
-- **Muted**: Warna latar abu-abu netral untuk kontras yang nyaman di mata.
-- **Destructive**: Warna indikator peringatan atau pembatalan.
+Desktop memperlihatkan logo, pencarian, akun/cart, dan banner aktual.
 
-<Callout type="info">
-  Selalu gunakan utility class bertema semantik (seperti `bg-primary`, `text-muted-foreground`) daripada hardcoded hex color seperti `#ff0000` agar konsistensi tema tetap terjaga.
-</Callout>
+  </Tab>
+  <Tab value="Mobile">
 
----
+<img src="/docs/frontend/mamabear-mobile-view.webp" alt="Homepage MamaBear pada viewport 390 piksel dengan navigasi bawah mobile" width="390" height="844" style={{ maxWidth: '100%', height: 'auto' }} />
 
-## 3. Ikon & Animasi
+Mobile memperlihatkan banner dan navigasi bawah pada layar sempit.
 
-- **Ikon**: Menggunakan pustaka resmi `lucide-react`.
-- **Notifikasi Toast**: Menggunakan `sonner` untuk menampilkan feedback visual saat item berhasil dimasukkan ke keranjang atau form berhasil dikirim.
-- **Carousel Banner**: Menggunakan `embla-carousel-react` untuk banner promo di halaman utama.
-
+  </Tab>
+</Tabs>

@@ -1,0 +1,409 @@
+[
+  {
+    "url": "https://vi-mamabear-backend.onrender.com/api/products/filter?limit=1",
+    "status": 200,
+    "body": {
+      "success": true,
+      "statusCode": 200,
+      "message": [
+        "Returned 1 products with the selected filters"
+      ],
+      "data": {
+        "success": true,
+        "data": [
+          {
+            "id": 5,
+            "name": "MamaBear ASI Booster 30 Kapsul - Pelancar ASI Fenugreek Free Halal BPOM",
+            "slug": "mamabear-asi-booster-30-kapsul",
+            "isActive": true,
+            "totalSold": 0,
+            "categoryId": 2,
+            "highlightId": 2,
+            "tags": [],
+            "description": "MAMABEAR KAPSUL ASI BOOSTER\n\nKapsul Pelancar ASI pertama dengan Triple Benefit dalam 1 kapsul:\nMeningkatkan produksi dan nutrisi ASI\nMembantu meredakan peradangan pada penyumbatan kelenjar ASI (Mastitis)\nMembantu meredakan nyeri pasca melahirkan\n\nKeunggulan lainnya :\nTerjamin Mutu & Sesuai Standard Keamanan Pangan\n- POM TR243057401\n- HALAL MUI : ID00110000288610422\n\nKombinasi herbal & SUPERFOOD dari ekstrak daun katuk, ekstrak daun kelor, ekstrak jahe merah dan serbuk almond\nFish Allergen Free\nFenugreek Free\n17 Nutrisi Makro & Mikro\nEkstrak Jahe untuk antioksida yang membantu menjaga daya tahan tubuh Ibu selama menyusui\nMudah dikonsumsi tidak memerlukan penyeduhan\n\n\nANJURAN PEMAKAIAN untuk manfaat maksimal :\n- Konsumsi MamaBear Kapsul Pelancar ASI 2-3x sehari.\n*1 kapsul setelah makan\nCatatan : Tidak untuk Ibu hamil\n\n\n\nCATATAN PEMESANAN:\n- Estimasi pengiriman produk 3-4 hari kerja\n- Bila pemesanan sudah di checkout maka tidak bisa ganti alamat\n(Apabila ada kesalahan input alamat, bisa dibatalkan dulu pemesanan sebelumnya lalu bisa order ulang)\n\n*Baca label sebelum membeli",
+            "ingredients": null,
+            "usageInstructions": null,
+            "createdAt": "2026-09-02T15:58:44.863Z",
+            "updatedAt": "2026-09-02T15:58:44.863Z",
+            "metaTitle": null,
+            "metaDescription": null,
+            "category": {
+              "id": 2,
+              "name": "ASI Booster",
+              "slug": "asi-booster",
+              "description": "Produk pelancar & peningkat ASI",
+              "metaTitle": null,
+              "metaDescription": null,
+              "isActive": true,
+              "sortOrder": 2,
+              "createdAt": "2026-09-02T15:58:02.998Z",
+              "updatedAt": "2026-09-02T15:58:02.998Z"
+            },
+            "images": [
+              {
+                "id": 46,
+                "publicId": "mamabear/Kapsul/Kapsul-01",
+                "productId": 5,
+                "variantId": null,
+                "reviewId": null,
+                "categoryId": null,
+                "imageUrl": "https://res.cloudinary.com/dvr6ibd7e/image/upload/v1788363121/mamabear/Kapsul/Kapsul-01.jpg",
+                "sortOrder": 1,
+                "altText": "MamaBear Kapsul 01",
+                "width": 1080,
+                "height": 1080,
+                "fileSize": 494478,
+                "format": "jpg"
+              },
+              {
+                "id": 47,
+                "publicId": "mamabear/Kapsul/Kapsul-02",
+                "productId": 5,
+                "variantId": null,
+                "reviewId": null,
+                "categoryId": null,
+                "imageUrl": "https://res.cloudinary.com/dvr6ibd7e/image/upload/v1788363123/mamabear/Kapsul/Kapsul-02.jpg",
+                "sortOrder": 2,
+                "altText": "MamaBear Kapsul 02",
+                "width": 1080,
+                "height": 1080,
+                "fileSize": 469792,
+                "format": "jpg"
+              },
+              {
+                "id": 48,
+                "publicId": "mamabear/Kapsul/Kapsul-03",
+                "productId": 5,
+                "variantId": null,
+                "reviewId": null,
+                "categoryId": null,
+                "imageUrl": "https://res.cloudinary.com/dvr6ibd7e/image/upload/v1788363126/mamabear/Kapsul/Kapsul-03.jpg",
+                "sortOrder": 3,
+                "altText": "MamaBear Kapsul 03",
+                "width": 1080,
+                "height": 1080,
+                "fileSize": 317084,
+                "format": "jpg"
+              },
+              {
+                "id": 49,
+                "publicId": "mamabear/Kapsul/Kapsul-04",
+                "productId": 5,
+                "variantId": null,
+                "reviewId": null,
+                "categoryId": null,
+                "imageUrl": "https://res.cloudinary.com/dvr6ibd7e/image/upload/v1788363128/mamabear/Kapsul/Kapsul-04.jpg",
+                "sortOrder": 4,
+                "altText": "MamaBear Kapsul 04",
+                "width": 1080,
+                "height": 1080,
+                "fileSize": 586920,
+                "format": "jpg"
+              }
+            ],
+            "variants": [
+              {
+                "id": 14,
+                "productId": 5,
+                "name": "30 kapsul",
+                "priceIdr": "100000",
+                "weightG": 30,
+                "sku": "CP.AB30",
+                "stock": 100,
+                "sortOrder": 0,
+                "createdAt": "2026-09-02T15:58:45.100Z",
+                "updatedAt": "2026-09-02T15:58:45.100Z",
+                "images": [
+                  {
+                    "id": 43,
+                    "publicId": "mamabear/Kapsul/30-Kapsul/Kapsul-ASI-Booster-1",
+                    "productId": null,
+                    "variantId": 14,
+                    "reviewId": null,
+                    "categoryId": null,
+                    "imageUrl": "https://res.cloudinary.com/dvr6ibd7e/image/upload/v1788363134/mamabear/Kapsul/30-Kapsul/Kapsul-ASI-Booster-1.png",
+                    "sortOrder": 1,
+                    "altText": "MamaBear Kapsul ASI Booster 1",
+                    "width": 3028,
+                    "height": 5309,
+                    "fileSize": 5931795,
+                    "format": "png"
+                  },
+                  {
+                    "id": 44,
+                    "publicId": "mamabear/Kapsul/30-Kapsul/Kapsul-ASI-Booster-2",
+                    "productId": null,
+                    "variantId": 14,
+                    "reviewId": null,
+                    "categoryId": null,
+                    "imageUrl": "https://res.cloudinary.com/dvr6ibd7e/image/upload/v1788363142/mamabear/Kapsul/30-Kapsul/Kapsul-ASI-Booster-2.png",
+                    "sortOrder": 2,
+                    "altText": "MamaBear Kapsul ASI Booster 2",
+                    "width": 2706,
+                    "height": 5000,
+                    "fileSize": 7124269,
+                    "format": "png"
+                  },
+                  {
+                    "id": 45,
+                    "publicId": "mamabear/Kapsul/30-Kapsul/Kapsul-ASI-Booster-Pill",
+                    "productId": null,
+                    "variantId": 14,
+                    "reviewId": null,
+                    "categoryId": null,
+                    "imageUrl": "https://res.cloudinary.com/dvr6ibd7e/image/upload/v1788363144/mamabear/Kapsul/30-Kapsul/Kapsul-ASI-Booster-Pill.png",
+                    "sortOrder": 3,
+                    "altText": "MamaBear Kapsul ASI Booster Pill",
+                    "width": 1176,
+                    "height": 451,
+                    "fileSize": 468495,
+                    "format": "png"
+                  }
+                ]
+              }
+            ],
+            "highlight": {
+              "id": 2,
+              "name": "Recommended",
+              "slug": "recommended",
+              "description": "Rekomendasi terbaik untuk Mama",
+              "isActive": true,
+              "metaTitle": null,
+              "metaDescription": null
+            },
+            "currentPrice": "100000",
+            "originalPrice": "100000",
+            "discountPercent": 0,
+            "rating": 4.299999999999999,
+            "reviewsCount": 5
+          }
+        ],
+        "pagination": {
+          "nextCursor": "eyJpZCI6NH0=",
+          "hasNextPage": true,
+          "limit": 1
+        }
+      },
+      "timestamp": "2026-10-14T23:46:22.063Z"
+    },
+    "verifiedAt": "2026-10-14T23:46:21.939525+00:00"
+  },
+  {
+    "url": "https://vi-mamabear-backend.onrender.com/api/products/search?q=asi&limit=1",
+    "status": 200,
+    "body": {
+      "success": true,
+      "statusCode": 200,
+      "message": [
+        "Found 1 products matching query 'asi'"
+      ],
+      "data": {
+        "success": true,
+        "data": [
+          {
+            "id": 5,
+            "name": "MamaBear ASI Booster 30 Kapsul - Pelancar ASI Fenugreek Free Halal BPOM",
+            "slug": "mamabear-asi-booster-30-kapsul",
+            "isActive": true,
+            "totalSold": 0,
+            "categoryId": 2,
+            "highlightId": 2,
+            "tags": [],
+            "description": "MAMABEAR KAPSUL ASI BOOSTER\n\nKapsul Pelancar ASI pertama dengan Triple Benefit dalam 1 kapsul:\nMeningkatkan produksi dan nutrisi ASI\nMembantu meredakan peradangan pada penyumbatan kelenjar ASI (Mastitis)\nMembantu meredakan nyeri pasca melahirkan\n\nKeunggulan lainnya :\nTerjamin Mutu & Sesuai Standard Keamanan Pangan\n- POM TR243057401\n- HALAL MUI : ID00110000288610422\n\nKombinasi herbal & SUPERFOOD dari ekstrak daun katuk, ekstrak daun kelor, ekstrak jahe merah dan serbuk almond\nFish Allergen Free\nFenugreek Free\n17 Nutrisi Makro & Mikro\nEkstrak Jahe untuk antioksida yang membantu menjaga daya tahan tubuh Ibu selama menyusui\nMudah dikonsumsi tidak memerlukan penyeduhan\n\n\nANJURAN PEMAKAIAN untuk manfaat maksimal :\n- Konsumsi MamaBear Kapsul Pelancar ASI 2-3x sehari.\n*1 kapsul setelah makan\nCatatan : Tidak untuk Ibu hamil\n\n\n\nCATATAN PEMESANAN:\n- Estimasi pengiriman produk 3-4 hari kerja\n- Bila pemesanan sudah di checkout maka tidak bisa ganti alamat\n(Apabila ada kesalahan input alamat, bisa dibatalkan dulu pemesanan sebelumnya lalu bisa order ulang)\n\n*Baca label sebelum membeli",
+            "ingredients": null,
+            "usageInstructions": null,
+            "createdAt": "2026-09-02T15:58:44.863Z",
+            "updatedAt": "2026-09-02T15:58:44.863Z",
+            "metaTitle": null,
+            "metaDescription": null,
+            "category": {
+              "id": 2,
+              "name": "ASI Booster",
+              "slug": "asi-booster",
+              "description": "Produk pelancar & peningkat ASI",
+              "metaTitle": null,
+              "metaDescription": null,
+              "isActive": true,
+              "sortOrder": 2,
+              "createdAt": "2026-09-02T15:58:02.998Z",
+              "updatedAt": "2026-09-02T15:58:02.998Z"
+            },
+            "images": [
+              {
+                "id": 46,
+                "publicId": "mamabear/Kapsul/Kapsul-01",
+                "productId": 5,
+                "variantId": null,
+                "reviewId": null,
+                "categoryId": null,
+                "imageUrl": "https://res.cloudinary.com/dvr6ibd7e/image/upload/v1788363121/mamabear/Kapsul/Kapsul-01.jpg",
+                "sortOrder": 1,
+                "altText": "MamaBear Kapsul 01",
+                "width": 1080,
+                "height": 1080,
+                "fileSize": 494478,
+                "format": "jpg"
+              },
+              {
+                "id": 47,
+                "publicId": "mamabear/Kapsul/Kapsul-02",
+                "productId": 5,
+                "variantId": null,
+                "reviewId": null,
+                "categoryId": null,
+                "imageUrl": "https://res.cloudinary.com/dvr6ibd7e/image/upload/v1788363123/mamabear/Kapsul/Kapsul-02.jpg",
+                "sortOrder": 2,
+                "altText": "MamaBear Kapsul 02",
+                "width": 1080,
+                "height": 1080,
+                "fileSize": 469792,
+                "format": "jpg"
+              },
+              {
+                "id": 48,
+                "publicId": "mamabear/Kapsul/Kapsul-03",
+                "productId": 5,
+                "variantId": null,
+                "reviewId": null,
+                "categoryId": null,
+                "imageUrl": "https://res.cloudinary.com/dvr6ibd7e/image/upload/v1788363126/mamabear/Kapsul/Kapsul-03.jpg",
+                "sortOrder": 3,
+                "altText": "MamaBear Kapsul 03",
+                "width": 1080,
+                "height": 1080,
+                "fileSize": 317084,
+                "format": "jpg"
+              },
+              {
+                "id": 49,
+                "publicId": "mamabear/Kapsul/Kapsul-04",
+                "productId": 5,
+                "variantId": null,
+                "reviewId": null,
+                "categoryId": null,
+                "imageUrl": "https://res.cloudinary.com/dvr6ibd7e/image/upload/v1788363128/mamabear/Kapsul/Kapsul-04.jpg",
+                "sortOrder": 4,
+                "altText": "MamaBear Kapsul 04",
+                "width": 1080,
+                "height": 1080,
+                "fileSize": 586920,
+                "format": "jpg"
+              }
+            ],
+            "variants": [
+              {
+                "id": 14,
+                "productId": 5,
+                "name": "30 kapsul",
+                "priceIdr": "100000",
+                "weightG": 30,
+                "sku": "CP.AB30",
+                "stock": 100,
+                "sortOrder": 0,
+                "createdAt": "2026-09-02T15:58:45.100Z",
+                "updatedAt": "2026-09-02T15:58:45.100Z",
+                "images": [
+                  {
+                    "id": 43,
+                    "publicId": "mamabear/Kapsul/30-Kapsul/Kapsul-ASI-Booster-1",
+                    "productId": null,
+                    "variantId": 14,
+                    "reviewId": null,
+                    "categoryId": null,
+                    "imageUrl": "https://res.cloudinary.com/dvr6ibd7e/image/upload/v1788363134/mamabear/Kapsul/30-Kapsul/Kapsul-ASI-Booster-1.png",
+                    "sortOrder": 1,
+                    "altText": "MamaBear Kapsul ASI Booster 1",
+                    "width": 3028,
+                    "height": 5309,
+                    "fileSize": 5931795,
+                    "format": "png"
+                  },
+                  {
+                    "id": 44,
+                    "publicId": "mamabear/Kapsul/30-Kapsul/Kapsul-ASI-Booster-2",
+                    "productId": null,
+                    "variantId": 14,
+                    "reviewId": null,
+                    "categoryId": null,
+                    "imageUrl": "https://res.cloudinary.com/dvr6ibd7e/image/upload/v1788363142/mamabear/Kapsul/30-Kapsul/Kapsul-ASI-Booster-2.png",
+                    "sortOrder": 2,
+                    "altText": "MamaBear Kapsul ASI Booster 2",
+                    "width": 2706,
+                    "height": 5000,
+                    "fileSize": 7124269,
+                    "format": "png"
+                  },
+                  {
+                    "id": 45,
+                    "publicId": "mamabear/Kapsul/30-Kapsul/Kapsul-ASI-Booster-Pill",
+                    "productId": null,
+                    "variantId": 14,
+                    "reviewId": null,
+                    "categoryId": null,
+                    "imageUrl": "https://res.cloudinary.com/dvr6ibd7e/image/upload/v1788363144/mamabear/Kapsul/30-Kapsul/Kapsul-ASI-Booster-Pill.png",
+                    "sortOrder": 3,
+                    "altText": "MamaBear Kapsul ASI Booster Pill",
+                    "width": 1176,
+                    "height": 451,
+                    "fileSize": 468495,
+                    "format": "png"
+                  }
+                ]
+              }
+            ],
+            "highlight": {
+              "id": 2,
+              "name": "Recommended",
+              "slug": "recommended",
+              "description": "Rekomendasi terbaik untuk Mama",
+              "isActive": true,
+              "metaTitle": null,
+              "metaDescription": null
+            },
+            "currentPrice": "100000",
+            "originalPrice": "100000",
+            "discountPercent": 0,
+            "rating": 4.299999999999999,
+            "reviewsCount": 5
+          }
+        ],
+        "pagination": {
+          "limit": 1,
+          "nextCursor": 5,
+          "hasNextPage": true
+        }
+      },
+      "timestamp": "2026-10-14T23:46:23.300Z"
+    },
+    "verifiedAt": "2026-10-14T23:46:23.166914+00:00"
+  },
+  {
+    "url": "https://vi-mamabear-backend.onrender.com/api/products/search/suggestions?q=asi&limit=1",
+    "status": 400,
+    "body": {
+      "success": false,
+      "statusCode": 400,
+      "message": [
+        "limit must not be less than 1",
+        "limit must be a number conforming to the specified constraints"
+      ],
+      "data": null,
+      "timestamp": "2026-10-14T23:46:24.362Z"
+    },
+    "verifiedAt": "2026-10-14T23:46:24.236874+00:00"
+  },
+  {
+    "url": "https://vi-mamabear-backend.onrender.com/api/products/docs-audit-missing-product-20261015",
+    "status": 404,
+    "body": {
+      "success": false,
+      "statusCode": 404,
+      "message": [
+        "Product with slug docs-audit-missing-product-20261015 not found"
+      ],
+      "data": null,
+      "timestamp": "2026-10-14T23:46:25.412Z"
+    },
+    "verifiedAt": "2026-10-14T23:46:25.275817+00:00"
+  }
+]

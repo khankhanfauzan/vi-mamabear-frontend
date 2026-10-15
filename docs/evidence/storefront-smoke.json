@@ -1,0 +1,39 @@
+{
+  "checkedAt": "2026-10-15T00:09:23.601Z",
+  "checks": [
+    {
+      "route": "/",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "route": "/products",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "route": "/search?q=asi",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "route": "/login",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "route": "/account/orders",
+      "status": 307,
+      "passed": true
+    },
+    {
+      "route": "/admin/dashboard",
+      "status": 307,
+      "passed": true
+    },
+    {
+      "name": "Docs mappings and existing backend mapping verified from config",
+      "passed": true
+    }
+  ]
+}

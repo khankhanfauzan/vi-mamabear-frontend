@@ -1,0 +1,55 @@
+---
+title: Homepage, Katalog & Pencarian
+description: Alur produk, kategori, detail, filter, serta pencarian berdasarkan komponen dan service aktif.
+---
+
+## Homepage
+
+Tujuannya mengenalkan produk dan mengarahkan ke katalog. `src/app/page.tsx` memanggil fetchFilteredProducts dengan limit empat, kemudian merakit HeroSection, RoadToSale, CategoryShowcase, FeaturedProducts, USPBanner, TestimonialSection, dan AwardsSection. Navbar/Footer/ChatWidget/NewsletterPopup dipasang pada page.
+
+API: GET `/api/products/filter?limit=4`. FeaturedProducts memakai array kosong jika prop tidak ada. Exception fetch tidak ditangkap sendiri oleh page utama sehingga dapat menggagalkan render. Newsletter hanya menyimpan dismiss di localStorage; submit belum mengirim email ke API.
+
+![Homepage MamaBear desktop dengan banner dan awal bagian kategori](/docs/frontend/mamabear-homepage.webp)
+
+Halaman utama menampilkan banner produk dan navigasi kategori.
+
+## Katalog dan Kategori
+
+Tujuannya memilih produk melalui kategori, rentang harga, stok, sorting, dan pagination. Route `/products` merakit ProductCatalogClient dan banner. Hook useProductList aktif berada di dalam `src/features/products/components/listing/ProductCatalogClient.tsx`; service berada di `services/productsService.ts`.
+
+1. Komponen membentuk filter dari interaksi/query URL.
+2. Service menyusun query categories berulang, harga, stok, sort, cursor, dan limit.
+3. GET `/api/products/filter` menggunakan no-store. Envelope luar dibuka menjadi daftar/pagination; hook memakai limit delapan untuk load more.
+4. Komponen memisahkan loading awal, loading lanjutan, error, dan keadaan kosong.
+
+Kategori memakai `src/features/categories/services/categoryService.ts`: GET `/api/categories` dengan next.revalidate 12, dan GET `/api/categories/{slug}` dengan no-store. Detail kategori mengembalikan null untuk 404. UI berada di components/listing, cdp, dan megamenu pada fitur categories.
+
+<Callout type="warn">
+  UI rating mengisi minRating, tetapi fetchFilteredProducts belum menserialisasikannya ke query. Filter rating belum boleh diklaim selesai. Cursor pada response publik juga dapat berupa angka walaupun tipe frontend menyatakan string.
+</Callout>
+
+![Katalog MamaBear dengan filter kiri dan daftar produk aktual](/docs/frontend/mamabear-product-catalog.webp)
+
+Katalog produk menyediakan filter kategori, harga, rating, dan stok.
+
+## Detail Produk
+
+Tujuannya menampilkan produk berdasarkan slug, memilih varian, dan mengisi jumlah sebelum add to cart. Route: `src/app/(shop)/products/[slug]/page.tsx`. Service aktif: `src/features/products/services/productService.ts`, berbeda dari productsService katalog.
+
+Page meminta GET `/api/products/{slug}` dan `/api/products/{slug}/related` bersamaan. ProductDetailClient merakit ProductGallery, ProductInfo, ProductTabs, RelatedProducts, dan ProductBottomBar. Hook useProductDetail memilih varian dari query variant, memperbarui URL/gambar, mereset jumlah, dan membatasi penambahan jumlah sesuai stok varian.
+
+Service melempar error HTTP/flag success. Page memetakan semua error menjadi notFound, termasuk kegagalan related products. Add to cart dijelaskan di [Transaksi](/docs/developer/frontend/transaksi).
+
+![Detail produk ASI Booster MamaBear dengan galeri, varian, jumlah, dan deskripsi](/docs/frontend/mamabear-product-detail.webp)
+
+Halaman detail menampilkan informasi produk, pilihan varian, harga, dan stok.
+
+## Pencarian
+
+SearchBar menggunakan useProductSearch: debounce 500 ms, GET `/api/products/search/suggestions?q=...`, dan lima recent searches unik di localStorage. Enter menavigasi ke `/search?q=...` dengan encoding query. Halaman hasil memakai SearchResults, useSearchResults, dan searchService.getProducts untuk GET `/api/products/search?q=...`.
+
+Lokasi: `src/features/products/components/shared/SearchBar.tsx`, `components/search/SearchResults.tsx`, hooks useProductSearch/useSearchResults, dan services/searchService.ts. Query kosong mengosongkan hasil. Error suggestions hanya dicatat di console; hasil pencarian memiliki pesan error UI. Request suggestions belum memakai AbortController; response lama berpotensi tiba setelah query berubah, berdasarkan analisis kode.
+
+![Hasil pencarian MamaBear untuk kata asi pada desktop](/docs/frontend/mamabear-search.webp)
+
+Halaman `/search?q=asi` menampilkan hasil aktual. Probe suggestions dengan tambahan limit=1 menghasilkan HTTP 400; frontend saat ini tidak mengirim limit tersebut. Lihat [Referensi API](/docs/developer/backend/api-reference).

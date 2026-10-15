@@ -1,0 +1,38 @@
+---
+title: Autentikasi & Kontrol Akses
+description: Login credentials, siklus refresh token, proteksi route, dan pemisahan akses docs internal.
+---
+
+## Tujuan dan Modul
+
+Auth toko memakai NextAuth CredentialsProvider di `src/lib/auth.ts`, handler `src/app/api/auth/[...nextauth]/route.ts`, dan AuthProvider. Form/hook berada di `src/features/auth`. Auth docs memakai sistem terpisah.
+
+## Alur Login
+
+1. useLogin memanggil signIn credentials dengan redirect false.
+2. authorize mengirim email/password ke backend POST `/api/auth/login` dan membaca access/refresh token dari data.
+3. Access token di-decode untuk identitas/role. Callback JWT menyimpan token serta waktu kedaluwarsa. Callback session mengekspos access token dan identitas ke client; refresh token tidak dipetakan ke session client.
+4. ADMIN/SUPERADMIN diarahkan ke `/admin/dashboard`; pengguna lain mengikuti callbackUrl atau homepage.
+5. Setelah cache access token frontend 14 menit berakhir, callback memanggil POST `/api/auth/refresh` dengan bearer refresh token. Batas frontend delapan jam tanpa remember dan tujuh hari dengan remember.
+
+Source backend pada commit audit menerbitkan access token 15 menit dan refresh token tujuh hari. Backend memeriksa hash bcrypt dan expiry sebelum rotasi refresh. Ini verifikasi source, bukan pengujian expiry produksi.
+
+## Informasi Akun
+
+Setelah login, pengguna dapat melihat nama dan email pada halaman `/account/info`. Halaman ini menggunakan `AccountInformation` di `src/features/account/components/AccountInformation.tsx` dan membaca data pengguna melalui `useAuth`. Saat sesi tidak tersedia, komponen menampilkan pesan untuk masuk kembali.
+
+![Halaman informasi akun MamaBear dengan nama dan email disamarkan](/docs/frontend/mamabear-account-info.webp)
+
+## Register dan Pemulihan
+
+authService mengirim register ke `/auth/register`, memetakan fullname menjadi name. Pemulihan memakai `/auth/forgot-password`, `/auth/reset-password/{token}`, dan `/auth/verify-email/{token}`. Service memeriksa HTTP/flag sukses. Tidak ada akun atau email pemulihan produksi dibuat pada audit.
+
+Tombol Google/Facebook di SocialLogins belum memiliki handler/provider OAuth aktif, sehingga social login tidak diklaim selesai.
+
+## Proteksi dan Error
+
+`src/middleware.ts` mensyaratkan sesi untuk account/admin/dashboard; admin memerlukan ADMIN/SUPERADMIN. RefreshAccessTokenError memicu redirect login dan penghapusan nama cookie sesi yang ditentukan kode. Checkout mengecek getServerSession/access token pada server page.
+
+useLogin menampilkan error email/password salah saat NextAuth melaporkan kegagalan. Refresh gagal mengembalikan flag error. apiClient tidak otomatis logout/redirect untuk setiap 401. Backend tetap wajib memverifikasi JWT dan role pada route operasinya.
+
+Alur login pelanggan, reset, expiry, dan seluruh role belum diuji produksi dalam audit ini. Proteksi docs dijelaskan di [Audit Akses](/docs/developer/development/audit-repository).

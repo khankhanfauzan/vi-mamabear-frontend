@@ -1,0 +1,36 @@
+---
+title: AI Assistant & Administrasi
+description: Peta source AI dan admin, alur integrasi, feedback error, status mock, serta batas akses.
+---
+
+## AI Assistant
+
+Tujuan widget adalah percakapan pada toko. Titik masuk: `src/components/layout/ChatWidget.tsx`; komponen ConversationHistoryList dan AssistantTypingIndicator ada di `src/features/ai/components`. Tipe ada di `types/conversation.types.ts`, service di `services/conversationService.ts`.
+
+sendAiChatMessage menolak pesan kosong, mengirim POST `/api/ai/chat` dengan message dan conversationId opsional, membuka envelope, lalu menormalisasi conversationId/reply. Format tak sesuai dilempar menjadi error. fetchAiConversations meminta GET `/api/ai/conversations`; hook useAiConversations mengelola loading/error dan mencegah update state setelah unmount.
+
+<Callout type="warn">
+  HTTP 404/501 pada riwayat menghasilkan mockAiConversations dan isMock true. Fallback existing ini tidak dipakai sebagai bukti response aktual, screenshot, atau keberhasilan backend.
+</Callout>
+
+OpenAPI memuat history/delete conversation, tetapi belum membuktikan seluruh aksi ada di UI checkout ini. Tidak dikirim chat produksi untuk menguji kualitas jawaban atau guardrail. [Fitur AI backend](/docs/developer/backend/fitur-ai) dipertahankan dengan batas bukti yang dijelaskan.
+
+## Administrasi
+
+Portal admin mengelola operasi toko pada `src/app/admin`. Middleware membatasi role ADMIN/SUPERADMIN. Shell ada di components/layout/admin-navigation.
+
+| Modul | UI/hook | Service relatif terhadap src/features |
+| --- | --- | --- |
+| Dashboard | DashboardClient, useDashboard | admin/dashboard/services/dashboardService.ts |
+| Produk | AdminProductClient, ProductCreateForm, ProductEditForm | admin/products/services/adminListingProductService.ts, adminProductService.ts |
+| Kategori | CategoryListingClient, form create/edit | admin/categories/services/adminCategoryService.ts |
+| Pesanan | AdminOrderListing, AdminOrderDetailOrchestrator | admin/orders/service/adminOrderService.ts |
+| Promo | PromoListingClient, AdminPromoForm | admin/promos/services/promoService.ts |
+| Pengguna | AdminUserList, CreateAdminForm | admin/users/services/adminService.ts |
+| Pelanggan | CustomerManagementClient, CustomerDetailClient | admin/customers/services/customerService.ts |
+| Laporan | ReportDashboard, useReports | admin/reports/services/reportService.ts |
+| Pengaturan | SettingsView, useSetting | admin/settings/services/settingService.ts |
+
+UI memanggil hook/service untuk list/detail/mutasi/export yang relevan. Service memeriksa kegagalan request; hook/form menampung state loading/error, dan beberapa aksi hapus mempunyai dialog konfirmasi. Pola penanganan error tidak sepenuhnya seragam; lihat file service tiap modul sebelum mengandalkan format tertentu. [Inventaris API](/docs/developer/backend/endpoint-inventory) memetakan operasi resmi tanpa memanggilnya.
+
+Ini peta source, bukan laporan E2E. Tidak diuji seluruh role, mutasi, akurasi laporan keuangan, atau export produksi. Dashboard dan data pelanggan tidak difoto.

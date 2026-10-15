@@ -13,7 +13,7 @@ URL halaman itu menjadi `/docs/user/promo`. Halaman ini publik.
 
 ## Developer Guide
 
-Langkahnya sama, dengan folder `content/docs/developer` dan `meta.json` di folder itu. URL-nya berada di bawah `/docs/developer` dan ikut Basic Auth.
+Langkahnya sama, dengan folder `content/docs/developer` dan `meta.json` di folder itu. URL-nya berada di bawah `/docs/developer` dan ikut autentikasi internal.
 
 Jangan menulis kata sandi, token, atau isi `.env` di file MDX.
 
@@ -25,4 +25,4 @@ Dari folder `mamabear-docs`:
 npm run dev
 ```
 
-Buka `/docs/user` tanpa login. Buka `/docs/developer` dan isi user serta password dari `.env.local`.
+Buka `/docs/user` tanpa login. Buka `/docs/developer` dan gunakan form login dengan password lokal yang dikonfigurasi.

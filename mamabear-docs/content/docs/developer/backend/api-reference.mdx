@@ -1,106 +1,849 @@
 ---
 title: Standar & Referensi API
-description: Standar komunikasi REST API, konvensi respon JSON, autentikasi JWT, dan katalog endpoint MamaBear.
+description: Kontrak endpoint utama, request schema, respons publik aktual, dan batas informasi Swagger MamaBear.
 ---
 
-MamaBear Backend mengekspos endpoint RESTful API berbasis JSON. Halaman ini mendefinisikan standar format respons, kode status HTTP, serta katalog endpoint utama.
+## Dasar Kontrak
 
-## Konvensi Standar Respons JSON
+Host API: `https://vi-mamabear-backend.onrender.com`; seluruh path di bawah sudah termasuk prefix `/api`. Frontend memakai API_BASE_URL yang biasanya sudah berakhiran /api, sehingga service hanya menambahkan /products, /order, dan seterusnya.
 
-Semua endpoint mengembalikan struktur respons yang konsisten:
+[Swagger resmi](https://vi-mamabear-backend.onrender.com/api) dan [OpenAPI JSON](https://vi-mamabear-backend.onrender.com/api-json) diverifikasi pada 15 Oktober 2026. Source backend commit `8118516` dipakai untuk menjelaskan guard, bukan untuk mengasumsikan revision deployment. [Inventaris lengkap](/docs/developer/backend/endpoint-inventory) mencakup semua operasi snapshot.
 
-<Tabs items={['Respons Sukses', 'Respons Error Validasi (400)', 'Respons Unauthorized (401)']}>
-  <Tab value="Respons Sukses">
-    ```json
-    {
-      "status": "success",
-      "message": "Data produk berhasil diambil",
-      "data": [
-        {
-          "id": "prod_01",
-          "name": "MamaBear Teh Pelancar ASI",
-          "price": 42000,
-          "stock": 50,
-          "category": "teh-herbal"
-        }
-      ]
-    }
-    ```
+<Callout type="warn">
+  Banyak response Swagger tidak memiliki schema/contoh, dan banyak error status tidak dicantumkan. Bagian ini menyatakan keterbatasan tersebut. Contoh aktual hanya berasal dari GET publik katalog/error; tidak ada response login, transaksi, pembayaran, admin, atau AI yang direkayasa.
+</Callout>
+
+## Envelope yang Diamati
+
+Response publik memakai success, statusCode, message berupa array, data, serta timestamp. Source TransformInterceptor dan AllExceptionsFilter mengonfirmasi pola ini. Tipe frontend message masih string dan perlu ditinjau terpisah. Token/secret tidak dicetak di sini.
+
+## GET /api/products/filter
+
+**Path:** `/api/products/filter`. **Tujuan:** Mencari katalog dengan filter, sorting, dan cursor.
+
+**Autentikasi:** OpenAPI tidak mencantumkan security. Ini bukan jaminan akses publik untuk semua konteks.
+
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
+
+| Parameter | Lokasi | Wajib | Tipe | Keterangan |
+| --- | --- | --- | --- | --- |
+| categories | query | Tidak | array&lt;string&gt; | Include category (returns all categories if not selected) |
+| highlights | query | Tidak | array&lt;string&gt; | Include highlight (returns all highlights if not selected) |
+| minPrice | query | Tidak | number | Minimum price of product |
+| maxPrice | query | Tidak | number | Maximum price of product |
+| inStock | query | Tidak | boolean | Return only products in stock |
+| priceAscending | query | Tidak | number | Sort price ascending |
+| creationDateAscending | query | Tidak | number | Sort creation date ascending |
+| popularAscending | query | Tidak | number | (TODO) Sort popularity date ascending |
+| ratingAscending | query | Tidak | number | (TODO) Sort rating date ascending |
+| search | query | Tidak | string | Fuzzy search by name, slug, or description |
+| similarityThreshold | query | Tidak | number | Minimum similarity threshold for fuzzy search (0-1) |
+| cursor | query | Tidak | string | Pagination cursor (base64-encoded) |
+| limit | query | Tidak | number | Number of rows to fetch |
+
+Request body: tidak didefinisikan pada OpenAPI.
+
   </Tab>
-  <Tab value="Respons Error Validasi (400)">
-    ```json
-    {
-      "status": "fail",
-      "message": "Validasi gagal",
-      "errors": [
-        {
-          "field": "email",
-          "message": "Format email tidak valid"
-        }
-      ]
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 200 | Tidak dijelaskan | Tidak disediakan |
+
+GET publik aktual: `https://vi-mamabear-backend.onrender.com/api/products/filter?limit=1`, HTTP 200. Cuplikan aktual: properti produk lain dihilangkan; nilai yang ditampilkan tidak diganti.
+
+```json title="Response aktual pada waktu audit"
+{
+  "success": true,
+  "statusCode": 200,
+  "message": [
+    "Returned 1 products with the selected filters"
+  ],
+  "data": {
+    "success": true,
+    "data": [
+      {
+        "id": 5,
+        "name": "MamaBear ASI Booster 30 Kapsul - Pelancar ASI Fenugreek Free Halal BPOM",
+        "slug": "mamabear-asi-booster-30-kapsul",
+        "currentPrice": "100000",
+        "originalPrice": "100000",
+        "discountPercent": 0
+      }
+    ],
+    "pagination": {
+      "nextCursor": "eyJpZCI6NH0=",
+      "hasNextPage": true,
+      "limit": 1
     }
-    ```
-  </Tab>
-  <Tab value="Respons Unauthorized (401)">
-    ```json
-    {
-      "status": "error",
-      "message": "Token tidak valid atau sesi telah kedaluwarsa"
-    }
-    ```
+  },
+  "timestamp": "2026-10-14T23:46:22.063Z"
+}
+```
+
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
+
   </Tab>
 </Tabs>
 
----
+## GET /api/products/slug
 
-## Autentikasi & Authorization
+**Path:** `/api/products/{slug}`. **Tujuan:** Mengambil detail produk berdasarkan slug.
 
-Untuk mengakses endpoint privat (user profile, orders, checkout, admin), sertakan JSON Web Token (JWT) di HTTP Header:
+**Autentikasi:** OpenAPI tidak mencantumkan security. Ini bukan jaminan akses publik untuk semua konteks.
 
-```http
-Authorization: Bearer <YOUR_JWT_TOKEN>
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
+
+| Parameter | Lokasi | Wajib | Tipe | Keterangan |
+| --- | --- | --- | --- | --- |
+| slug | path | Ya | string | Tidak dijelaskan OpenAPI |
+
+Request body: tidak didefinisikan pada OpenAPI.
+
+  </Tab>
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 200 | Tidak dijelaskan | Tidak disediakan |
+
+GET publik aktual: `https://vi-mamabear-backend.onrender.com/api/products/docs-audit-missing-product-20261015`, HTTP 404.
+
+```json title="Response aktual pada waktu audit"
+{
+  "success": false,
+  "statusCode": 404,
+  "message": [
+    "Product with slug docs-audit-missing-product-20261015 not found"
+  ],
+  "data": null,
+  "timestamp": "2026-10-14T23:46:25.412Z"
+}
 ```
 
-<Callout type="info">
-  Token JWT memiliki masa berlaku 7 hari. Refresh token diatur secara otomatis saat user melakukan login ulang.
-</Callout>
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
 
----
+  </Tab>
+</Tabs>
 
-## Katalog Endpoint Utama
+## GET /api/products/slug/related
 
-| Method | Endpoint | Akses | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/register` | Publik | Mendaftarkan akun pelanggan baru |
-| `POST` | `/api/auth/login` | Publik | Otentikasi dan penerbitan token JWT |
-| `GET` | `/api/auth/profile` | Authed | Mendapatkan profil akun yang sedang login |
-| `GET` | `/api/products` | Publik | Daftar katalog produk dengan filter & pagination |
-| `GET` | `/api/products/:id` | Publik | Detail lengkap satu produk |
-| `POST` | `/api/orders` | Authed | Membuat pesanan baru dan menghasilkan link bayar |
-| `GET` | `/api/orders/user` | Authed | Daftar riwayat pesanan milik pengguna |
-| `POST` | `/api/webhooks/payment` | Webhook | Menerima callback status pembayaran dari payment gateway |
+**Path:** `/api/products/{slug}/related`. **Tujuan:** Mengambil produk terkait untuk detail produk.
 
----
+**Autentikasi:** OpenAPI tidak mencantumkan security. Ini bukan jaminan akses publik untuk semua konteks.
 
-## Contoh Alur Pemesanan (Sequence Diagram)
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Customer as Pelanggan (FE)
-    participant API as MamaBear BE
-    participant DB as Database
-    participant PG as Payment Gateway
+| Parameter | Lokasi | Wajib | Tipe | Keterangan |
+| --- | --- | --- | --- | --- |
+| slug | path | Ya | string | Tidak dijelaskan OpenAPI |
 
-    Customer->>API: POST /api/orders (Item & Alamat)
-    API->>DB: Validasi stok produk
-    DB-->>API: Stok terkonfirmasi
-    API->>PG: Generate Snap Payment Token
-    PG-->>API: Payment Token & URL
-    API->>DB: Simpan Order (Status: Pending)
-    API-->>Customer: 201 Created (Order Data & URL Pembayaran)
-    Customer->>PG: Menyelesaikan Pembayaran
-    PG->>API: POST /api/webhooks/payment (Status: Settled)
-    API->>DB: Update Status Order -> Paid
+Request body: tidak didefinisikan pada OpenAPI.
+
+  </Tab>
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 200 | Tidak dijelaskan | Tidak disediakan |
+
+Contoh response runtime: tidak diambil untuk operasi ini. Schema atau body response yang tidak tersedia tidak diisi dengan data buatan.
+
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
+
+  </Tab>
+</Tabs>
+
+## GET /api/products/slug/variants
+
+**Path:** `/api/products/{slug}/variants`. **Tujuan:** Mengambil varian produk.
+
+**Autentikasi:** OpenAPI tidak mencantumkan security. Ini bukan jaminan akses publik untuk semua konteks.
+
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
+
+| Parameter | Lokasi | Wajib | Tipe | Keterangan |
+| --- | --- | --- | --- | --- |
+| slug | path | Ya | string | Tidak dijelaskan OpenAPI |
+
+Request body: tidak didefinisikan pada OpenAPI.
+
+  </Tab>
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 200 | Tidak dijelaskan | Tidak disediakan |
+
+Contoh response runtime: tidak diambil untuk operasi ini. Schema atau body response yang tidak tersedia tidak diisi dengan data buatan.
+
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
+
+  </Tab>
+</Tabs>
+
+## GET /api/products/search
+
+**Path:** `/api/products/search`. **Tujuan:** Mencari produk menggunakan query q.
+
+**Autentikasi:** OpenAPI tidak mencantumkan security. Ini bukan jaminan akses publik untuk semua konteks.
+
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
+
+| Parameter | Lokasi | Wajib | Tipe | Keterangan |
+| --- | --- | --- | --- | --- |
+| q | query | Tidak | string | Text search query |
+| cursor | query | Tidak | number | Pagination cursor (product id) |
+| limit | query | Tidak | number | Number of results to return |
+
+Request body: tidak didefinisikan pada OpenAPI.
+
+  </Tab>
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 200 | Tidak dijelaskan | Tidak disediakan |
+
+GET publik aktual: `https://vi-mamabear-backend.onrender.com/api/products/search?q=asi&limit=1`, HTTP 200. Cuplikan aktual: properti produk lain dihilangkan; nilai yang ditampilkan tidak diganti.
+
+```json title="Response aktual pada waktu audit"
+{
+  "success": true,
+  "statusCode": 200,
+  "message": [
+    "Found 1 products matching query 'asi'"
+  ],
+  "data": {
+    "success": true,
+    "data": [
+      {
+        "id": 5,
+        "name": "MamaBear ASI Booster 30 Kapsul - Pelancar ASI Fenugreek Free Halal BPOM",
+        "slug": "mamabear-asi-booster-30-kapsul",
+        "currentPrice": "100000",
+        "originalPrice": "100000",
+        "discountPercent": 0
+      }
+    ],
+    "pagination": {
+      "limit": 1,
+      "nextCursor": 5,
+      "hasNextPage": true
+    }
+  },
+  "timestamp": "2026-10-14T23:46:23.300Z"
+}
 ```
 
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
+
+  </Tab>
+</Tabs>
+
+## GET /api/products/search/suggestions
+
+**Path:** `/api/products/search/suggestions`. **Tujuan:** Mengambil saran pencarian.
+
+**Autentikasi:** OpenAPI tidak mencantumkan security. Ini bukan jaminan akses publik untuk semua konteks.
+
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
+
+| Parameter | Lokasi | Wajib | Tipe | Keterangan |
+| --- | --- | --- | --- | --- |
+| q | query | Tidak | string | Text search query |
+| cursor | query | Tidak | number | Pagination cursor (product id) |
+| limit | query | Tidak | number | Number of results to return |
+| minChars | query | Tidak | number | Minimum chars in search in order to query database |
+| similarityThreshold | query | Tidak | number | Similarity threshold in trigram search for fuzzy matching |
+
+Request body: tidak didefinisikan pada OpenAPI.
+
+  </Tab>
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 200 | Tidak dijelaskan | Tidak disediakan |
+
+GET publik aktual: `https://vi-mamabear-backend.onrender.com/api/products/search/suggestions?q=asi&limit=1`, HTTP 400.
+
+```json title="Response aktual pada waktu audit"
+{
+  "success": false,
+  "statusCode": 400,
+  "message": [
+    "limit must not be less than 1",
+    "limit must be a number conforming to the specified constraints"
+  ],
+  "data": null,
+  "timestamp": "2026-10-14T23:46:24.362Z"
+}
+```
+
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
+
+  </Tab>
+</Tabs>
+
+## GET /api/categories
+
+**Path:** `/api/categories`. **Tujuan:** Mengambil daftar kategori.
+
+**Autentikasi:** OpenAPI tidak mencantumkan security. Ini bukan jaminan akses publik untuk semua konteks.
+
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
+
+Parameter path/query: tidak dicantumkan OpenAPI.
+
+Request body: tidak didefinisikan pada OpenAPI.
+
+  </Tab>
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 200 | Tidak dijelaskan | Tidak disediakan |
+
+Contoh response runtime: tidak diambil untuk operasi ini. Schema atau body response yang tidak tersedia tidak diisi dengan data buatan.
+
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
+
+  </Tab>
+</Tabs>
+
+## POST /api/auth/login
+
+**Path:** `/api/auth/login`. **Tujuan:** Login credentials untuk menerbitkan token.
+
+**Autentikasi:** Tidak memasang JwtAuthGuard pada method source; login menerbitkan token. Swagger tetap beranotasi bearer.
+
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
+
+Parameter path/query: tidak dicantumkan OpenAPI.
+
+Body: `application/json`; requestBody.required: ya. Berikut schema dari kontrak, bukan contoh payload yang telah dikirim.
+
+```json title="Schema request dari OpenAPI"
+{
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string"
+    },
+    "password": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "email",
+    "password"
+  ]
+}
+```
+
+  </Tab>
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 201 | Tidak dijelaskan | Tidak disediakan |
+
+Contoh response runtime: tidak diambil untuk operasi ini. Schema atau body response yang tidak tersedia tidak diisi dengan data buatan.
+
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
+
+  </Tab>
+</Tabs>
+
+## POST /api/auth/register
+
+**Path:** `/api/auth/register`. **Tujuan:** Mendaftarkan pengguna.
+
+**Autentikasi:** Tidak memasang JwtAuthGuard pada method source. Swagger beranotasi bearer.
+
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
+
+Parameter path/query: tidak dicantumkan OpenAPI.
+
+Body: `application/json`; requestBody.required: ya. Berikut schema dari kontrak, bukan contoh payload yang telah dikirim.
+
+```json title="Schema request dari OpenAPI"
+{
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string"
+    },
+    "password": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "email",
+    "password",
+    "name",
+    "phone"
+  ]
+}
+```
+
+  </Tab>
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 201 | Tidak dijelaskan | Tidak disediakan |
+
+Contoh response runtime: tidak diambil untuk operasi ini. Schema atau body response yang tidak tersedia tidak diisi dengan data buatan.
+
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
+
+  </Tab>
+</Tabs>
+
+## POST /api/auth/refresh
+
+**Path:** `/api/auth/refresh`. **Tujuan:** Memperbarui access token dan merotasi refresh token.
+
+**Autentikasi:** RefreshGuard dan bearer refresh token pada source, bukan access token biasa.
+
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
+
+Parameter path/query: tidak dicantumkan OpenAPI.
+
+Request body: tidak didefinisikan pada OpenAPI.
+
+  </Tab>
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 201 | Tidak dijelaskan | Tidak disediakan |
+
+Contoh response runtime: tidak diambil untuk operasi ini. Schema atau body response yang tidak tersedia tidak diisi dengan data buatan.
+
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
+
+  </Tab>
+</Tabs>
+
+## GET /api/cart
+
+**Path:** `/api/cart`. **Tujuan:** Mengambil cart untuk konteks pengguna atau guest.
+
+**Autentikasi:** Source cart memakai optional JWT untuk GET; guest cart tersedia. Anotasi Swagger memakai bearer.
+
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
+
+Parameter path/query: tidak dicantumkan OpenAPI.
+
+Request body: tidak didefinisikan pada OpenAPI.
+
+  </Tab>
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 200 | Tidak dijelaskan | Tidak disediakan |
+
+Contoh response runtime: tidak diambil untuk operasi ini. Schema atau body response yang tidak tersedia tidak diisi dengan data buatan.
+
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
+
+  </Tab>
+</Tabs>
+
+## POST /api/cart/items
+
+**Path:** `/api/cart/items`. **Tujuan:** Menambahkan item produk dan varian ke cart.
+
+**Autentikasi:** Source cart memakai optional JWT untuk POST; cookie guest atau bearer mengikuti konteks.
+
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
+
+Parameter path/query: tidak dicantumkan OpenAPI.
+
+Body: `application/json`; requestBody.required: ya. Berikut schema dari kontrak, bukan contoh payload yang telah dikirim.
+
+```json title="Schema request dari OpenAPI"
+{
+  "type": "object",
+  "properties": {
+    "productId": {
+      "type": "number"
+    },
+    "variantId": {
+      "type": "number"
+    },
+    "quantity": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "productId",
+    "variantId",
+    "quantity"
+  ]
+}
+```
+
+  </Tab>
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 201 | Tidak dijelaskan | Tidak disediakan |
+
+Contoh response runtime: tidak diambil untuk operasi ini. Schema atau body response yang tidak tersedia tidak diisi dengan data buatan.
+
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
+
+  </Tab>
+</Tabs>
+
+## PATCH /api/cart/items/id
+
+**Path:** `/api/cart/items/{id}`. **Tujuan:** Memperbarui jumlah item cart.
+
+**Autentikasi:** OpenAPI mencantumkan bearer JwtAuthGuard; kebutuhan role/detail guard harus mengikuti source controller.
+
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
+
+| Parameter | Lokasi | Wajib | Tipe | Keterangan |
+| --- | --- | --- | --- | --- |
+| id | path | Ya | string | Tidak dijelaskan OpenAPI |
+
+Body: `application/json`; requestBody.required: ya. Berikut schema dari kontrak, bukan contoh payload yang telah dikirim.
+
+```json title="Schema request dari OpenAPI"
+{
+  "type": "object",
+  "properties": {
+    "quantity": {
+      "type": "number",
+      "minimum": 1
+    }
+  },
+  "required": [
+    "quantity"
+  ]
+}
+```
+
+  </Tab>
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 200 | Tidak dijelaskan | Tidak disediakan |
+
+Contoh response runtime: tidak diambil untuk operasi ini. Schema atau body response yang tidak tersedia tidak diisi dengan data buatan.
+
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
+
+  </Tab>
+</Tabs>
+
+## POST /api/shipping/cost
+
+**Path:** `/api/shipping/cost`. **Tujuan:** Menghitung pilihan ongkir.
+
+**Autentikasi:** OpenAPI mencantumkan bearer JwtAuthGuard; kebutuhan role/detail guard harus mengikuti source controller.
+
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
+
+Parameter path/query: tidak dicantumkan OpenAPI.
+
+Body: `application/json`; requestBody.required: ya. Berikut schema dari kontrak, bukan contoh payload yang telah dikirim.
+
+```json title="Schema request dari OpenAPI"
+{
+  "type": "object",
+  "properties": {
+    "destination": {
+      "type": "number",
+      "description": "Destination location ID"
+    },
+    "priceSortDirection": {
+      "type": "string",
+      "enum": [
+        "highest",
+        "lowest"
+      ],
+      "description": "Sort shipping price result"
+    }
+  },
+  "required": [
+    "destination",
+    "priceSortDirection"
+  ]
+}
+```
+
+  </Tab>
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 201 | Tidak dijelaskan | Tidak disediakan |
+
+Contoh response runtime: tidak diambil untuk operasi ini. Schema atau body response yang tidak tersedia tidak diisi dengan data buatan.
+
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
+
+  </Tab>
+</Tabs>
+
+## POST /api/order
+
+**Path:** `/api/order`. **Tujuan:** Membuat pesanan dari cart dan alamat.
+
+**Autentikasi:** OpenAPI mencantumkan bearer JwtAuthGuard; kebutuhan role/detail guard harus mengikuti source controller.
+
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
+
+Parameter path/query: tidak dicantumkan OpenAPI.
+
+Body: `application/json`; requestBody.required: ya. Berikut schema dari kontrak, bukan contoh payload yang telah dikirim.
+
+```json title="Schema request dari OpenAPI"
+{
+  "type": "object",
+  "properties": {
+    "cartId": {
+      "type": "string",
+      "description": "UUID"
+    },
+    "addressId": {
+      "type": "number",
+      "description": "id of final selected address"
+    },
+    "notes": {
+      "type": "string",
+      "description": "notes from customer"
+    }
+  },
+  "required": [
+    "cartId",
+    "addressId"
+  ]
+}
+```
+
+  </Tab>
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 201 | Tidak dijelaskan | Tidak disediakan |
+
+Contoh response runtime: tidak diambil untuk operasi ini. Schema atau body response yang tidak tersedia tidak diisi dengan data buatan.
+
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
+
+  </Tab>
+</Tabs>
+
+## GET /api/order/id
+
+**Path:** `/api/order/{id}`. **Tujuan:** Mengambil detail pesanan pengguna.
+
+**Autentikasi:** OpenAPI mencantumkan bearer JwtAuthGuard; kebutuhan role/detail guard harus mengikuti source controller.
+
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
+
+| Parameter | Lokasi | Wajib | Tipe | Keterangan |
+| --- | --- | --- | --- | --- |
+| id | path | Ya | string | Tidak dijelaskan OpenAPI |
+
+Request body: tidak didefinisikan pada OpenAPI.
+
+  </Tab>
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 200 | Tidak dijelaskan | Tidak disediakan |
+
+Contoh response runtime: tidak diambil untuk operasi ini. Schema atau body response yang tidak tersedia tidak diisi dengan data buatan.
+
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
+
+  </Tab>
+</Tabs>
+
+## POST /api/payment/create
+
+**Path:** `/api/payment/create`. **Tujuan:** Membuat sesi transaksi pembayaran.
+
+**Autentikasi:** OpenAPI mencantumkan bearer JwtAuthGuard; kebutuhan role/detail guard harus mengikuti source controller.
+
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
+
+Parameter path/query: tidak dicantumkan OpenAPI.
+
+Body: `application/json`; requestBody.required: ya. Berikut schema dari kontrak, bukan contoh payload yang telah dikirim.
+
+```json title="Schema request dari OpenAPI"
+{
+  "type": "object",
+  "properties": {
+    "orderId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "orderId"
+  ]
+}
+```
+
+  </Tab>
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 201 | Tidak dijelaskan | Tidak disediakan |
+
+Contoh response runtime: tidak diambil untuk operasi ini. Schema atau body response yang tidak tersedia tidak diisi dengan data buatan.
+
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
+
+  </Tab>
+</Tabs>
+
+## POST /api/ai/chat
+
+**Path:** `/api/ai/chat`. **Tujuan:** Mengirim pesan ke AI Assistant.
+
+**Autentikasi:** OpenAPI mencantumkan bearer JwtAuthGuard; kebutuhan role/detail guard harus mengikuti source controller.
+
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
+
+Parameter path/query: tidak dicantumkan OpenAPI.
+
+Body: `application/json`; requestBody.required: ya. Berikut schema dari kontrak, bukan contoh payload yang telah dikirim.
+
+```json title="Schema request dari OpenAPI"
+{
+  "type": "object",
+  "properties": {
+    "conversationId": {
+      "type": "string",
+      "description": "ID percakapan yang sudah ada. Kosongkan untuk memulai percakapan baru."
+    },
+    "message": {
+      "type": "string",
+      "description": "Pesan dari pengguna"
+    }
+  },
+  "required": [
+    "message"
+  ]
+}
+```
+
+  </Tab>
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 201 | Tidak dijelaskan | Tidak disediakan |
+
+Contoh response runtime: tidak diambil untuk operasi ini. Schema atau body response yang tidak tersedia tidak diisi dengan data buatan.
+
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
+
+  </Tab>
+</Tabs>
+
+## GET /api/ai/conversations
+
+**Path:** `/api/ai/conversations`. **Tujuan:** Mengambil daftar percakapan pengguna.
+
+**Autentikasi:** OpenAPI mencantumkan bearer JwtAuthGuard; kebutuhan role/detail guard harus mengikuti source controller.
+
+<Tabs items={['Request', 'Response dan Error']}>
+  <Tab value="Request">
+
+Parameter path/query: tidak dicantumkan OpenAPI.
+
+Request body: tidak didefinisikan pada OpenAPI.
+
+  </Tab>
+  <Tab value="Response dan Error">
+
+Status yang didokumentasikan OpenAPI:
+
+| HTTP | Deskripsi | Schema |
+| --- | --- | --- |
+| 200 | Tidak dijelaskan | Tidak disediakan |
+
+Contoh response runtime: tidak diambil untuk operasi ini. Schema atau body response yang tidak tersedia tidak diisi dengan data buatan.
+
+Error khusus operasi ini hanya diklaim bila ada observasi di atas. Source global memakai envelope error dengan data null; daftar error/status per endpoint belum lengkap pada OpenAPI. Tidak diasumsikan bahwa status sukses Swagger adalah satu-satunya hasil runtime.
+
+  </Tab>
+</Tabs>

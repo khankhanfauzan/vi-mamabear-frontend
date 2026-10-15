@@ -1,76 +1,57 @@
 ---
 title: Arsitektur Frontend
-description: Struktur App Router, pola pemisahan Server vs Client Components, dan modularisasi berbasis fitur.
+description: Direktori aktual, routing App Router, navigasi, dan pemisahan toko dari aplikasi docs.
 ---
 
-Aplikasi toko MamaBear menerapkan **Feature-Driven Architecture** di dalam **Next.js App Router** untuk menjaga kode tetap rapi, mudah didekati oleh tim baru, dan terisolasi per domain bisnis.
+## Struktur Direktori
 
-## Struktur Direktori Utama
-
-```text
+```text title="Struktur checkout"
 src/
-├── app/                # Next.js App Router (Routing, Layouts, Metadata)
-│   ├── (auth)/         # Rute autentikasi (login, register)
-│   ├── (shop)/         # Rute katalog publik toko dan checkout
-│   └── admin/          # Rute portal dashboard admin
-├── features/           # Domain-driven features (logika per modul bisnis)
-│   ├── products/       # Katalog, detail produk, filter, pagination
-│   ├── cart/           # Keranjang belanja, perhitungan subtotal
-│   ├── checkout/       # Form checkout, pemilihan ekspedisi & pembayaran
-│   ├── orders/         # Riwayat pesanan & tracking status
-│   ├── chat/           # Widget konsultasi MamaBear Care
-│   ├── auth/           # Form login/register dan sinkronisasi sesi
-│   └── admin/          # Komponen tabel, charts, dan kelola produk
-├── components/         # Komponen UI global (shared / re-usable)
-│   └── ui/             # Komponen shadcn/ui primitif (Button, Dialog, Input)
-├── store/              # Global state management (Zustand)
-├── lib/                # Klien API, konfigurasi NextAuth, dan helper umum
-└── types/              # Type definitions dan skema OpenAPI ter-generate
+  app/
+    (auth)/           login, register, forgot-password, auth/verify-email, auth/reset-password
+    (shop)/           products, categories, search, cart, checkout, account
+    admin/            dashboard, products, categories, orders, promos, users, customers, reports, settings
+    api/auth/         handler NextAuth
+  features/           account, address, admin, ai, auth, cart, categories, checkout, home, orders, products
+  components/layout/  Navbar, Footer, ChatWidget, navigasi akun/admin
+  components/ui/      komponen shared Radix/shadcn
+  lib/                api.ts, auth.ts, config.ts, helper
+  providers/          AuthProvider.tsx
+  store/              use-ui-store.ts
+  types/              tipe bersama, NextAuth, OpenAPI
+mamabear-docs/        aplikasi Next.js/Fumadocs terpisah
+public/               asset statis toko
 ```
 
----
+Modul menggunakan components/hooks/services/types sesuai kebutuhan. Tidak ada folder `products/api`. Hook katalog aktif didefinisikan dalam `ProductCatalogClient.tsx`; `hooks/useProductList.ts` pada checkout audit kosong.
 
-## Prinsip Pemisahan Komponen
+## Route dan Navigasi
 
-Kami menerapkan aturan ketat mengenai pemisahan antara **Server Components** dan **Client Components**:
+Route group `(shop)`/`(auth)` tidak masuk URL. `components/layout/navigation` berisi TopNavbar, BottomNavbar, SidebarMenu, dan UserDropdown. Akun memakai AccountSidebar; shell admin ada di `layout/admin-navigation`.
 
-```mermaid
-flowchart TD
-    Page[Server Component: page.tsx] -->|Fetch Data API| ServerData[(Backend API)]
-    Page --> LayoutContainer[Server Layout Container]
-    LayoutContainer --> StaticUI[Komponen Statis: Info Produk, Banner]
-    LayoutContainer --> ClientIsland[Client Island: 'use client']
-    ClientIsland --> InteractiveUI[Tombol Add to Cart, Modal Dialog, Tab Filter]
-    ClientIsland --> ZustandStore[(Zustand Local State)]
-```
+| URL | File di src/app | Akses menurut kode |
+| --- | --- | --- |
+| `/` | `page.tsx` | Publik; force-dynamic |
+| `/products`, `/products/[slug]` | `(shop)/products` | Publik |
+| `/categories`, `/categories/[slug]` | `(shop)/categories` | Publik |
+| `/search?q=...` | `(shop)/search/page.tsx` | Publik |
+| `/cart` | `(shop)/cart/page.tsx` | Tidak masuk matcher middleware |
+| `/checkout`, `/checkout/payment/[id]` | `(shop)/checkout` | Sesi dicek pada server page; redirect login tanpa access token |
+| `/account/**` | `(shop)/account` | Middleware mensyaratkan sesi |
+| `/admin/**` | `admin` | Middleware mensyaratkan ADMIN/SUPERADMIN |
+| `/login`, `/register`, `/forgot-password` | `(auth)` | Form publik |
+| `/api/auth/[...nextauth]` | `api/auth/[...nextauth]/route.ts` | Handler NextAuth, berbeda dari API auth backend |
 
-### 1. Server Components (Default)
-- Seluruh file `page.tsx` dan `layout.tsx` adalah Server Components secara default.
-- Mengambil data awal (*initial data fetching*) di server untuk performa SEO optimal dan waktu muat cepat.
-- Tidak boleh menggunakan React Hooks (`useState`, `useEffect`) atau event listeners (`onClick`).
+Matcher toko juga memuat `/dashboard/**`, tetapi page dashboard publik tersebut tidak ditemukan. Docs dilindungi proxy aplikasi docs sendiri.
 
-### 2. Client Components (`'use client'`)
-- Hanya digunakan pada komponen interaktif yang memerlukan interaksi pengguna, event browser, atau state lokal (misalnya: drawer keranjang, input form, tombol tambah ke keranjang, dan chat widget).
-- Jadikan Client Component sekecil mungkin (*leaf node*) agar tidak mengorbankan performa Server Rendering.
+## Server dan Client
 
----
+`src/app/page.tsx` meminta empat produk. Detail page mengambil detail/related melalui Promise.all dan meneruskan ke ProductDetailClient di dalam Suspense. State interaktif dan query varian dikelola client. Root layout membungkus AuthProvider dan menjalankan CartInitializer.
 
-## Struktur Modul Fitur (`src/features/*`)
+Seluruh exception pada detail, termasuk error related products, dipetakan ke `notFound()`. Karena itu 404 UI tidak selalu membuktikan produk tidak ada.
 
-Setiap domain bisnis di `src/features/` memiliki struktur modular mandiri:
+## Sumber Fumadocs
 
-```text
-src/features/products/
-├── components/         # Komponen tampilan khusus produk
-│   ├── product-card.tsx
-│   ├── product-grid.tsx
-│   └── product-filter.tsx
-├── hooks/              # Custom hooks untuk manipulasi data produk
-├── api/                # Helper pemanggilan endpoint produk
-└── types.ts            # Tipe data khusus domain produk
-```
+`mamabear-docs/lib/source.ts` memakai defineDocs dari fumadocs-mdx/macro untuk `content/docs`, schema page/meta, dan loader base URL `/docs`. Konfigurasi MDX ada pada next.config.mjs docs. Catch-all developer menambahkan slug developer; section-tree memisahkan sidebar user/developer. Urutan mengikuti meta.json.
 
-<Callout type="info">
-  Halaman di `src/app/(shop)/products/page.tsx` bertindak sebagai perakit (*assembler*) yang mengimpor komponen dari `src/features/products`.
-</Callout>
-
+Root next.config.mjs meneruskan `/docs`, `/docs/**`, `/docs-assets/_next/**`, dan `/api/search` ke DOCS_APP_URL. Proteksi tetap pada aplikasi docs. Rewrite `/api/backend/**` existing masih Railway; service berbasis API_BASE_URL mengikuti NEXT_PUBLIC_API_URL.

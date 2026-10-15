@@ -1,0 +1,58 @@
+---
+title: Integrasi Frontend dan Backend
+description: Request server/client, pemrosesan backend, response, token, dan error API pada implementasi MamaBear.
+---
+
+## Jalur Komunikasi
+
+```text title="Data flow katalog dan cart"
+Server page /products/[slug]
+ -> productService -> native fetch(API_BASE_URL + /products/{slug})
+ -> Backend controller/service -> Prisma
+ <- JSON envelope -> page -> ProductDetailClient -> UI
+
+Interaksi add to cart pada browser
+ -> useCartStore.addItem -> cartService.addToCart
+ -> apiClient.post -> fetchWrapper -> getSession -> bearer bila ada
+ -> POST API_BASE_URL/cart/items (credentials: include)
+ -> Backend controller/guard/DTO/service -> Prisma
+ <- JSON envelope -> parseResponse -> Zustand -> UI cart
+```
+
+Diagram teks dirender oleh code block existing tanpa plugin baru. Jalur diambil dari source; tidak menganggap setiap request melewati Next API route atau payment provider.
+
+## Frontend Membentuk Request
+
+`src/lib/config.ts` menetapkan API_BASE_URL. Produk memakai native fetch; private client umumnya memakai apiClient pada `src/lib/api.ts`. Wrapper mengambil access token getSession jika tersedia, mengirim bearer, dan menetapkan JSON untuk body string. FormData memakai boundary browser. Request server private menggunakan getServerSession dan bearer eksplisit, bukan helper client.
+
+NEXT_PUBLIC_API_URL mencakup prefix /api. Root rewrite /api/backend merupakan jalur lain yang masih menunjuk Railway pada checkout toko. Service membangun URL dari env, sehingga keberadaan rewrite tidak membuktikan semua request melewatinya.
+
+## Backend Memproses
+
+NestJS memakai prefix /api, guard sesuai controller/method, dan ValidationPipe global transform/whitelist. Service mengolah identitas/filter/domain dan mengakses Prisma. PostgreSQL, Midtrans, Cloudinary, dan OpenRouter terkonfirmasi pada source, tetapi tidak semua dipakai dalam setiap request.
+
+Source CORS mengizinkan credentials dan bearer untuk origin yang ditentukan. Cart memakai credentials include untuk konteks guest. Pengaruh domain, SameSite, dan CORS pada seluruh alur cross-origin belum diuji menyeluruh.
+
+## Response dan Tampilan
+
+TransformInterceptor membentuk success/statusCode/message array/data/timestamp. AllExceptionsFilter mengembalikan status error dan data null. Katalog teramati mempunyai daftar/pagination di dalam data: hook membuka response.data.data dan response.data.pagination.
+
+Page server meneruskan data awal ke client. Hook mengisi state dan merender komponen. Store cart menggabungkan response item dengan metadata produk yang telah tersedia. TypeScript hanya memeriksa kontrak compile time; tipe message string belum sesuai array aktual. Parser cart dan AI menormalisasi payload sendiri, belum seragam antarmodul.
+
+## Error Handling
+
+| Lapisan | Perilaku source | Implikasi |
+| --- | --- | --- |
+| Wrapper | Mengembalikan Response | Service wajib memeriksa HTTP/payload |
+| Katalog | HTTP gagal dapat menghasilkan null; kegagalan lain dilempar | Kosong/error/loading perlu dibedakan |
+| Detail | Seluruh exception menjadi notFound | 404 UI dapat menyamarkan gangguan backend |
+| Search | Error hasil menjadi pesan; suggestions hanya log | Hasil kosong bukan bukti produk tidak ada |
+| Cart | Parser menangani status, success, array/string pesan, 204/non-JSON | Lebih toleran terhadap variasi gateway |
+| Checkout | Error order/payment menjadi errorMessage | Tidak ada bukti recovery otomatis bila order sukses tetapi payment gagal |
+| AI history | 404/501 menghasilkan isMock true | Fallback tidak boleh disebut data nyata |
+
+## Siklus Token
+
+NextAuth server melakukan login backend. Callback JWT menyimpan access/refresh token, sedangkan callback session mengekspos access token ke client. Wrapper mengirim access token sebagai bearer; callback JWT meminta refresh menggunakan bearer refresh token ketika cache access token berakhir. Batas sesi dan role dijelaskan di [Autentikasi](/docs/developer/frontend/autentikasi).
+
+Docs menggunakan cookie/Basic Auth tersendiri dan tidak memakai token pelanggan. [Audit Akses](/docs/developer/development/audit-repository) mencakup HTML, search, markdown, dan OG internal.

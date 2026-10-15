@@ -1,33 +1,37 @@
 ---
 title: Ringkasan Frontend
-description: Gambaran umum aplikasi toko online MamaBear, tech stack, dan prinsip perancangan antarmuka.
+description: Modul, stack teknologi, dan tingkat verifikasi frontend berdasarkan checkout aktif.
 ---
 
-MamaBear Frontend adalah aplikasi e-commerce modern yang melayani pelanggan dalam memilih dan membeli produk kehamilan, persalinan, dan menyusui, serta menyediakan kanal konsultasi interaktif melalui MamaBear Care.
+## Stack dan Batas Verifikasi
 
-Aplikasi ini dibangun menggunakan ekosistem **Next.js App Router** dengan pendekatan arsitektur berbasis fitur (*feature-driven*).
+Toko: Next.js `14.2.35`, React 18, TypeScript strict, Tailwind CSS 3, Zustand 5, NextAuth 4, React Hook Form, Radix UI, dan Sonner. Aplikasi `mamabear-docs` memakai package/lockfile terpisah dengan Next.js 16, React 19, dan Fumadocs.
 
-## Informasi Repositori & Stack Teknologi
-
-- **Framework**: Next.js 14 (App Router)
-- **Bahasa**: TypeScript (Strict Mode)
-- **Komponen UI**: shadcn/ui berbasis Radix UI Primitives
-- **Styling**: Tailwind CSS
-- **State Management**: Zustand
-- **Klien API**: `openapi-fetch` + tipe otomatis dari OpenAPI Backend
-- **Autentikasi**: NextAuth.js (JWT Session)
-- **Dokumentasi Terintegrasi**: Next.js 16 + Fumadocs di subfolder `mamabear-docs/`
-
-<Callout type="info">
-  Situs dokumentasi yang sedang Anda baca ini merupakan aplikasi Next.js terpisah di folder `mamabear-docs`, yang di-deploy ke Vercel dan di-proxy di jalur `/docs`.
+<Callout type="warn">
+  Request aktif memakai native fetch dan wrapper `src/lib/api.ts`. Package openapi-fetch dan tipe OpenAPI tersedia, tetapi createClient pada wrapper dikomentari. Jangan mengklaim seluruh request tervalidasi otomatis terhadap OpenAPI.
 </Callout>
 
-## Topik Dokumentasi Frontend
+| Modul | Implementasi | Status bukti |
+| --- | --- | --- |
+| Homepage | `src/app/page.tsx`, `features/home` | Source dan screenshot deployment |
+| Produk/kategori/search | `features/products`, `features/categories` | Source dan halaman publik diamati |
+| Auth | `features/auth`, `lib/auth.ts` | Source; login pelanggan belum dijalankan |
+| Cart | `features/cart` | Source, test existing, dan screenshot keranjang |
+| Checkout/order | `features/checkout`, `features/orders` | Source; tidak membuat transaksi/pembayaran |
+| Alamat/ongkir/akun | `features/address`, `features/account` | Source dan screenshot akun; alamat/ongkir belum diuji |
+| Admin | `features/admin` | Source; dashboard internal tidak difoto |
+| AI | `features/ai`, `components/layout/ChatWidget.tsx` | Source; riwayat memiliki fallback mock berflag isMock |
 
-<Cards>
-  <Card title="Arsitektur Aplikasi" href="/docs/developer/frontend/arsitektur" description="Pola App Router, pemisahan Server vs Client Components, dan arsitektur fitur." />
-  <Card title="State & Integrasi API" href="/docs/developer/frontend/state-dan-api" description="Manajemen state global dengan Zustand dan konsumsi REST API menggunakan openapi-fetch." />
-  <Card title="Komponen UI & Styling" href="/docs/developer/frontend/komponen-ui" description="Penggunaan shadcn/ui, konfigurasi Tailwind CSS, dan desain token responsif." />
-  <Card title="Setup Lokal & Testing" href="/docs/developer/frontend/setup-lokal" description="Cara mengklon, setup .env, menjalankan toko lokal, dan pengujian unit test Jest." />
-</Cards>
+Path features/lib pada tabel relatif terhadap `src`.
 
+## Navigasi
+
+- [Arsitektur dan routing](/docs/developer/frontend/arsitektur).
+- [State dan API](/docs/developer/frontend/state-dan-api).
+- [UI dan responsive](/docs/developer/frontend/komponen-ui).
+- [Homepage, katalog, pencarian](/docs/developer/frontend/katalog-dan-pencarian).
+- [Autentikasi](/docs/developer/frontend/autentikasi).
+- [Keranjang dan transaksi](/docs/developer/frontend/transaksi).
+- [AI dan admin](/docs/developer/frontend/ai-dan-admin).
+- [Gambar dan asset](/docs/developer/frontend/gambar-dan-asset).
+- [Setup lokal](/docs/developer/frontend/setup-lokal).

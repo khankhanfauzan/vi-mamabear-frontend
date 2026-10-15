@@ -1,13 +1,13 @@
 {
   "title": "Backend Guide",
-  "description": "Dokumentasi teknis arsitektur, API, database, dan layanan backend MamaBear.",
   "pages": [
     "index",
     "arsitektur",
     "api-reference",
+    "endpoint-inventory",
+    "database",
     "fitur-ai",
     "product-guardrail",
-    "database",
     "pemeliharaan"
   ]
 }

@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-15",
+  "timezone": "Asia/Jakarta",
+  "docs": {
+    "mdxPages": 32,
+    "developerPages": 28,
+    "sidebarFolders": 7,
+    "localImages": 8,
+    "validator": "passed",
+    "lint": "passed with one existing warning",
+    "types": "passed",
+    "productionBuild": "passed",
+    "authUnitTests": {
+      "passed": 8,
+      "failed": 0
+    },
+    "smokeChecks": 41,
+    "smokeResult": "passed"
+  },
+  "storefront": {
+    "lint": "passed with existing warnings",
+    "types": "failed: Cart test fixture missing productDiscountIdr/shippingDiscountIdr",
+    "jest": {
+      "passed": 98,
+      "failed": 4,
+      "suitesPassed": 10,
+      "suitesFailed": 1
+    },
+    "productionBuild": "passed with NEXT_PUBLIC_API_URL=https://vi-mamabear-backend.onrender.com/api",
+    "smokeChecks": 7,
+    "smokeResult": "passed"
+  },
+  "release": "Documentation ready for review/preview; full release retains existing storefront test/type failures and unverified hosting configuration. No deployment performed."
+}

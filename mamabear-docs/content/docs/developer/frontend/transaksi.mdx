@@ -1,0 +1,57 @@
+---
+title: Keranjang, Checkout & Pesanan
+description: Tujuan, alur, komponen, API, dan error transaksi berdasarkan source tanpa mutasi produksi.
+---
+
+## Keranjang
+
+Tujuannya menyimpan pilihan produk dan menyinkronkan jumlah/promo. UI: CartClientView, CartItemCard, OrderSummary, MiniCartDropdown, dan AddToCartModal. Hook useCartLogic ada di `src/features/cart/hooks/useCart.ts`; store di `src/features/cart/store/use-cart-store.ts`; service di `src/features/cart/services/cartService.ts`.
+
+addItem mengirim productId/variantId/quantity ke POST `/api/cart/items`, lalu memperbarui state dari response serta metadata produk frontend. PATCH `/api/cart/items/{id}` mengubah jumlah; DELETE menghapus item/cart. Promo memakai POST/DELETE `/api/cart/promo`. Request menyertakan credentials include dan bearer bila tersedia. Backend memakai optional JWT pada beberapa operasi cart; anotasi bearer Swagger tidak membuktikan semua operasi memerlukan login.
+
+useCartLogic membatasi jumlah terhadap stok lokal dan menampilkan toast/error promo. Parser cart menangani envelope atau payload mentah, success false, 204, dan error non-JSON. fetchCart memetakan 404 ke null. Persistensi localStorage bukan bukti cart dapat dimutasi offline; validasi stok server tetap diperlukan.
+
+![Keranjang MamaBear dengan pilihan varian, jumlah produk, ringkasan belanja, dan pesan kode promo tidak ditemukan](/docs/frontend/mamabear-cart.webp)
+
+## Checkout dan Pembayaran
+
+Tujuannya menggabungkan alamat, ongkir, order, dan sesi bayar. `/checkout/page.tsx` memeriksa sesi server, memuat alamat melalui addressService, dan memberikan data awal ke CheckoutView. Gagal mengambil alamat dipetakan menjadi daftar kosong.
+
+<Steps>
+  <Step>
+
+### Pilih Alamat dan Pengiriman
+
+`src/features/checkout/hooks/useCheckout.ts` mengambil cart, memilih alamat, meminta POST `/api/shipping/cost` dengan destination subdistrict dan priceSortDirection, lalu memperbarui kurir lewat PATCH `/api/cart/{id}/courier`. Komponen: CheckoutAddressSection, CheckoutShippingSection, CheckoutNotesSection, CheckoutSummaryCard.
+
+  </Step>
+  <Step>
+
+### Buat Order
+
+checkoutService.createOrder memanggil POST `/api/order` dengan cartId, addressId berupa number, serta notes. Endpoint memakai order singular. Komentar lama yang menyatakan addressId string tidak sesuai payload aktif.
+
+  </Step>
+  <Step>
+
+### Buat Sesi Pembayaran
+
+paymentService.createPayment meminta POST `/api/payment/create`: orderId, subtotal perhitungan tampilan, dan array customerDetails. Response dibaca sebagai token dan paymentRedirectUrl. Nilai token/URL transaksi tidak dicatat pada docs.
+
+  </Step>
+  <Step>
+
+### Buka Halaman Pembayaran
+
+Cart disinkronkan lalu router menuju `/checkout/payment/{id}?payUrl=...`. CheckoutPaymentView memeriksa status order untuk perpindahan success sesuai kode. Navigasi frontend tidak membuktikan pembayaran berhasil.
+
+  </Step>
+</Steps>
+
+Service berada di `src/features/checkout/services/checkoutService.ts` dan paymentService.ts. Kekurangan alamat/pengiriman/cart menghasilkan pesan pelengkapan. Error order/payment menjadi errorMessage; isSubmitting membatasi submit berulang di UI. Gagal hitung ongkir mengosongkan opsi; beberapa error sinkronisasi kurir hanya dicatat di console. Tidak ditemukan jaminan idempotency frontend jika order berhasil tetapi sesi pembayaran gagal.
+
+## Pesanan dan Alamat
+
+`src/features/orders/services/orderService.ts` membaca `/order`, `/order/{id}`, dan `/order/{id}/invoice`; hook useOrderList/useOrderDetail menyajikan ke OrderList/OrderDetail. Invoice memakai useDownloadInvoice. Alamat menggunakan `src/features/address/services/addressService.ts` untuk `/me/addresses`; shippingService menangani hirarki wilayah dan ongkir.
+
+Semua bagian ini diverifikasi pada source. Tidak dibuat order/pembayaran, tidak diakses alamat/riwayat pelanggan, dan tidak diunggah screenshot transaksi internal. Alur end-to-end tetap perlu diuji pada akun/environment uji yang sesuai.

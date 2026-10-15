@@ -1,0 +1,66 @@
+---
+title: Quality Assurance
+description: Hasil verifikasi dokumentasi, build kedua aplikasi, smoke test akses, dan masalah existing.
+---
+
+## Ringkasan Hasil
+
+Audit 15 Oktober 2026 (Asia/Jakarta), Node 22 dan npm. Tidak dilakukan deployment atau perubahan API/database.
+
+| Pemeriksaan | Hasil aktual |
+| --- | --- |
+| Validator docs | Lolos: 32 MDX, tujuh folder sidebar, sepuluh gambar lokal; YAML, compile MDX, kebab-case, heading, index, navigasi, link/anchor, dan komponen |
+| Lint docs | Exit 0; satu warning existing navigasi window.location.href di docs-logout-button.tsx |
+| Type check docs | Exit 0: next typegen dan tsc tanpa menonaktifkan validasi |
+| Build docs | Exit 0 memakai Next.js/Fumadocs asli; developer HTML tetap dynamic |
+| Lint toko | Exit 0 dengan warning existing hooks dependencies dan penggunaan img |
+| Type check toko | Gagal: use-cart-store.test.ts:60, fixture Cart tidak memiliki productDiscountIdr/shippingDiscountIdr |
+| Jest root | 98 passed, 4 failed, 102 total; 10 suite passed dan 1 failed. Suite docs-auth existing lolos |
+| Build toko | Exit 0 dengan NEXT_PUBLIC_API_URL mengarah API Render terverifikasi |
+| Smoke toko | Homepage, katalog, search, login HTTP 200; account/admin tanpa sesi redirect login; rewrite docs diperiksa dari config |
+| Screenshot | Sepuluh WebP, seluruhnya di bawah 400 KB; dimensi/file dibuka dan URL HTTP diuji |
+| Kontrak backend | 118 operasi diinventarisasi; 19 operasi utama dengan parameter/body/status yang tersedia |
+| Source backend | Source commit 8118516 dibaca; test/server/DB backend tidak dijalankan |
+
+Build toko awal tanpa env API gagal pada prerender /products dan /admin/products akibat GET kategori 404. Build dengan URL Render berhasil. Type check CLI tetap menemukan fixture test yang tidak masuk keberhasilan build Next; hasil ini dilaporkan terpisah.
+
+## Smoke Test Docs
+
+Server production docs dijalankan lokal dengan password/salt uji acak yang tidak disimpan. Pemeriksaan mencakup seluruh 28 halaman developer dengan HTTP 200 dan judul render, User Guide publik, redirect developer tanpa sesi, penolakan markdown/OG tanpa sesi, login salah/benar, Basic Auth, search publik/private, LLM publik, delapan asset image pada audit awal, dan logout.
+
+Chromium memeriksa galeri desktop, UI docs pada viewport 390 piksel, dan referensi API dengan 38 tab. Semua gambar galeri ter-load tanpa broken image; UI docs mobile tidak overflow horizontal pada pengukuran. Interaksi tab request/response diuji. Manifest hasil tersimpan pada docs/evidence/docs-smoke.json; server log dipakai untuk mendeteksi runtime error.
+
+Pemeriksaan pertama pada build sebelum perbaikan await melaporkan unhandled async authorization pada handler markdown/OG. Source diperbaiki untuk menunggu hasil helper. Pemeriksaan berikutnya menemukan fallback static handler tidak dapat membaca request headers untuk otorisasi dan mengembalikan 500; handler markdown/OG diubah menjadi force-dynamic agar pemeriksaan akses berlangsung per request. Build dan smoke test final dijalankan ulang setelah perubahan ini.
+
+## Masalah Existing
+
+Empat test gagal berada di `src/features/cart/hooks/useCart.test.ts`: subtotal, promo valid/tidak valid, dan progress free shipping. Mock service belum mengikuti alur promo API. Fixture pada use-cart-store.test.ts menyebabkan tsc CLI gagal. Source/test bisnis terkait tidak diubah dalam pekerjaan docs.
+
+Build docs memberi warning CSS pseudo-element highlight, cache dependency dinamis Fumadocs, dan metadataBase yang belum ditetapkan. Warning dan konfigurasi hosting perlu ditinjau pemilik aplikasi; validasi tidak dinonaktifkan. TypeScript docs dipin ke 5.9.3 karena TypeScript 7 branch sumber ditolak typescript-eslint existing; tidak ada upgrade dependency runtime massal.
+
+## Menjalankan Ulang
+
+```bash title="Root repository"
+npm run docs:validate --prefix mamabear-docs
+npm run lint --prefix mamabear-docs
+npm run types:check --prefix mamabear-docs
+npm run build --prefix mamabear-docs
+```
+
+Untuk smoke browser, set DOCS_CHROMIUM_PATH menuju executable Chromium lokal, lalu:
+
+```bash title="Root repository"
+node scripts/docs/smoke-docs.mjs
+```
+
+Script memakai port 3011 secara default, server miliknya sendiri, profil Chromium baru, dan kredensial lokal acak; tidak memakai password/sesi produksi. DOCS_SMOKE_PORT dapat memilih port alternatif. Hasil API dan capture berada di docs/evidence; tidak ditempatkan pada public asset.
+
+## Kesiapan dan Batas
+
+Dokumentasi siap direview dan diuji pada preview setelah pemeriksaan final lolos. Rilis seluruh aplikasi belum dapat dinyatakan bebas masalah karena tsc/test toko masih gagal dan konfigurasi hosting belum diverifikasi. Deployment produksi tidak dijalankan.
+
+Tidak dilakukan login pelanggan, transaksi/payment, upload produksi, mutasi database, seluruh role admin, atau evaluasi kualitas AI. Source backend belum dicocokkan dengan hash deployment; response Swagger yang kosong tidak diisi data buatan. Screenshot hanya membuktikan tampilan pada waktu capture.
+
+## Screenshot Keranjang dan Akun
+
+Dua screenshot tambahan memperlihatkan keranjang dan informasi akun. Nama dan email pada informasi akun disamarkan sebelum disimpan ke public. Validator memeriksa total sepuluh gambar; browser memeriksa galeri serta halaman transaksi/autentikasi tanpa broken image. Penambahan visual ini tidak mencakup pengujian checkout atau pembayaran.

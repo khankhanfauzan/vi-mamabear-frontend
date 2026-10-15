@@ -20,7 +20,7 @@ export default function Layout({ children }: LayoutProps<'/docs/developer'>) {
       ]}
       sidebar={{
         footer: (
-          <div className="flex w-full items-center justify-between gap-2 border-t border-fd-border pt-3">
+          <div key="developer-sidebar-footer" className="flex w-full items-center justify-between gap-2 border-t border-fd-border pt-3">
             <span className="text-[11px] font-medium uppercase tracking-wider text-fd-muted-foreground">
               Internal Dev
             </span>

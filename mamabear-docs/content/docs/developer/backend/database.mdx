@@ -1,81 +1,43 @@
 ---
 title: Database & Skema
-description: Desain tabel data, relasi antar entitas, strategi migrasi, dan seed data backend MamaBear.
+description: Model dan relasi Prisma yang dikonfirmasi pada source tanpa akses database produksi.
 ---
 
-Dokumen ini menjelaskan struktur basis data yang digunakan oleh layanan Backend MamaBear.
+## Sumber
 
-## Entity Relationship (ERD Ringkas)
+Dasar: [prisma/schema.prisma pada commit audit](https://github.com/khankhanfauzan/vi-mamabear-backend/blob/811851650796c06d4f4a6f5ca22b833c730385d6/prisma/schema.prisma). Provider postgresql, adapter PrismaPg, dan DATABASE_URL terkonfirmasi pada source; revision schema/data database Render belum diketahui.
 
-```mermaid
-erDiagram
-    USERS ||--o{ ORDERS : places
-    USERS {
-        string id PK
-        string name
-        string email UK
-        string password_hash
-        string role
-        datetime created_at
-    }
-    PRODUCTS ||--o{ ORDER_ITEMS : contains
-    PRODUCTS {
-        string id PK
-        string name
-        int price
-        int stock
-        string description
-        string category
-    }
-    ORDERS ||--|{ ORDER_ITEMS : includes
-    ORDERS {
-        string id PK
-        string user_id FK
-        int total_amount
-        string status
-        string payment_url
-        datetime created_at
-    }
-    ORDER_ITEMS {
-        string id PK
-        string order_id FK
-        string product_id FK
-        int quantity
-        int price_at_purchase
-    }
+## Model Utama
+
+| Kelompok | Model aktual | Relasi terkonfirmasi |
+| --- | --- | --- |
+| Identitas | User, Address, AdminActivityLog | Address/activity log merujuk User; user ID UUID |
+| Katalog | Product, ProductVariant, Category, Highlight | Product memiliki Category/Highlight opsional; variant merujuk Product |
+| Harga/promo | Discount, PromoCode, PromoUsage | Discount merujuk variant unik; penggunaan promo merujuk user/order/promo |
+| Asset/review | Image, Review | Image dapat terkait product/variant/review/category; review merujuk product/reviewer |
+| Cart | Cart, CartItem | User opsional dan guest session; item merujuk product/variant |
+| Transaksi | Order, OrderItem, OrderAddress, OrderStatusHistory | Order merujuk User; item/alamat snapshot/status merujuk Order |
+| Konfigurasi | Setting | Konfigurasi toko |
+| AI | AiConversation, AiMessage | Conversation merujuk User; message merujuk conversation |
+
+```text title="Referensi relasi utama"
+User -> Address
+User -> Order -> OrderItem -> Product / ProductVariant
+             -> OrderAddress
+             -> OrderStatusHistory
+User -> Cart -> CartItem -> Product / ProductVariant
+Product -> ProductVariant -> Discount
+Product -> Category / Highlight
+Product -> Image / Review
+User -> AiConversation -> AiMessage
 ```
 
----
+Diagram menyederhanakan referensi, bukan ERD seluruh kolom. CartItem unik pada cart/product/variant; OrderItem unik pada order/product/variant. ProductVariant.priceIdr memakai Decimal(10,2), bukan asumsi Product.price integer. Embedding Product memakai unsupported Prisma vector(1024).
 
-## Manajemen Migrasi Database
+## Migrasi
 
-Seluruh perubahan skema basis data wajib dicatat melalui skrip migrasi agar dapat direproduksi di lingkungan lokal, staging, dan production.
-
-<Steps>
-  <Step>
-    #### Membuat File Migrasi Baru
-    Jika ada penambahan kolom atau tabel baru:
-    ```bash
-    npm run migration:generate -- name_of_migration
-    ```
-  </Step>
-
-  <Step>
-    #### Menjalankan Migrasi ke Database Lokal
-    ```bash
-    npm run migration:run
-    ```
-  </Step>
-
-  <Step>
-    #### Menjalankan Seeder (Data Awal Produk & Admin)
-    ```bash
-    npm run seed
-    ```
-  </Step>
-</Steps>
+Package menyediakan start:migrate (prisma migrate deploy) dan build (prisma generate). Script migration:generate, migration:run, dan seed tidak ada pada package audit; instruksi generik lama dikoreksi. Seluruh migrasi tetap di repository backend.
 
 <Callout type="warn">
-  Jangan pernah mengubah file migrasi yang sudah pernah di-merge dan dijalankan pada database production. Selalu buat file migrasi baru untuk setiap perubahan skema.
+  Tidak dilakukan koneksi database, perubahan schema, migrasi, reset, atau seed. Prosedur operasional lama harus dicocokkan dengan revision backend oleh pemilik layanan sebelum digunakan pada lingkungan nyata.
 </Callout>
-

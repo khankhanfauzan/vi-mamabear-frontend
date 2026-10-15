@@ -1,118 +1,42 @@
 ---
 title: State Management & Integrasi API
-description: Arsitektur pengelolaan state klien menggunakan Zustand dan konsumsi REST API menggunakan openapi-fetch.
+description: Kepemilikan state, native fetch, wrapper, dan envelope response pada implementasi aktif.
 ---
 
-Aplikasi frontend MamaBear memadukan state lokal di memori klien dengan data remote dari backend REST API melalui pendekatan yang efisien dan bertipe aman (*type-safe*).
+## State
 
-## 1. Global State Management (Zustand)
+| State | File | Persistensi |
+| --- | --- | --- |
+| Cart/items/loading/mini cart | `src/features/cart/store/use-cart-store.ts` | Zustand persist mamabear-cart-storage; hanya cart/items di localStorage |
+| Sidebar/modal/animasi | `src/store/use-ui-store.ts` | Memori |
+| Sesi | `src/providers/AuthProvider.tsx`, `src/lib/auth.ts` | NextAuth provider dan cookie |
+| Filter/cursor | `ProductCatalogClient.tsx` | State React dan URL |
+| Varian | `useProductDetail.ts` | State dan query variant |
+| Pencarian | `useProductSearch.ts` | recentSearches localStorage; lima entri unik |
+| Newsletter | `useNewsletterPopup.ts` | newsletter-dismissed; submit belum terhubung API |
 
-Kami menggunakan **Zustand** untuk mengelola state global yang perlu diakses oleh banyak komponen tanpa prop drilling (seperti keranjang belanja dan preferensi UI).
+Cart meminta backend sebelum memperbarui item lokal. initializeCart membersihkan cache ketika cart tidak ada; kegagalan request dicatat dan loading dihentikan. Event storage melakukan rehydration lintas tab. Persistensi ini tidak membuktikan dukungan mutasi offline.
 
-### Contoh Store Keranjang Belanja
+## HTTP Request
 
-```typescript title="src/store/use-cart-store.ts"
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+API_BASE_URL berasal dari NEXT_PUBLIC_API_URL dengan fallback `http://localhost:3000/api`. Produk/kategori memakai native fetch, termasuk pada server. fetchWrapper client membaca getSession, menambahkan bearer jika tersedia, mempertahankan opsi request, dan menambahkan Content-Type JSON untuk body string. apiClient menyediakan get/post/put/patch/delete/postImage; FormData tetap menggunakan boundary browser.
 
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image?: string;
-}
-
-interface CartStore {
-  items: CartItem[];
-  addItem: (item: CartItem) => void;
-  removeItem: (id: string) => void;
-  updateQuantity: (id: string, qty: number) => void;
-  clearCart: () => void;
-}
-
-export const useCartStore = create<CartStore>()(
-  persist(
-    (set) => ({
-      items: [],
-      addItem: (newItem) =>
-        set((state) => {
-          const existing = state.items.find((i) => i.id === newItem.id);
-          if (existing) {
-            return {
-              items: state.items.map((i) =>
-                i.id === newItem.id ? { ...i, quantity: i.quantity + newItem.quantity } : i
-              ),
-            };
-          }
-          return { items: [...state.items, newItem] };
-        }),
-      removeItem: (id) =>
-        set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
-      updateQuantity: (id, qty) =>
-        set((state) => ({
-          items: state.items.map((i) => (i.id === id ? { ...i, quantity: qty } : i)),
-        })),
-      clearCart: () => set({ items: [] }),
-    }),
-    {
-      name: 'mamabear-cart-storage',
-    }
-  )
-);
-```
-
----
-
-## 2. Konsumsi REST API (`openapi-fetch`)
-
-Untuk menjamin keselarasan antara API backend dan frontend tanpa risiko salah ketik nama field, kami menggunakan **`openapi-fetch`** yang dipadukan dengan tipe yang di-generate otomatis dari spesifikasi OpenAPI Backend.
-
-### Skrip Generator Tipe OpenAPI
-Tipe data diperbarui secara otomatis dari backend menggunakan skrip:
-
-```bash
-npm run generate:api
-```
-Skrip ini membaca OpenAPI JSON backend dan meng-output berkas tipe di `src/types/openapi/api.d.ts`.
-
-### Contoh Pemanggilan API Type-Safe
-
-```typescript title="src/lib/api-client.ts"
-import createClient from 'openapi-fetch';
-import type { paths } from '@/types/openapi/api';
-
-export const apiClient = createClient<paths>({
-  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://vi-mamabear-backend.onrender.com/api',
+```ts title="Pemanggilan existing pada cartService.ts"
+const res = await apiClient.post('/cart/items', payload, {
+  credentials: 'include',
 });
 ```
 
-Contoh pemanggilan endpoint produk:
+Wrapper mengembalikan Response asli. Service bertanggung jawab memeriksa res.ok, payload success, JSON, dan error. Tidak ada retry atau normalisasi error global di wrapper. Request server private memakai sesi server dan bearer eksplisit, bukan helper getSession client.
 
-```typescript title="src/features/products/api/get-products.ts"
-import { apiClient } from '@/lib/api-client';
+## Envelope dan Tipe
 
-export async function fetchProducts() {
-  const { data, error } = await apiClient.GET('/products', {
-    params: {
-      query: { limit: 20 },
-    },
-  });
+Response publik teramati memakai success/statusCode/message/data/timestamp. message berupa array, sementara `src/types/api.types.ts` mendefinisikan string. Cursor publik dapat berupa angka, meski beberapa tipe frontend menyatakan string. Type assertion tidak memvalidasi JSON runtime.
 
-  if (error) {
-    throw new Error('Gagal mengambil data produk');
-  }
+fetchFilteredProducts membuka response.data menjadi objek daftar/pagination. Hook search membaca response.data.data. Parser cart menerima envelope atau payload mentah, status 204, dan error non-JSON. Normalisasi belum seragam antarservice.
 
-  return data;
-}
-```
+## OpenAPI
 
----
+`src/types/openapi/api.d.ts` adalah hasil generator. Script generate:api masih membaca Railway, bukan Render. openapi-fetch terpasang tetapi konfigurasi createClient di wrapper dikomentari. Tinjau perbedaan kontrak sebelum regenerasi.
 
-## 3. Autentikasi Pengguna (NextAuth.js)
-
-Autentikasi dikelola oleh **NextAuth.js** dengan JWT session strategy:
-- Kredensial login dikirimkan ke endpoint `/api/auth/login` backend.
-- Token JWT disimpan di dalam session cookie terenkripsi.
-- Komponen klien mengakses sesi dengan hook `useSession()` dari `next-auth/react`.
-
+Alur lengkap: [Integrasi Sistem](/docs/developer/integration).

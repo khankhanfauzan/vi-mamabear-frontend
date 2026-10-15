@@ -1,0 +1,193 @@
+{
+  "checkedAt": "2026-10-15T00:12:59.253Z",
+  "checks": [
+    {
+      "name": "Anonymous developer HTML redirects to login",
+      "passed": true
+    },
+    {
+      "name": "Anonymous markdown, OG, and Accept negotiation remain protected",
+      "passed": true
+    },
+    {
+      "name": "Public User Guide markdown and OG remain available",
+      "passed": true
+    },
+    {
+      "name": "User Guide and public LLM/search endpoints exclude developer content",
+      "passed": true
+    },
+    {
+      "name": "Invalid local docs login rejected",
+      "passed": true
+    },
+    {
+      "name": "Local docs login succeeds and issues HttpOnly cookie",
+      "passed": true
+    },
+    {
+      "name": "Existing HTTP Basic Auth fallback works",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/arsitektur",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/backend/api-reference",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/backend/arsitektur",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/backend/database",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/backend/endpoint-inventory",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/backend/fitur-ai",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/backend",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/backend/pemeliharaan",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/backend/product-guardrail",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/development/audit-repository",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/development/deployment",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/development",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/development/quality-assurance",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/frontend/ai-dan-admin",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/frontend/arsitektur",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/frontend/autentikasi",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/frontend/gambar-dan-asset",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/frontend",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/frontend/katalog-dan-pencarian",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/frontend/komponen-ui",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/frontend/setup-lokal",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/frontend/state-dan-api",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/frontend/transaksi",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/integration",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/menambah-halaman",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/panduan-dokumentasi",
+      "passed": true
+    },
+    {
+      "name": "Authenticated render /docs/developer/screenshots",
+      "passed": true
+    },
+    {
+      "name": "Authorized markdown, OG, and private search work",
+      "passed": true
+    },
+    {
+      "name": "All eight public screenshot URLs serve WebP successfully",
+      "passed": true
+    },
+    {
+      "name": "Browser render /docs/developer/screenshots (1440px)",
+      "passed": true,
+      "pathname": "/docs/developer/screenshots",
+      "title": "Screenshot Aplikasi",
+      "brokenImages": [],
+      "imageCount": 8,
+      "tabs": 0,
+      "width": 1440,
+      "scrollWidth": 1425,
+      "error": false
+    },
+    {
+      "name": "Browser render /docs/developer/frontend/komponen-ui (390px)",
+      "passed": true,
+      "pathname": "/docs/developer/frontend/komponen-ui",
+      "title": "Komponen UI & Responsive Design",
+      "brokenImages": [],
+      "imageCount": 1,
+      "tabs": 2,
+      "width": 390,
+      "scrollWidth": 390,
+      "error": false
+    },
+    {
+      "name": "Browser render /docs/developer/backend/api-reference (1440px)",
+      "passed": true,
+      "pathname": "/docs/developer/backend/api-reference",
+      "title": "Standar & Referensi API",
+      "brokenImages": [],
+      "imageCount": 0,
+      "tabs": 38,
+      "width": 1440,
+      "scrollWidth": 1425,
+      "error": false
+    },
+    {
+      "name": "Logout clears local docs session cookie",
+      "passed": true
+    }
+  ]
+}

@@ -2,6 +2,16 @@
 
 Aplikasi web MamaBear untuk belanja kebutuhan Mama: katalog produk, keranjang, checkout, akun, dan chat MamaBear Care. Proyek ini memakai **Next.js App Router**. Route hanya tinggal di `src/app`. Logika tiap fitur tinggal di `src/features`. Komponen yang dipakai di banyak halaman tinggal di `src/components`.
 
+## Screenshots
+
+Screenshot asli website publik tersedia di
+[`mamabear-docs/public/docs/frontend`](mamabear-docs/public/docs/frontend) dan
+[`mamabear-docs/public/docs/backend`](mamabear-docs/public/docs/backend).
+Galeri MDX memuat sumber, waktu, viewport, dan batas verifikasi di
+[`screenshots/index.mdx`](mamabear-docs/content/docs/developer/screenshots/index.mdx).
+Galeri juga memuat keranjang dan informasi akun dengan data pribadi disamarkan.
+Halaman checkout, detail transaksi, alamat pelanggan, dan dashboard internal belum disertakan.
+
 ## Tech Stack
 
 | Tech | Pemakaian |
@@ -115,3 +125,18 @@ Build production:
 npm run build
 npm start
 ```
+
+## Panduan Developer
+
+Dokumentasi teknis tersedia di aplikasi Fumadocs terpisah:
+[`mamabear-docs`](mamabear-docs/README.md). Konten internal berada di
+`mamabear-docs/content/docs/developer` dan dilindungi autentikasi aplikasi docs.
+Panduan kontribusi ada di [`PANDUAN_DOKUMENTASI_FE.md`](PANDUAN_DOKUMENTASI_FE.md).
+
+Jalankan docs pada port 3001 dan set `DOCS_APP_URL=http://localhost:3001`
+di environment toko untuk memeriksa integrasi `/docs` secara lokal. Instalasi,
+validasi, dan prasyarat deployment dijelaskan di README aplikasi docs.
+
+## Credit
+
+Proyek ini merupakan bagian dari program Virtual Internship RevoU x MamaBear.

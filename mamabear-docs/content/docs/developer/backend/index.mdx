@@ -1,146 +1,29 @@
 ---
-title: Backend MamaBear
-description: "Dokumentasi backend MamaBear: setup lokal, menjalankan server & test, Docker, serta tautan ke panduan arsitektur, fitur AI, guardrail produk, dan pemeliharaan."
+title: Ringkasan Backend
+description: Stack, modul, sumber verifikasi API/database, dan batas audit backend MamaBear.
 ---
 
-Backend REST API untuk **MamaBear**, platform e-commerce produk ibu dan bayi.
-Dibangun dengan [NestJS](https://nestjs.com/) + TypeScript, PostgreSQL (dengan
-[pgvector](https://github.com/pgvector/pgvector) untuk pencarian semantik produk),
-Prisma ORM, dan fitur **AI Health Assistant** berbasis OpenRouter dengan guardrail medis.
+## Sumber dan Cakupan
 
-Fitur utama: katalog produk & varian, cart, order, pembayaran (Midtrans), pengiriman
-(RajaOngkir), review, customer, alamat, upload gambar (Cloudinary), notifikasi email
-(SMTP/Brevo/MailHog), laporan, activity log, dan chat AI untuk pertanyaan kesehatan
-ibu & bayi.
+Backend tidak ada di workspace frontend. [Source publik pada commit audit](https://github.com/khankhanfauzan/vi-mamabear-backend/tree/811851650796c06d4f4a6f5ca22b833c730385d6) tersedia melalui repository yang dirujuk docs. File dibaca untuk audit; server, test backend, database, migrasi, dan seed tidak dijalankan.
+
+Package mengonfirmasi NestJS 11, TypeScript, Prisma 7 dan adapter PostgreSQL. Schema memakai PostgreSQL dan embedding vector(1024) pada Product. Modul mencakup auth/users, products/variants/reviews, category/highlights, cart/promo, order/payment, shipping/addresses, upload/Cloudinary, reports/settings/activity log, dan AI/search/embeddings. Package juga memuat Midtrans, Cloudinary, OpenRouter SDK, serta mailer.
 
 <Callout type="info">
-  **Informasi Server & Repositori**:
-  - **Repository**: [GitHub vi-mamabear-backend](https://github.com/khankhanfauzan/vi-mamabear-backend)
-  - **Base URL (Production)**: `https://vi-mamabear-backend.onrender.com/api`
-  - Aplikasi frontend MamaBear mem-proxy permintaan `/api/backend/*` langsung ke server production ini.
+  Hash source belum dapat dicocokkan dengan deployment Render. OpenAPI publik dan GET katalog/error diamati terpisah pada 15 Oktober 2026. Response Swagger belum lengkap; metadata tanpa guard tidak membuktikan endpoint admin publik.
 </Callout>
 
-## Topik Dokumentasi Backend
+## Navigasi
 
-<Cards>
-  <Card title="Arsitektur Sistem" href="/docs/developer/backend/arsitektur" description="Pola layering Controller - Service - Repository, model Prisma, dan alur integrasi AI." />
-  <Card title="Standar & Referensi API" href="/docs/developer/backend/api-reference" description="Format request/response, autentikasi JWT, dan katalog endpoint." />
-  <Card title="Fitur AI Assistant" href="/docs/developer/backend/fitur-ai" description="Orkestrasi LLM OpenRouter, guardrail medis, alur verifikasi produk, dan batas limitasi." />
-  <Card title="Guardrail Produk" href="/docs/developer/backend/product-guardrail" description="Kebijakan pencocokan produk, verifikasi embedding pgvector, dan kalibrasi threshold." />
-  <Card title="Database & Skema" href="/docs/developer/backend/database" description="Desain tabel, ERD relasi data, skema migrasi, dan seed data." />
-  <Card title="Pemeliharaan Backend" href="/docs/developer/backend/pemeliharaan" description="Panduan operasional Docker & PM2, logging Pino, migrasi Prisma, dan monitoring." />
-</Cards>
+- [Arsitektur dan validasi](/docs/developer/backend/arsitektur).
+- [Referensi API dan response aktual](/docs/developer/backend/api-reference).
+- [Inventaris seluruh operasi OpenAPI](/docs/developer/backend/endpoint-inventory).
+- [Database dan relasi terkonfirmasi](/docs/developer/backend/database).
+- [Fitur AI](/docs/developer/backend/fitur-ai), [guardrail produk](/docs/developer/backend/product-guardrail), serta [pemeliharaan](/docs/developer/backend/pemeliharaan), dipertahankan dengan catatan batas bukti.
+- [Deployment](/docs/developer/development/deployment).
 
----
+## Menjalankan pada Repository Backend
 
-## Prasyarat Lingkungan Lokal
+Script terkonfirmasi: start:dev, start:debug, build (prisma generate lalu nest build), start:prod, start:migrate, test, test:e2e, dan test:cov. start:migrate menjalankan prisma migrate deploy sebelum start. Audit ini tidak menjalankan operasi tersebut.
 
-- Node.js 20+ dan npm
-- Docker + Docker Compose (untuk PostgreSQL ber-pgvector dan MailHog)
-- Akun OpenRouter (untuk fitur AI & embeddings)
-
-## Setup Lokal
-
-1. Clone repository:
-
-   ```bash
-   git clone git@github.com:khankhanfauzan/vi-mamabear-backend.git
-   cd vi-mamabear-backend
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. Jalankan service pendukung (PostgreSQL + MailHog):
-
-   ```bash
-   docker compose up -d db mailhog
-   ```
-
-   - PostgreSQL: `localhost:5432` (user/password/db: `satria`/`satria`/`mamabear`)
-   - MailHog SMTP: `localhost:1025`, web UI: `http://localhost:8025`
-
-4. Salin template environment lalu isi sesuai kebutuhan (minimal `DATABASE_URL`,
-   JWT secrets, dan `OPENROUTER_API_KEY` untuk fitur AI):
-
-   ```bash
-   cp .env.example .env
-   ```
-
-   Daftar lengkap variabel dan fungsinya ada di `.env.example`.
-
-5. Jalankan migrasi database:
-
-   ```bash
-   npx prisma migrate deploy
-   ```
-
-6. (Opsional) Seed data produk, user, kategori, review, dan settings.
-   Membutuhkan `OPENROUTER_API_KEY` (embedding produk) dan kredensial Cloudinary
-   yang valid (upload gambar):
-
-   ```bash
-   npm run seed
-   ```
-
-## Menjalankan Server
-
-```bash
-# development (watch mode)
-npm run start:dev
-
-# debug mode
-npm run start:debug
-
-# build untuk production (prisma generate + nest build)
-npm run build
-
-# jalankan hasil build
-npm run start:prod
-
-# migrate lalu start dalam satu langkah
-npm run start:migrate
-```
-
-Server berjalan di `http://localhost:3001` (sesuai `PORT` di `.env`).
-
-## Menjalankan Test
-
-```bash
-# unit test
-npm run test
-
-# unit test watch mode
-npm run test:watch
-
-# e2e test (butuh database aktif, lihat test/jest-e2e.json)
-npm run test:e2e
-
-# coverage
-npm run test:cov
-```
-
-## Menjalankan dengan Docker (opsional)
-
-```bash
-# build image lalu jalankan app + db + mailhog
-docker compose up -d --build
-```
-
-## Kode Style
-
-```bash
-# lint + auto-fix
-npm run lint
-
-# format dengan Prettier
-npm run format
-```
-
-## API Client & Dokumentasi Lanjutan
-
-Daftar endpoint lengkap ada di modul masing-masing di `src/` (controller per domain: auth, products, cart, orders, payment, ai, dll).
-Koleksi request siap pakai tersedia di folder `bruno/` (Bruno API client) serta panduan lengkap di [Standar & Referensi API](/docs/developer/backend/api-reference).
+Gunakan .env.example backend pada revision yang digunakan tanpa menyalin nilainya ke docs. Source main.ts memakai PORT atau fallback 3000; jangan mengasumsikan port 3001. Script seed tidak ditemukan pada package audit walaupun konfigurasi Prisma mencantumkan entri seed. Instruksi npm run seed lama harus diverifikasi dengan pemilik backend.

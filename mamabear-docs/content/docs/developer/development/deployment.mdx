@@ -1,0 +1,72 @@
+---
+title: Development & Deployment
+description: Environment, routing dua aplikasi Vercel, API Render, serta prasyarat rilis berdasarkan source.
+---
+
+## Dua Aplikasi
+
+Root adalah toko Next.js 14; root project docs adalah mamabear-docs dengan Next.js 16/Fumadocs. TypeScript root mengecualikan aplikasi docs agar alias dan tipe React/Next tidak bercampur; masing-masing aplikasi tetap diperiksa dengan konfigurasinya sendiri.
+
+| Project | Build/start | Environment yang perlu ditinjau |
+| --- | --- | --- |
+| Toko | npm ci; npm run build; npm start | NEXT_PUBLIC_API_URL, NEXTAUTH_SECRET, NEXTAUTH_URL, DOCS_APP_URL |
+| Docs | npm ci; npm run build; npm start | DOCS_PASSWORD, DOCS_USER, DOCS_SESSION_SECRET, opsional DOCS_ASSET_PREFIX |
+
+Default DOCS_APP_URL mengikuti integrasi branch docs existing. Perubahan lokal tidak otomatis mengubah deployment; project docs hosting harus menargetkan revision hasil review.
+
+## Rewrite dan Asset
+
+Toko meneruskan /docs ke landing docs, /docs/** ke path docs yang sama, /docs-assets/_next/** ke asset Next docs, dan /api/search ke search docs. assetPrefix docs default /docs-assets. Screenshot /docs/frontend/** dan /docs/backend/** berasal dari public aplikasi docs.
+
+Developer HTML bersifat dinamis dan tetap dilindungi proxy docs. Jangan memakai static export: auth, login, dan search memerlukan server. Password docs tidak boleh memakai prefix NEXT_PUBLIC_.
+
+## Render
+
+[API Render](https://vi-mamabear-backend.onrender.com/api) dan OpenAPI merespons saat audit, tetapi konfigurasi hosting tidak tersedia. Tidak ditemukan render.yaml dalam tree yang diperiksa; build/start/environment dashboard Render belum terkonfirmasi.
+
+Package backend menyediakan build (prisma generate lalu nest build), start:prod, dan start:migrate. main.ts mendengarkan PORT atau 3000 pada 0.0.0.0. Prisma memakai DATABASE_URL; JWT memakai JWT_ACCESS_SECRET/JWT_REFRESH_SECRET. Nama env layanan tambahan mengikuti .env.example/service backend pada revision yang dipakai tanpa menyalin nilainya. Tidak dijalankan migrasi, seed, atau deployment.
+
+## Sebelum Rilis
+
+<Steps>
+  <Step>
+
+### Jalankan QA
+
+Periksa [hasil aktual](/docs/developer/development/quality-assurance), termasuk kedua build, validator MDX, link, image, dan route rendering.
+
+  </Step>
+  <Step>
+
+### Verifikasi Preview
+
+Gunakan DOCS_APP_URL menuju docs preview. Pastikan developer tanpa sesi redirect login; periksa HTML, markdown, OG, search, logout dengan sesi lokal. User Guide tetap publik.
+
+  </Step>
+  <Step>
+
+### Tinjau Hosting
+
+Pastikan root directory, Node engine, environment, origin API, asset rewrite, dan secret ditetapkan tim deployment. Nilai risiko masalah existing sebelum rilis; jangan memakai secret template.
+
+  </Step>
+</Steps>
+
+Kesiapan deployment mengikuti hasil QA dan verifikasi hosting, bukan hanya keberadaan file MDX. Tidak dilakukan deployment produksi.
+
+## Kelompok Environment Backend
+
+Nama berikut dikonfirmasi dari .env.example backend; nilai deployment tidak dibaca.
+
+| Kelompok | Variabel |
+| --- | --- |
+| Server/log/origin | NODE_ENV, PORT, LOG_LEVEL, CORS_ORIGIN, BACKEND_URL, FRONTEND_URL |
+| Database dan JWT | DATABASE_URL, JWT_ACCESS_SECRET, JWT_REFRESH_SECRET |
+| Email | BREVO_SMTP_HOST/PORT/USER/PASS, BREVO_FROM_EMAIL; SMTP_HOST/PORT/USER/PASS, MAIL_FROM; MAILHOG_URL, MAIL_USER, MAIL_PASS |
+| Cloudinary | CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET |
+| Pembayaran | MIDTRANS_SERVER_KEY, MIDTRANS_CLIENT_KEY |
+| Pengiriman | RAJAONGKIR_API_KEY, RAJAONGKIR_BASE_URL |
+| AI | OPENROUTER_API_KEY/BASE_URL/MODEL/FALLBACK_MODEL/TIMEOUT_MS, PRODUCT_MATCH_THRESHOLD |
+| Cart | CART_CACHE_TTL_MS |
+
+Keberadaan nama pada template tidak membuktikan semua opsi aktif atau wajib pada setiap lingkungan. Cocokkan dengan service/config source revision backend dan kebijakan secret tim.
